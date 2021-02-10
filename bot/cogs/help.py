@@ -2,11 +2,6 @@ import discord
 from discord.ext import commands
 from bot.helpers import tools
 
-from bot.cogs.suggestions import Suggestions
-from bot.cogs.school import School
-from bot.cogs.fun import Fun
-from bot.cogs.info import Info
-
 class Help(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
