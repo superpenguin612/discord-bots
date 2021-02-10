@@ -8,4 +8,4 @@ The two bots are in separate sub-packages with code shared as necessary.
 - Custom Links
 - Economy (davidhackerman exclusive)
 - Moderation (davidhackerman exclusive)
-- Suggestions (chs_bot exclusive)
+- Suggestions (CHS Bot exclusive)
