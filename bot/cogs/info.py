@@ -26,4 +26,5 @@ class Info(commands.Cog):
             embed.add_field(name='Author', value=f'{author.mention}', inline=False)
         embed.add_field(name='Language', value='Python', inline=False)
         embed.add_field(name='Version', value='1.0', inline=False)
+        embed.add_field(name='GitHub', value='https://github.com/davidracovan/discord-bots')
         await ctx.send(embed=embed)
