@@ -3,13 +3,14 @@ from discord.ext import commands
 import os
 import dotenv
 
-from bot.cogs.economy import Economy
+
 from bot.cogs.events import Events
 from bot.cogs.school import School
 from bot.cogs.fun import Fun
 from bot.cogs.help import Help
 from bot.cogs.info import Info
 from bot.games.tictactoe import TicTacToe
+from bot.davidhackerman.cogs.economy import Economy
 from bot.davidhackerman.cogs.links import Links
 from bot.davidhackerman.cogs.moderation import Moderation
 
