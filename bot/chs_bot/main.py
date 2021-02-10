@@ -3,13 +3,14 @@ from discord.ext import commands
 import os
 import dotenv
 
-from bot.cogs.suggestions import Suggestions
+
 from bot.cogs.events import Events
 from bot.cogs.school import School
 from bot.cogs.fun import Fun
 from bot.cogs.help import Help
 from bot.cogs.info import Info
 from bot.games.tictactoe import TicTacToe
+from bot.chs_bot.cogs.suggestions import Suggestions
 
 # https://discord.com/api/oauth2/authorize?client_id=796805491186597968&permissions=2147483639&scope=bot
 
