@@ -1,0 +1,1 @@
+worker: python chs-freshmen-bot/main.py

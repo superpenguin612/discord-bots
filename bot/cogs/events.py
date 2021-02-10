@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from bot import tools
+from bot.helpers import tools
 import asyncio
 import time
 # import psycopg2
@@ -12,8 +12,11 @@ class Events(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        print(f'Logged in as {self.bot.user}.')
-        await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name=f'c?help | ccs.k12.in.us/chs'))
+        print(f'Logged in.\nUser: {self.bot.user}\nID: {self.bot.user.id}\n----------------------')
+        if self.bot.user.id == 802211256383438861: # chs bot
+            await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name=f'c?help | ccs.k12.in.us/chs'))
+        elif self.bot.user.id == 796805491186597968: # davidhackerman bot
+            await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name=f'$help | this is a good bot'))
 
     # async def open_psql(self):
     #     DATABASE_URL = os.environ['DATABASE_URL']

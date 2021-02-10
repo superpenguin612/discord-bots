@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from bot import tools
+from bot.helpers import tools
 
 from bot.cogs.suggestions import Suggestions
 from bot.cogs.school import School
@@ -14,9 +14,7 @@ class Help(commands.Cog):
     @commands.group()
     async def help(self, ctx):
         if ctx.invoked_subcommand is None:
-            author1 = await ctx.guild.fetch_member(688530998920871969)
-            author2 = await ctx.guild.fetch_member(654874992672112650)
-            embed = tools.create_embed(ctx, 'Bot Commands', desc=f"Written by {author1.mention} and {author2.mention}.")
+            embed = tools.create_embed(ctx, 'Bot Commands', desc=f"Visit {ctx.prefix}about to see more information about the bot.")
             embed.add_field(name='Fun Commands', value=f'`{ctx.prefix}help fun`', inline=False)
             embed.add_field(name='Informational Commands', value=f'`{ctx.prefix}help info`', inline=False)
             embed.add_field(name='School Commands', value=f'`{ctx.prefix}help school`', inline=False)

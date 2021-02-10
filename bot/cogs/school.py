@@ -1,19 +1,19 @@
 import discord
 from discord.ext import commands
-from bot import tools
+from bot.helpers import tools
 import json
 from datetime import date,datetime,time,timedelta
-from bot import classschedule
+from bot.helpers import classschedule
 
 class School(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
     def _register(self, user: str, blue_day_lunch, gold_day_lunch, cohort):
-        with open('bot/school.json', 'r') as f:
+        with open('bot/helpers/school.json', 'r') as f:
             school_dict = json.load(f)
         if user not in school_dict:
-            with open('bot/school.json', 'w') as f:
+            with open('bot/helpers/school.json', 'w') as f:
                 school_dict[user] = {
                     'blue_day_lunch': blue_day_lunch.upper(),
                     'gold_day_lunch': gold_day_lunch.upper(),
@@ -22,37 +22,37 @@ class School(commands.Cog):
                 json.dump(school_dict, f)
 
     def _register_class(self, user_id, class_type: str, class_name):
-        with open('bot/school.json', 'r') as f:
+        with open('bot/helpers/school.json', 'r') as f:
             school_dict = json.load(f)
         if str(user_id) not in school_dict:
-            with open('bot/school.json', 'w') as f:
+            with open('bot/helpers/school.json', 'w') as f:
                 if not school_dict[str(user_id)]['classes']:
                     school_dict[str(user_id)]['classes'] = {}
                 school_dict[str(user_id)]['classes'][class_type] = class_name
                 json.dump(school_dict, f)
 
     def _registration_checks(self, ctx):
-        with open('bot/school.json', 'r') as f:
+        with open('bot/helpers/school.json', 'r') as f:
             school_dict = json.load(f)
         return str(ctx.author.id) in school_dict
     
     def _class_registration_checks(self, ctx, class_type):
-        with open('bot/school.json', 'r') as f:
+        with open('bot/helpers/school.json', 'r') as f:
             school_dict = json.load(f)
         return str(ctx.author.id) in school_dict
 
     def _get_users_dict(self):
-        with open('bot/school.json', 'r') as f: 
+        with open('bot/helpers/school.json', 'r') as f: 
             school_dict = json.load(f)
         return school_dict
 
     def _get_user_info(self, user: str):
-        with open('bot/school.json', 'r') as f: 
+        with open('bot/helpers/school.json', 'r') as f: 
             school_dict = json.load(f)
         return school_dict[user]
     
     def _set_users_dict(self, school_dict):
-        with open('bot/school.json', 'w') as f:
+        with open('bot/helpers/school.json', 'w') as f:
             json.dump(school_dict, f)
     
     @commands.command()

@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from bot import tools
+from bot.helpers import tools
 import asyncio
 
 class Suggestions(commands.Cog):

@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from bot import tools
+from bot.helpers import tools
 
 class Moderation(commands.Cog):
     def __init__(self, bot):
