@@ -9,10 +9,9 @@ from bot.cogs.school import School
 from bot.cogs.fun import Fun
 from bot.cogs.help import Help
 from bot.cogs.info import Info
-from bot.cogs.links import Links
-
-from bot.cogs.moderation import Moderation
 from bot.games.tictactoe import TicTacToe
+from bot.davidhackerman.cogs.links import Links
+from bot.davidhackerman.cogs.moderation import Moderation
 
 # https://discord.com/api/oauth2/authorize?client_id=796805491186597968&permissions=2147483639&scope=bot
 
