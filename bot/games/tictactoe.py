@@ -11,27 +11,33 @@ class TicTacToe(commands.Cog):
 
     @commands.command(aliases=['tic', 'ttt'])
     async def tictactoe(self, ctx, player2: discord.User):
-        embed = tools.create_embed(ctx, "Tic Tac Toe Request", desc=f'{player2.mention}, you have 45 seconds to respond to {ctx.author.mention}\'s request to play Tic Tac Toe.\nType "y" or "yes" to accept.')
-        await ctx.send(embed=embed)
-        def check(msg):
-            return msg.author == player2 and msg.channel == ctx.channel
+        embed = tools.create_embed(ctx, "Tic Tac Toe Request", desc=f'{player2.mention}, you have 45 seconds to respond to {ctx.author.mention}\'s request to play Tic Tac Toe.\nReact with 👍 to accept, 👎 to decline.')
+        request_msg = await ctx.send(embed=embed)
+        await request_msg.add_reaction('👍')
+        await request_msg.add_reaction('👎')
+        def check(reaction, user):
+            return user == player2 and reaction.message == request_msg
         try:
-            msg = await self.bot.wait_for('message', check=check, timeout=45)
+            reaction, user = await self.bot.wait_for('reaction_add', check=check, timeout=45)
         except asyncio.TimeoutError:
             embed = tools.create_error_embed(ctx, f"Sorry, {player2.mention} didn't respond in time!")
-            await ctx.send(embed=embed)
+            await request_msg.edit(embed=embed)
             return
         
-        if msg.content.lower() in ['y','yes']:
-            await self.start_game(ctx, player2)
-        elif msg.content.lower() in ['n','no']:
+        if reaction.emoji == '👍':
+            embed = tools.create_embed(ctx, "Tic Tac Toe Request", desc=f"{player2.mention} accepted {ctx.author.mention}'s request to play Tic Tac Toe.")
+            await request_msg.edit(embed=embed)
+            await self.start_game(ctx, request_msg, player2)
+        elif reaction.emoji == '👎':
             embed = tools.create_embed(ctx, "Tic Tac Toe Request", desc=f"{player2.mention} rejected {ctx.author.mention}'s request to play Tic Tac Toe.")
-            await ctx.send(embed=embed)
+            await request_msg.edit(embed=embed)
+            return
         else:
-            embed = tools.create_error_embed(ctx, f"Invalid response.")
-            await ctx.send(embed=embed)
+            embed = tools.create_error_embed(ctx, f"Invalid reaction.")
+            await request_msg.edit(embed=embed)
+            return
 
-    async def start_game(self, ctx, p2):
+    async def start_game(self, ctx, msg, p2):
         game = {}
         game['board'] = {
             'a1':'', 
@@ -51,8 +57,7 @@ class TicTacToe(commands.Cog):
 
         board_text = self.create_board_text(game['board'])
         embed = self.create_game_embed(game, board_text)
-        
-        msg = await ctx.send(embed=embed)
+        await msg.edit(embed=embed)
         for arrow in ['↖️','⬆️','↗️','⬅️','⏺','➡️','↙️','⬇️','↘️']:
             await msg.add_reaction(arrow)
         game['msg'] = msg
