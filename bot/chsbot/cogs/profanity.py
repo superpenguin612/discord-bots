@@ -15,7 +15,7 @@ class Profanity(commands.Cog):
         censored_message_list = []
         profane_message = False
         for index, val in enumerate(message_list):
-            if any(val == item for item in self.profanity_wordlist):
+            if any(val.lower() == item for item in self.profanity_wordlist):
                 profane_message = True
                 censored_message_list.append(f'||{val}||')
             else:

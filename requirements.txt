@@ -4,4 +4,3 @@ PyNaCl
 flask
 gunicorn
 python-dotenv
-alt-profanity-check
