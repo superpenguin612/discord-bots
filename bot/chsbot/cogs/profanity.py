@@ -10,11 +10,11 @@ class Profanity(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message):
         message_list = message.content.split(" ")
-        message_check = profanity_check.predict(message_list)
-        if 1 in message_check:
+        message_check = profanity_check.predict_prob(message_list)
+        if all(i >= 0.7 for i in message_check):
             censored_message_list = []
             for index, val in enumerate(message_check):
-                if val == 1:
+                if val >= 0.7:
                     censored_message_list.append(f'||{message_list[index]}||')
                 else:
                     censored_message_list.append(f'{message_list[index]}')
