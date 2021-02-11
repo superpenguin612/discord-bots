@@ -15,10 +15,21 @@ class TicTacToe(commands.Cog):
         await ctx.send(embed=embed)
         def check(msg):
             return msg.author == player2 and msg.channel == ctx.channel
-
-        msg = await self.bot.wait_for('message', check=check, timeout=45)
+        try:
+            msg = await self.bot.wait_for('message', check=check, timeout=45)
+        except asyncio.TimeoutError:
+            embed = tools.create_error_embed(ctx, f"Sorry, {player2.mention} didn't respond in time!")
+            await ctx.send(embed=embed)
+            return
+        
         if msg.content.lower() in ['y','yes']:
             await self.start_game(ctx, player2)
+        elif msg.content.lower() in ['n','no']:
+            embed = tools.create_embed(ctx, "Tic Tac Toe Request", desc=f"{player2.mention} rejected {ctx.author.mention}'s request to play Tic Tac Toe.")
+            await ctx.send(embed=embed)
+        else:
+            embed = tools.create_error_embed(ctx, f"Invalid response.")
+            await ctx.send(embed=embed)
 
     async def start_game(self, ctx, p2):
         game = {}
@@ -39,15 +50,27 @@ class TicTacToe(commands.Cog):
         game['winner'] = ''
 
         board_text = self.create_board_text(game['board'])
-        embed = discord.Embed(title='Tic Tac Toe', description=board_text)
-        footer = f'{game["p1"].name} playing {game["p2"].name}\n{game[game["turn"]].name}\'s turn'
-        embed.set_footer(text=footer)
+        embed = self.create_game_embed(game, board_text)
+        
         msg = await ctx.send(embed=embed)
         for arrow in ['↖️','⬆️','↗️','⬅️','⏺','➡️','↙️','⬇️','↘️']:
             await msg.add_reaction(arrow)
         game['msg'] = msg
         self.games[msg.id] = game
     
+    def create_game_embed(self, game, board_text):
+        embed = discord.Embed(title='Tic Tac Toe')
+        embed.add_field(name='Board', value=board_text, inline=False)
+        embed.add_field(name='Players', value=f'{game["p1"].mention} playing {game["p2"].mention}', inline=False)
+        if game['winner']:
+            if game['winner'] == 'draw':
+                embed.add_field(name='Winner', value='Draw!', inline=False)
+            else:
+                embed.add_field(name='Winner', value=f'{game[game["winner"]].mention} won!')
+        else:
+            embed.add_field(name='Turn', value=f'{game[game["turn"]].mention}\'s turn', inline=False)
+        return embed
+
     def create_board_text(self, board):
         iter_list = [['a1','b1','c1'],['a2','b2','c2'],['a3','b3','c3']]
         text = ''
@@ -71,18 +94,16 @@ class TicTacToe(commands.Cog):
         game['winner'] = self.check_victory(game)
         self.games[game_id] = game
         board_text = self.create_board_text(game['board'])
-        
-        embed = discord.Embed(title='Tic Tac Toe', description=board_text)
-        if game['winner']:
-            footer = f'{game["p1"].name} playing {game["p2"].name}\n{game[game["winner"]].name} won!'
-        else:
-            footer = f'{game["p1"].name} playing {game["p2"].name}\n{game[game["turn"]].name}\'s turn'
-        embed.set_footer(text=footer)
+        embed = self.create_game_embed(game, board_text)
         await game['msg'].edit(embed=embed)
     
     def check_victory(self, game):
         iter_list = [['a1','b1','c1'],['a2','b2','c2'],['a3','b3','c3']]
         winner = None
+
+        # draw
+        if not '' in game['board'].values():
+            winner = 'draw'
 
         # vertical
         for i in range(0,2):

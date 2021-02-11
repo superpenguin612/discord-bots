@@ -5,3 +5,4 @@ __pycache__/
 *.toml
 .vscode
 venv/
+*.pyc

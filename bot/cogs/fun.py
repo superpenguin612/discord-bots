@@ -53,10 +53,12 @@ class Fun(commands.Cog):
             response_category = responses[2]
 
         if ("lying" in request.lower()) or ("lie" in request.lower()):
-            desc = "🟢 🟡 🔴 How dare you! The magical 8 ball never lies! Shame on you! 🔴 🟡 🟢"
+            response = "🟢 🟡 🔴 How dare you! The magical 8 ball never lies! Shame on you! 🔴 🟡 🟢"
         else:
-            desc = response_category[random.randint(0, len(response_category)-1)]
-        embed = tools.create_embed(ctx, 'Magic 8 Ball', desc=desc)
+            response = response_category[random.randint(0, len(response_category)-1)]
+        embed = tools.create_embed(ctx, 'Magic 8 Ball')
+        embed.add_field(name='Request', value=request, inline=False)
+        embed.add_field(name='Answer', value=response, inline=False)
         await ctx.send(embed=embed)
     
     @commands.command()
