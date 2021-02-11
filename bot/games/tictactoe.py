@@ -21,7 +21,8 @@ class TicTacToe(commands.Cog):
             await self.start_game(ctx, player2)
 
     async def start_game(self, ctx, p2):
-        game = {'board': {
+        game = {}
+        game['board'] = {
             'a1':'', 
             'b1':'', 
             'c1':'', 
@@ -31,9 +32,7 @@ class TicTacToe(commands.Cog):
             'a3':'', 
             'b3':'', 
             'c3':''
-            }
         }
-
         game['p1'] = ctx.message.author
         game['p2'] = p2
         game['turn'] = 'p1'
@@ -88,8 +87,7 @@ class TicTacToe(commands.Cog):
         # vertical
         for i in range(0,2):
             if game['board'][iter_list[i][0]] == game['board'][iter_list[i][1]] == game['board'][iter_list[i][2]]:
-                winner = game['board'][iter_list[i][0]]
-        
+                winner = game['board'][iter_list[i][0]]        
         # horizontal
         for i in range(0,2):
             if game['board'][iter_list[0][i]] == game['board'][iter_list[1][i]] == game['board'][iter_list[2][i]]:
