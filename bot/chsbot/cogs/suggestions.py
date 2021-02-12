@@ -18,7 +18,7 @@ class Suggestions(commands.Cog):
         if ctx.invoked_subcommand is None:
             embed = tools.create_embed(ctx, 'Suggestion', desc=f'Please specify a category for your suggestion.\nThe available categories are `server`, `bot`, and `rule`.\nThe command\'s usage is `{ctx.prefix}suggest <category> <suggestion>`')
             await ctx.send(embed=embed)
-            await self.suggest.reset_cooldown(ctx)
+            self.suggest.reset_cooldown(ctx)
 
     @suggest.command(name='server')
     async def _server(self, ctx, *, suggestion):
