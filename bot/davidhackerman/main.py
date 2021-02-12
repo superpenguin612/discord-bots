@@ -3,7 +3,6 @@ from discord.ext import commands
 import os
 import dotenv
 
-
 from bot.cogs.events import Events
 from bot.cogs.school import School
 from bot.cogs.fun import Fun
@@ -12,11 +11,9 @@ from bot.cogs.info import Info
 from bot.games.tictactoe import TicTacToe
 from bot.davidhackerman.cogs.economy import Economy
 from bot.davidhackerman.cogs.links import Links
-from bot.davidhackerman.cogs.moderation import Moderation
+from bot.davidhackerman.cogs.punishments import Punishments
 
 # https://discord.com/api/oauth2/authorize?client_id=796805491186597968&permissions=2147483639&scope=bot
-
-
 
 def start():
     bot = commands.Bot(command_prefix='$', help_command=None)
@@ -27,7 +24,7 @@ def start():
     bot.add_cog(Info(bot))
     bot.add_cog(Links(bot))
     bot.add_cog(Economy(bot))
-    bot.add_cog(Moderation(bot))
+    bot.add_cog(Punishments(bot))
     bot.add_cog(TicTacToe(bot))
     dotenv.load_dotenv()
     bot.run(os.environ['TOKEN']) # bot token
