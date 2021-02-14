@@ -12,7 +12,7 @@ class Events(commands.Cog):
 
     async def create_db_pool(self):
         DATABASE_URL = os.environ['DATABASE_URL']
-        self.bot.db = await asyncpg.create_pool(DATABASE_URL, sslmode='require')
+        self.bot.db = await asyncpg.create_pool(DATABASE_URL, ssl='require')
 
     @commands.Cog.listener(name='on_ready')
     async def on_ready(self):
