@@ -4,3 +4,4 @@ PyNaCl
 flask
 gunicorn
 python-dotenv
+asyncpg
