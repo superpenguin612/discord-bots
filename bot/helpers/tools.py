@@ -6,7 +6,7 @@ def create_embed(ctx, title, desc=None, url=None, color=None, footer_enabled=Tru
     embed = discord.Embed(title=title, description=desc, url=url, color=color)
     embed.set_author(name=ctx.author, icon_url=ctx.author.avatar_url)
     if footer_enabled:
-        if ctx.channel.type is discord.ChannelType.private:
+        if ctx.channel.type is not discord.ChannelType.private:
             embed.set_footer(text=f'Server: {ctx.guild} | Command: {ctx.command}', icon_url=ctx.guild.icon_url)
         else:
             embed.set_footer(text=f'Server: DMs | Command: {ctx.command}', icon_url=ctx.guild.icon_url)
