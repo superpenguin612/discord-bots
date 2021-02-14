@@ -9,7 +9,7 @@ def create_embed(ctx, title, desc=None, url=None, color=None, footer_enabled=Tru
         if ctx.channel.type is not discord.ChannelType.private:
             embed.set_footer(text=f'Server: {ctx.guild} | Command: {ctx.command}', icon_url=ctx.guild.icon_url)
         else:
-            embed.set_footer(text=f'Server: DMs | Command: {ctx.command}', icon_url=ctx.guild.icon_url)
+            embed.set_footer(text=f'Server: DMs | Command: {ctx.command}')
     return embed
 
 def create_error_embed(ctx, desc):
