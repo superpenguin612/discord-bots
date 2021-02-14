@@ -10,8 +10,8 @@ class Events(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.Cog.listener()
-    async def on_ready(self):
+    @commands.Cog.listener(name='on_ready')
+    async def log_in_text(self):
         print(f'Logged in.\nUser: {self.bot.user}\nID: {self.bot.user.id}\n----------------------')
         if self.bot.user.id == 802211256383438861: # chs bot
             await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name='be my valentine? | c?help'))

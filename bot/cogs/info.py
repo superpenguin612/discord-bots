@@ -21,6 +21,8 @@ class Info(commands.Cog):
             author1 = await ctx.guild.fetch_member(688530998920871969)
             author2 = await ctx.guild.fetch_member(654874992672112650)
             embed.add_field(name='Authors', value=f'{author1.mention} and {author2.mention}', inline=False)
+            embed.add_field(name='Name', value='Mio', inline=False)
+            embed.add_field(name='Gender', value='Female', inline=False)
         elif self.bot.user.id == 796805491186597968:
             author = await ctx.guild.fetch_member(688530998920871969)
             embed.add_field(name='Author', value=f'{author.mention}', inline=False)
