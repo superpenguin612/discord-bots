@@ -3,27 +3,26 @@ from discord.ext import commands
 from bot.helpers import tools
 import asyncio
 import time
-# import psycopg2
+import asyncpg
 import os
 
 class Events(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    async def create_db_pool(self):
+        DATABASE_URL = os.environ['DATABASE_URL']
+        self.bot.db = await asyncpg.create_pool(DATABASE_URL, sslmode='require')
+
     @commands.Cog.listener(name='on_ready')
-    async def log_in_text(self):
+    async def on_ready(self):
         print(f'Logged in.\nUser: {self.bot.user}\nID: {self.bot.user.id}\n----------------------')
         if self.bot.user.id == 802211256383438861: # chs bot
             await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name='be my valentine? | c?help'))
         elif self.bot.user.id == 796805491186597968: # davidhackerman bot
             await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name='$help | this is a good bot'))
-
-    # async def open_psql(self):
-    #     DATABASE_URL = os.environ['DATABASE_URL']
-    #     self.conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+        self.bot.db = await self.create_db_pool()
         
-    # @commands.before_invoke(open_psql())
-    
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
         if isinstance(error, commands.CommandOnCooldown):
