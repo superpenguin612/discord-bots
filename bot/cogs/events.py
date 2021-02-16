@@ -12,7 +12,7 @@ class Events(commands.Cog):
 
     async def create_db_pool(self):
         DATABASE_URL = os.environ['DATABASE_URL']
-        self.bot.db = await asyncpg.create_pool(DATABASE_URL, ssl='require')
+        return await asyncpg.connect(DATABASE_URL, ssl='require')
 
     @commands.Cog.listener(name='on_ready')
     async def on_ready(self):
@@ -42,8 +42,11 @@ class Events(commands.Cog):
         elif isinstance(error, commands.CommandError):
             embed = tools.create_error_embed(ctx, f"Uh oh! Something went wrong, and this error wasn't anticipated. Sorry about that! I'll ping the owners of this bot to fix it.\nError: {error.__class__.__name__}")
             author1 = await ctx.guild.fetch_member(688530998920871969)
+            await ctx.send(embed=embed)
             await ctx.send(f"{author1.mention}")
             raise error
         else:
             embed = tools.create_error_embed(ctx, f"Ok, something really went wrong. This error message isn't supposed to show up, so we messed up pretty badly lmfao")
+            await ctx.send(embed=embed)
+            raise error
         await ctx.send(embed=embed)

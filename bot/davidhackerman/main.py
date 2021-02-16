@@ -16,7 +16,9 @@ from bot.davidhackerman.cogs.punishments import Punishments
 # https://discord.com/api/oauth2/authorize?client_id=796805491186597968&permissions=2147483639&scope=bot
 
 def start():
-    bot = commands.Bot(command_prefix='$', help_command=None)
+    intents = discord.Intents.default()
+    intents.members = True
+    bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
     bot.add_cog(Events(bot))
     bot.add_cog(School(bot))
     bot.add_cog(Fun(bot))

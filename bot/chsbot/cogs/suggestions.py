@@ -22,7 +22,7 @@ class Suggestions(commands.Cog):
 
     @suggest.command(name='server')
     async def _server(self, ctx, *, suggestion):
-        await self.create_suggestion(ctx, suggestion, 'Server Suggestion', color=discord.Color.orange())
+        await self.create_suggestion(ctx, suggestion, 'Server Suggestion', color=discord.Color.gold())
 
     # @suggest.command(name='movie')
     # async def _movie(self, ctx, *, suggestion):
@@ -30,7 +30,7 @@ class Suggestions(commands.Cog):
 
     @suggest.command(name='bot')
     async def _bot(self, ctx, *, suggestion):
-        await self.create_suggestion(ctx, suggestion, 'Bot Suggestion', color=discord.Color.green())
+        await self.create_suggestion(ctx, suggestion, 'Bot Suggestion', color=discord.Color.purple())
 
     @suggest.command(name='rule')
     async def _rule(self, ctx, *, suggestion):
