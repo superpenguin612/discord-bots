@@ -16,7 +16,7 @@ class Suggestions(commands.Cog):
         You may specify "none" for either the reason or the notes.
         """
         if ctx.invoked_subcommand is None:
-            embed = tools.create_embed(ctx, 'Suggestion', desc=f'Please specify a category for your suggestion.\nThe available categories are `server`, `bot`, and `rule`.\nThe command\'s usage is `{ctx.prefix}suggest <category> <suggestion>`')
+            embed = tools.create_embed(ctx, 'Suggestion', desc=f'Please specify a category for your suggestion.\nThe available categories are `server`, `bot`, `movie`, and `rule`.\nThe command\'s usage is `{ctx.prefix}suggest <category> <suggestion>`')
             await ctx.send(embed=embed)
             self.suggest.reset_cooldown(ctx)
 
