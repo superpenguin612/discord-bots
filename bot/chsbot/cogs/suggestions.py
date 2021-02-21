@@ -24,9 +24,9 @@ class Suggestions(commands.Cog):
     async def _server(self, ctx, *, suggestion):
         await self.create_suggestion(ctx, suggestion, 'Server Suggestion', color=discord.Color.gold())
 
-    # @suggest.command(name='movie')
-    # async def _movie(self, ctx, *, suggestion):
-    #     await self.create_suggestion(ctx, suggestion, 'Movie Suggestion', color=discord.Color.purple())
+    @suggest.command(name='movie')
+    async def _movie(self, ctx, *, suggestion):
+        await self.create_suggestion(ctx, suggestion, 'Movie Suggestion', color=discord.Color.green())
 
     @suggest.command(name='bot')
     async def _bot(self, ctx, *, suggestion):
