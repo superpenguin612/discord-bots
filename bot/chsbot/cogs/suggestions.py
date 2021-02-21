@@ -26,7 +26,7 @@ class Suggestions(commands.Cog):
 
     @suggest.command(name='movie')
     async def _movie(self, ctx, *, suggestion):
-        await self.create_suggestion(ctx, suggestion, 'Movie Suggestion', color=discord.Color.green())
+        await self.create_suggestion(ctx, suggestion, 'Movie Suggestion', color=discord.Color.green(), downvote=False)
 
     @suggest.command(name='bot')
     async def _bot(self, ctx, *, suggestion):
@@ -36,7 +36,7 @@ class Suggestions(commands.Cog):
     async def _rule(self, ctx, *, suggestion):
         await self.create_suggestion(ctx, suggestion, 'Rule Suggestion', color=discord.Color.blue())
 
-    async def create_suggestion(self, ctx, suggestion, title, color):
+    async def create_suggestion(self, ctx, suggestion, title, color, downvote=True):
         def check(msg):
             return msg.author == ctx.author and msg.channel == ctx.channel
         
@@ -64,7 +64,8 @@ class Suggestions(commands.Cog):
             embed.add_field(name="Notes", value=notes, inline=False)
         msg = await suggestions_channel.send(embed=embed)
         await msg.add_reaction('<:upvote:711333713316937819>')
-        await msg.add_reaction('<:downvote:711333713354686484>')
+        if downvote:
+            await msg.add_reaction('<:downvote:711333713354686484>')
 
         embed = tools.create_embed(ctx, title, desc="Your suggestion has been submitted successfully!", color=color)
         await ctx.send(embed=embed)
