@@ -42,7 +42,7 @@ class Suggestions(commands.Cog):
         
         embed = tools.create_embed(ctx, "Suggestion Reason", "What is the reason for your suggestion?")
         await ctx.send(embed=embed)
-        msg = await self.bot.wait_for("message", check=check, timeout=30)
+        msg = await self.bot.wait_for("message", check=check, timeout=60)
         if msg.content.lower() in ["none", "stop"]:
             reason = None
         else:
@@ -50,7 +50,7 @@ class Suggestions(commands.Cog):
 
         embed = tools.create_embed(ctx, "Suggestion Notes", "What else you would like to add? Type \"None\" if you don't have anything else.")
         await ctx.send(embed=embed)
-        msg = await self.bot.wait_for("message", check=check, timeout=30)
+        msg = await self.bot.wait_for("message", check=check, timeout=60)
         if msg.content.lower() in ["none", "stop"]:
             notes = None
         else:
