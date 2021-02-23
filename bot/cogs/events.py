@@ -40,14 +40,18 @@ class Events(commands.Cog):
         elif isinstance(error, commands.CommandInvokeError):
             if isinstance(error.original, asyncio.TimeoutError):
                 embed = tools.create_error_embed(ctx, "Sorry, you didn't respond in time!")
+                ctx.command.reset_cooldown(ctx)
             else:
                 embed = tools.create_error_embed(ctx, f"Uh oh! Something went wrong, and this error wasn't anticipated. Sorry about that! I'll ping the owners of this bot to fix it.\nError: {error.__class__.__name__}")
-                author1 = await ctx.guild.fetch_member(688530998920871969)
                 await ctx.send(embed=embed)
+                author1 = await ctx.guild.fetch_member(688530998920871969)
                 await ctx.send(f"{author1.mention}")
                 raise error
         else:
-            embed = tools.create_error_embed(ctx, f"Ok, something really went wrong. This error message isn't supposed to show up, so we messed up pretty badly lmfao")
+            embed = tools.create_error_embed(ctx, f"Ok, something really went wrong. This error message isn't supposed to show up, so ig I messed up pretty badly lmao")
             await ctx.send(embed=embed)
+            author1 = await ctx.guild.fetch_member(688530998920871969)
+            await ctx.send(f"{author1.mention}")
             raise error
         await ctx.send(embed=embed)
+        ctx.command.reset_cooldown(ctx)

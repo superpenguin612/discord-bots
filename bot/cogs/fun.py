@@ -2,6 +2,8 @@ import discord
 from discord.ext import commands
 from bot.helpers import tools
 import random
+import aiohttp
+import requests
 
 class Fun(commands.Cog):
     def __init__(self, bot):
@@ -67,3 +69,27 @@ class Fun(commands.Cog):
         """Get a random number!"""
         embed = tools.create_embed(ctx, 'Random Number', desc=f'`{random.randint(minnum, maxnum)}`')
         await ctx.send(embed=embed)
+    
+    @commands.command()
+    @commands.cooldown(1, 3)
+    async def dog(self, ctx):
+        """Get a dog picture!"""
+        async with aiohttp.ClientSession() as session:
+            async with session.get('https://dog.ceo/api/breeds/image/random') as r:
+                if r.status == 200:
+                    js = await r.json()
+                    embed = tools.create_embed(ctx, 'Doggo!')
+                    embed.set_image(url=js['message'])
+                    await ctx.send(embed=embed)
+    
+    @commands.command()
+    @commands.cooldown(1, 3)
+    async def cat(self, ctx):
+        """Get a cat picture!"""
+        async with aiohttp.ClientSession() as session:
+            async with session.get('http://aws.random.cat/meow') as r:
+                if r.status == 200:
+                    js = await r.json()
+                    embed = tools.create_embed(ctx, 'Cat!')
+                    embed.set_image(url=js['file'])
+                    await ctx.send(embed=embed)
