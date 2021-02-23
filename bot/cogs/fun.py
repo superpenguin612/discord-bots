@@ -3,7 +3,6 @@ from discord.ext import commands
 from bot.helpers import tools
 import random
 import aiohttp
-import requests
 
 class Fun(commands.Cog):
     def __init__(self, bot):
