@@ -43,18 +43,38 @@ class Suggestions(commands.Cog):
         embed = tools.create_embed(ctx, "Suggestion Reason", "What is the reason for your suggestion?")
         await ctx.send(embed=embed)
         msg = await self.bot.wait_for("message", check=check, timeout=60)
-        if msg.content.lower() in ["none", "stop"]:
+        if msg.content.lower() == "none":
             reason = None
+        elif msg.content.lower() == "stop":
+            embed = tools.create_error_embed(ctx, "Suggestion has been aborted.")
+            await ctx.send(embed=embed)
+            return
         else:
             reason = msg.content
 
-        embed = tools.create_embed(ctx, "Suggestion Notes", "What else you would like to add? Type \"None\" if you don't have anything else.")
+        embed = tools.create_embed(ctx, "Suggestion Notes", "What else you would like to add? Type \"none\" if you don't have anything else.")
         await ctx.send(embed=embed)
         msg = await self.bot.wait_for("message", check=check, timeout=60)
-        if msg.content.lower() in ["none", "stop"]:
+        if msg.content.lower() == "none":
             notes = None
+        elif msg.content.lower() == "stop":
+            embed = tools.create_error_embed(ctx, "Suggestion has been aborted.")
+            await ctx.send(embed=embed)
+            return
         else:
             notes = msg.content
+        
+        embed = tools.create_embed(ctx, "Suggestion Image", "Do you have an image to attach to the suggestion? Reply with \"none\" if you don't.")
+        await ctx.send(embed=embed)
+        msg = await self.bot.wait_for("message", check=check, timeout=60)
+        if msg.content.lower() == "none":
+            notes = None
+        elif msg.content.lower() == "stop":
+            embed = tools.create_error_embed(ctx, "Suggestion has been aborted.")
+            await ctx.send(embed=embed)
+            return
+        else:
+            image_url = msg.attachments[0].url
         
         suggestions_channel = self.bot.get_channel(710959620667211817)
         embed = tools.create_embed(ctx, title, desc=suggestion, footer_enabled=False, color=color)
@@ -62,6 +82,8 @@ class Suggestions(commands.Cog):
             embed.add_field(name="Reason", value=reason, inline=False)
         if notes:
             embed.add_field(name="Notes", value=notes, inline=False)
+        if image_url:
+            embed.set_image(url=image_url)
         msg = await suggestions_channel.send(embed=embed)
         await msg.add_reaction('<:upvote:711333713316937819>')
         if downvote:
