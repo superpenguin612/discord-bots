@@ -19,6 +19,7 @@ def start():
     intents = discord.Intents.default()
     intents.members = True
     bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
+    
     bot.add_cog(Events(bot))
     bot.add_cog(School(bot))
     bot.add_cog(Fun(bot))
@@ -29,6 +30,7 @@ def start():
     bot.add_cog(Punishments(bot))
     bot.add_cog(TicTacToe(bot))
     dotenv.load_dotenv()
+    bot.AZURE_KEY = os.environ['AZURE_KEY']
     bot.run(os.environ['TOKEN']) # bot token
 
 if __name__ == "__main__":

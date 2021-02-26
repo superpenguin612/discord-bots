@@ -25,6 +25,7 @@ def start():
     bot.add_cog(TicTacToe(bot))
     bot.add_cog(Profanity(bot))
     dotenv.load_dotenv()
+    bot.AZURE_KEY = os.environ['AZURE_KEY']
     bot.run(os.environ['TOKEN']) # bot token
 
 if __name__ == "__main__":

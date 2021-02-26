@@ -16,7 +16,10 @@ def create_error_embed(ctx, desc):
     color = discord.Color.red()
     embed = discord.Embed(title="Error", description=desc, color=color)
     embed.set_author(name=ctx.author, icon_url=ctx.author.avatar_url)
-    embed.set_footer(text=f'Server: {ctx.guild} | Command: {ctx.command}', icon_url=ctx.guild.icon_url)
+    if ctx.channel.type is not discord.ChannelType.private:
+            embed.set_footer(text=f'Server: {ctx.guild} | Command: {ctx.command}', icon_url=ctx.guild.icon_url)
+    else:
+        embed.set_footer(text=f'Server: DMs | Command: {ctx.command}')
     return embed
 
 def log_command(ctx):
