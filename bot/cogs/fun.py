@@ -105,17 +105,11 @@ class Fun(commands.Cog):
                     if 'items' not in js:
                         embed = tools.create_error_embed(ctx, 'No results found.')
                     else:
-                        
-                        url_valid = False
-                        for i in range(10):
-                            url=js['items'][random.randint(0,9)]['link']
-                            if url.startswith('http'):
-                                url_valid = True
-                                break
-                        if url_valid:
-                            embed = tools.create_embed(ctx, 'Picture!')
+                        url=js['items'][random.randint(0,9)]['link']
+                        embed = tools.create_embed(ctx, 'Picture!')
+                        try:
                             embed.set_image(url=url)
-                        else:
-                            embed = tools.create_error_embed(ctx, 'Search failed.')
+                        except:
+                            embed = tools.create_error_embed(ctx, 'Search failed. Please try again.')
                         await ctx.send(embed=embed)
                     
