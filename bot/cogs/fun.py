@@ -109,6 +109,6 @@ class Fun(commands.Cog):
                         try:
                             url=js['items'][random.randint(0,9)]['pagemap']['cse_image'][0]['src']
                         except KeyError:
-                            pass
+                            url=None
                     embed.set_image(url=url)
                     await ctx.send(embed=embed)
