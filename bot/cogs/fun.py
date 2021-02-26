@@ -95,20 +95,27 @@ class Fun(commands.Cog):
                     await ctx.send(embed=embed)
 
     @commands.command()
-    @commands.cooldown(1, 1)
     async def pic(self, ctx, *, arg):
         """Get any picture!"""
-        url_req = f'https://customsearch.googleapis.com/customsearch/v1?q={"+".join(arg.split(" "))}&searchtype=image&safe=active&cx=b56bd460ede944aef&key=AIzaSyATNnIQUjg9P4IYQJMs_QvWnMaaDVlT1PY'
+        url_req = f'https://customsearch.googleapis.com/customsearch/v1?q={"+".join(arg.split(" "))}&searchType=image&safe=active&cx=b56bd460ede944aef&key=AIzaSyATNnIQUjg9P4IYQJMs_QvWnMaaDVlT1PY'
         async with aiohttp.ClientSession() as session:
             async with session.get(url_req) as r:
                 if r.status == 200:
                     js = await r.json()
-                    embed = tools.create_embed(ctx, 'Picture!')
-                    url = None
-                    while not url:
-                        try:
-                            url=js['items'][random.randint(0,9)]['pagemap']['cse_image'][0]['src']
-                        except KeyError:
-                            url=None
-                    embed.set_image(url=url)
-                    await ctx.send(embed=embed)
+                    if 'items' not in js:
+                        embed = tools.create_error_embed(ctx, 'No results found.')
+                    else:
+                        
+                        url_valid = False
+                        for i in range(10):
+                            url=js['items'][random.randint(0,9)]['link']
+                            if url.startswith('http'):
+                                url_valid = True
+                                break
+                        if url_valid:
+                            embed = tools.create_embed(ctx, 'Picture!')
+                            embed.set_image(url=url)
+                        else:
+                            embed = tools.create_error_embed(ctx, 'Search failed.')
+                        await ctx.send(embed=embed)
+                    
