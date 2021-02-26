@@ -4,6 +4,7 @@ from bot.helpers import tools
 import random
 import aiohttp
 
+
 class Fun(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -91,4 +92,23 @@ class Fun(commands.Cog):
                     js = await r.json()
                     embed = tools.create_embed(ctx, 'Cat!')
                     embed.set_image(url=js['file'])
+                    await ctx.send(embed=embed)
+
+    @commands.command()
+    @commands.cooldown(1, 1)
+    async def pic(self, ctx, *, arg):
+        """Get any picture!"""
+        url_req = f'https://customsearch.googleapis.com/customsearch/v1?q={"+".join(arg.split(" "))}&searchtype=image&safe=active&cx=b56bd460ede944aef&key=AIzaSyATNnIQUjg9P4IYQJMs_QvWnMaaDVlT1PY'
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url_req) as r:
+                if r.status == 200:
+                    js = await r.json()
+                    embed = tools.create_embed(ctx, 'Picture!')
+                    url = None
+                    while not url:
+                        try:
+                            url=js['items'][random.randint(0,9)]['pagemap']['cse_image'][0]['src']
+                        except KeyError:
+                            pass
+                    embed.set_image(url=url)
                     await ctx.send(embed=embed)
