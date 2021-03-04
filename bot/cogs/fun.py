@@ -3,8 +3,6 @@ from discord.ext import commands
 from bot.helpers import tools
 import random
 import aiohttp
-import matplotlib
-matplotlib.rcParams['text.usetex'] = True
 import matplotlib.pyplot as plt
 
 class Fun(commands.Cog):

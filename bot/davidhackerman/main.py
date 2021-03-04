@@ -35,7 +35,7 @@ def start():
     @bot.event
     async def on_message(message):
         if message.author.id != 796805491186597968:
-            if random.randint(1,1) == 1:
+            if random.randint(1,200) == 1:
                 await message.add_reaction('🍾')
                 await message.channel.send(f'{message.author.mention} lol get bottled')
                 await bot.process_commands(message)
