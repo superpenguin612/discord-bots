@@ -2,7 +2,6 @@ import discord
 from discord.ext import commands
 import os
 import dotenv
-import random
 
 from bot.cogs.events import Events
 from bot.cogs.school import School
@@ -19,8 +18,7 @@ from bot.davidhackerman.cogs.punishments import Punishments
 def start():
     intents = discord.Intents.default()
     intents.members = True
-    bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
-    
+    bot = commands.Bot(command_prefix='_$', intents=intents, help_command=None, self_bot=False)
     bot.add_cog(Events(bot))
     bot.add_cog(School(bot))
     bot.add_cog(Fun(bot))
@@ -32,15 +30,7 @@ def start():
     bot.add_cog(TicTacToe(bot))
     dotenv.load_dotenv()
     bot.AZURE_KEY = os.environ['AZURE_KEY']
-    @bot.event
-    async def on_message(message):
-        if message.author.id != 796805491186597968:
-            if random.randint(1,1) == 1:
-                await message.add_reaction('🍾')
-                await message.channel.send(f'{message.author.mention} lol get bottled')
-                await bot.process_commands(message)
-
-    bot.run(os.environ['TOKEN']) # bot token
+    bot.run("ODE0MjA4NjQ0NjczNTY4ODI4.YDaiNw.G28N55slyAe6PsfG7rie8WjnFkg", bot=False) # bot token
 
 if __name__ == "__main__":
     start()

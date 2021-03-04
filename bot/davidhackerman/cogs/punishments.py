@@ -28,7 +28,7 @@ class Punishments(commands.Cog):
         await ctx.channel.delete_messages(msgs)
         embed = tools.create_embed(ctx, 'Message Purge', f'{num} messages deleted.')
         await ctx.send(embed=embed)
-
+ 
     @commands.command()
     @commands.has_permissions(manage_messages=True)
     @commands.bot_has_permissions(manage_messages=True)

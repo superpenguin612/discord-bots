@@ -38,7 +38,6 @@ class Events(commands.Cog):
         elif isinstance(error, commands.BotMissingPermissions):
             embed = tools.create_error_embed(ctx, f"The bot does not have the required permissions to run this command.\nMissing permission(s): {','.join(error.missing_perms)}")
         elif isinstance(error, commands.CommandInvokeError):
-            raise error
             if isinstance(error.original, asyncio.TimeoutError):
                 embed = tools.create_error_embed(ctx, "Sorry, you didn't respond in time!")
                 ctx.command.reset_cooldown(ctx)
@@ -47,7 +46,6 @@ class Events(commands.Cog):
                 await ctx.send(embed=embed)
                 author1 = await ctx.guild.fetch_member(688530998920871969)
                 await ctx.send(f"{author1.mention}")
-            
         else:
             embed = tools.create_error_embed(ctx, f"Ok, something really went wrong. This error message isn't supposed to show up, so ig I messed up pretty badly lmao")
             await ctx.send(embed=embed)

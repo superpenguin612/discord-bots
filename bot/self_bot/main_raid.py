@@ -4,25 +4,12 @@ import os
 import dotenv
 
 from bot.cogs.events import Events
-from bot.cogs.school import School
-from bot.cogs.fun import Fun
-from bot.cogs.help import Help
-from bot.cogs.info import Info
-from bot.games.tictactoe import TicTacToe
-from bot.chsbot.cogs.suggestions import Suggestions
-from bot.chsbot.cogs.profanity import Profanity
+
 
 # https://discord.com/api/oauth2/authorize?client_id=796805491186597968&permissions=2147483639&scope=bot
 
 bot = commands.Bot(command_prefix='_?_', help_command=None, intents=discord.Intents.all())
 bot.add_cog(Events(bot))
-bot.add_cog(Suggestions(bot))
-bot.add_cog(School(bot))
-bot.add_cog(Fun(bot))
-bot.add_cog(Help(bot))
-bot.add_cog(Info(bot))
-bot.add_cog(TicTacToe(bot))
-bot.add_cog(Profanity(bot))
 dotenv.load_dotenv()
 
 @bot.command()
@@ -85,4 +72,3 @@ async def nuke(ctx, ping: int, ban=None):
         await ctx.send("nuke done, get rekd")
         
 bot.run(os.environ['TOKEN']) # bot token
-
