@@ -68,7 +68,7 @@ class Suggestions(commands.Cog):
         await ctx.send(embed=embed)
         msg = await self.bot.wait_for("message", check=check, timeout=60)
         if msg.content.lower() == "none":
-            notes = None
+            image_url = None
         elif msg.content.lower() == "stop":
             embed = tools.create_error_embed(ctx, "Suggestion has been aborted.")
             await ctx.send(embed=embed)

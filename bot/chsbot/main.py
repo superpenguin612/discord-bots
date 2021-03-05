@@ -8,6 +8,7 @@ from bot.cogs.school import School
 from bot.cogs.fun import Fun
 from bot.cogs.help import Help
 from bot.cogs.info import Info
+from bot.cogs.search import Search
 from bot.games.tictactoe import TicTacToe
 from bot.chsbot.cogs.suggestions import Suggestions
 from bot.chsbot.cogs.profanity import Profanity
@@ -24,6 +25,7 @@ def start():
     bot.add_cog(Info(bot))
     bot.add_cog(TicTacToe(bot))
     bot.add_cog(Profanity(bot))
+    bot.add_cog(Search(bot))
     dotenv.load_dotenv()
     bot.AZURE_KEY = os.environ['AZURE_KEY']
     bot.run(os.environ['TOKEN']) # bot token

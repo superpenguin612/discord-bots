@@ -9,6 +9,7 @@ from bot.cogs.school import School
 from bot.cogs.fun import Fun
 from bot.cogs.help import Help
 from bot.cogs.info import Info
+from bot.cogs.search import Search
 from bot.games.tictactoe import TicTacToe
 from bot.davidhackerman.cogs.economy import Economy
 from bot.davidhackerman.cogs.links import Links
@@ -26,6 +27,7 @@ def start():
     bot.add_cog(Fun(bot))
     bot.add_cog(Help(bot))
     bot.add_cog(Info(bot))
+    bot.add_cog(Search(bot))
     bot.add_cog(Links(bot))
     bot.add_cog(Economy(bot))
     bot.add_cog(Punishments(bot))

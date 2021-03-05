@@ -6,9 +6,10 @@ import json
 import aiohttp
 import random
 
-class Fun(commands.Cog):
+class Search(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+
     @commands.group()
     @commands.cooldown(1, 10, type=commands.BucketType.user)
     async def pic(self, ctx):
