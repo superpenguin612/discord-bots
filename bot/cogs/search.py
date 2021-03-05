@@ -29,7 +29,6 @@ class Search(commands.Cog):
             search_url = "https://api.bing.microsoft.com/v7.0/images/search"
             async with session.get(search_url, headers=headers, params=params) as r:
                 js = await r.json()
-                print(js)
                 if not js['value']:
                     embed = tools.create_error_embed(ctx, 'No results.')
                 else:
@@ -50,8 +49,6 @@ class Search(commands.Cog):
             search_url = "https://api.bing.microsoft.com/v7.0/images/search"
             async with session.get(search_url, headers=headers, params=params) as r:
                 js = await r.json()
-                with open('test.json', 'w') as f:
-                    json.dump(js, f)
                 if not js['value']:
                     embed = tools.create_error_embed(ctx, 'No results.')
                 else:
