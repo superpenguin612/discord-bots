@@ -46,6 +46,7 @@ class Events(commands.Cog):
                 await ctx.send(embed=embed)
                 author1 = await ctx.guild.fetch_member(688530998920871969)
                 await ctx.send(f"{author1.mention}")
+            raise error
         else:
             embed = tools.create_error_embed(ctx, f"Ok, something really went wrong. This error message isn't supposed to show up, so ig I messed up pretty badly lmao")
             await ctx.send(embed=embed)
