@@ -10,7 +10,6 @@ from bot.cogs.fun import Fun
 from bot.cogs.help import Help
 from bot.cogs.info import Info
 from bot.cogs.search import Search
-from bot.cogs.music import Music
 from bot.games.tictactoe import TicTacToe
 from bot.davidhackerman.cogs.economy import Economy
 from bot.davidhackerman.cogs.links import Links
