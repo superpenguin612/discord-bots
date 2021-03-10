@@ -1,6 +1,6 @@
 # discord-bots
 This is a multi-purpose discord bot, currently being shared by CHS Bot and davidhackerman.
-The two bots are in separate sub-packages with code shared as necessary.
+Bot-specific code is in said bot's `cogs` package.
 ## Modules
 - Fun: hello, 8ball, rng
 - Info: ping, about
