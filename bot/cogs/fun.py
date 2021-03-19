@@ -4,19 +4,52 @@ from bot.helpers import tools
 import random
 import aiohttp
 
-class Fun(commands.Cog):
+class Fun(commands.Cog, name='fun'):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(aliases=["hi"])
+    @commands.command(
+        name='hello',
+        brief='Greet the bot!',
+        aliases=["hi"]
+    )
     async def hello(self, ctx):
-        """Greet the bot!"""
+        """Greet the bot!
+        **Usage**
+        `_prefix_pic hello`
+        **Parameters**
+        None
+        **Aliases**
+        `_prefix_hi`
+        **Cooldown**
+        None
+        **Permissions Required**
+        None
+        **Examples**
+        `_prefix_pic hello`
+        """
         embed = tools.create_embed(ctx, 'Hello!', desc=f'How are you, {ctx.author.mention}?')
         await ctx.send(embed=embed)
-    
-    @commands.command(name='8ball')
+
+    @commands.command(
+        name='8ball',
+        brief='Ask the Magic 8 Ball a question.'
+    )
     async def eightball(self, ctx, *, request):
-        """Consult the Magic 8 Ball. It is never wrong!"""
+        """Ask the Magic 8 Ball a question.
+        **Usage**
+        `_prefix_8ball <request>`
+        **Parameters**
+        `<request>`: Your question for the 8 Ball.
+        **Aliases**
+        None
+        **Cooldown**
+        None
+        **Permissions Required**
+        None
+        **Examples**
+        `_prefix_8ball am i cool kid?`
+        """
         responses = [
             [
                 '🟢 As I see it, yes. 🟢',
@@ -62,17 +95,50 @@ class Fun(commands.Cog):
         embed.add_field(name='Answer', value=response, inline=False)
         await ctx.send(embed=embed)
     
-    @commands.command()
+    @commands.command(
+        name='rng',
+        brief='Get a random number.'
+    )
     @commands.cooldown(1, 10)
     async def rng(self, ctx, minnum:int, maxnum: int):
-        """Get a random number!"""
+        """Get a random number.
+        **Usage**
+        `_prefix_rng <minnum> <maxnum>`
+        **Parameters**
+        `<minnum>`: The lower boundary for the random number to be in.
+        `<maxnum>`: The upper boundary for the random number to be in.
+        **Aliases**
+        None
+        **Cooldown**
+        None
+        **Permissions Required**
+        None
+        **Examples**
+        `_prefix_rng 1 6`
+        """
         embed = tools.create_embed(ctx, 'Random Number', desc=f'`{random.randint(minnum, maxnum)}`')
         await ctx.send(embed=embed)
     
-    @commands.command()
+    @commands.command(
+        name='dog',
+        brief='Get a dog picture!'
+    )
     @commands.cooldown(1, 3)
     async def dog(self, ctx):
-        """Get a dog picture!"""
+        """Get a dog picture!
+        **Usage**
+        `_prefix_dog`
+        **Parameters**
+        None
+        **Aliases**
+        None
+        **Cooldown**
+        None
+        **Permissions Required**
+        None
+        **Examples**
+        `_prefix_dog`
+        """
         async with aiohttp.ClientSession() as session:
             async with session.get('https://dog.ceo/api/breeds/image/random') as r:
                 if r.status == 200:
@@ -81,10 +147,26 @@ class Fun(commands.Cog):
                     embed.set_image(url=js['message'])
                     await ctx.send(embed=embed)
     
-    @commands.command()
+    @commands.command(
+        name='cat',
+        brief='Get a cat picture!'
+    )
     @commands.cooldown(1, 3)
     async def cat(self, ctx):
-        """Get a cat picture!"""
+        """Get a cat picture!
+        **Usage**
+        `_prefix_cat`
+        **Parameters**
+        None
+        **Aliases**
+        None
+        **Cooldown**
+        None
+        **Permissions Required**
+        None
+        **Examples**
+        `_prefix_cat`
+        """
         async with aiohttp.ClientSession() as session:
             async with session.get('http://aws.random.cat/meow') as r:
                 if r.status == 200:

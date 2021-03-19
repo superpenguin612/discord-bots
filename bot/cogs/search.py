@@ -7,22 +7,50 @@ import aiohttp
 import random
 import xmltodict
 
-class Search(commands.Cog):
+class Search(commands.Cog, name='search'):
     def __init__(self, bot):
         self.bot = bot
-        print([c.qualified_name for c in self.walk_commands()])
 
-    @commands.group()
+    @commands.group(
+        aliases = ['picture']
+    )
     @commands.cooldown(1, 10, type=commands.BucketType.user)
     async def pic(self, ctx):
-        """Get any picture!"""
+        """Search Bing for a picture. It should be noted that this command only returns the help command for the command group. 
+        You must use one of the subcommands (`top`, `random`, or `num`) to specify the search type. 
+        See the help text for the subcommands for more information.
+        **Usage**
+        `_prefix_pic`
+        **Parameters**
+        None
+        **Aliases**
+        `_prefix_picture`
+        **Cooldown**
+        10 seconds, persists across all subcommands
+        **Permissions Required**
+        None
+        **Examples**
+        `_prefix_pic random Carmel High School`
+        """
         if ctx.invoked_subcommand is None:
-            embed = tools.create_embed(ctx, 'Picture', desc=f'Please specify a category for your picture request.\nThe available categories are `top`, `random`, and `num`.\nThe command\'s usage is `{ctx.prefix}pic <category> <request>`')
-            await ctx.send(embed=embed)
+            await ctx.send_help(ctx.command)
     
     @pic.command(name='top')
     async def pic_top(self, ctx, *, arg):
-        """Get any picture!"""
+        """Search Bing for a picture and show the top result.
+        **Usage**
+        `_prefix_pic top <search_term>`
+        **Parameters**
+        `<search_term>`: Any search term. Keep in mind that SafeSearch is active, so the bot will not return inappropriate images.
+        **Aliases**
+        `_prefix_picture top`
+        **Cooldown**
+        10 seconds, persists across all subcommands
+        **Permissions Required**
+        None
+        **Examples**
+        `_prefix_pic top reddit`
+        """
         async with aiohttp.ClientSession() as session:
             dotenv.load_dotenv()
             mkt = 'en-US'
@@ -40,8 +68,22 @@ class Search(commands.Cog):
                 await ctx.send(embed=embed)
     
     @pic.command(name='num')
-    async def pic_num(self, ctx, num:int, *, arg):
-        """Get any picture!"""
+    async def pic_num(self, ctx, num: int, *, arg: str):
+        """Search Bing for a picture and return the result at a certain rank.
+        **Usage**
+        `_prefix_pic num <number> <search_term>`
+        **Parameters**
+        `<num>`: The number at which the search is located. For example, 1 returns the first picture, 2 is 2nd, 3 is 3rd, and so on. The maximum value is 150.
+        `<search_term>`: Any search term. Keep in mind that SafeSearch is active, so the bot will not return inappropriate images.
+        **Aliases**
+        `_prefix_picture num`
+        **Cooldown**
+        10 seconds, persists across all subcommands
+        **Permissions Required**
+        None
+        **Examples**
+        `_prefix_pic num 5 fish`
+        """
         # url_req = f'https://customsearch.googleapis.com/customsearch/v1?q={"+".join(arg.split(" "))}&searchType=image&safe=active&cx=b56bd460ede944aef&key=AIzaSyATNnIQUjg9P4IYQJMs_QvWnMaaDVlT1PY'
         async with aiohttp.ClientSession() as session:
             dotenv.load_dotenv()
@@ -55,13 +97,26 @@ class Search(commands.Cog):
                     embed = tools.create_error_embed(ctx, 'No results.')
                 else:
                     embed = tools.create_embed(ctx, 'Picture!')
-                    url = js['value'][num]['contentUrl']
+                    url = js['value'][num-1]['contentUrl']
                     embed.set_image(url=url)
                 await ctx.send(embed=embed)
     
     @pic.command(name='random')
     async def pic_rand(self, ctx, *, arg):
-        """Get any picture!"""
+        """Search Bing for a picture and return the result at a random rank.
+        **Usage**
+        `_prefix_pic random <search_term>`
+        **Parameters**
+        `<search_term>`: Any search term. Keep in mind that SafeSearch is active, so the bot will not return inappropriate images.
+        **Aliases**
+        `_prefix_picture random`
+        **Cooldown**
+        10 seconds, persists across all subcommands
+        **Permissions Required**
+        None
+        **Examples**
+        `_prefix_pic random cute doggo`
+        """
         # url_req = f'https://customsearch.googleapis.com/customsearch/v1?q={"+".join(arg.split(" "))}&searchType=image&safe=active&cx=b56bd460ede944aef&key=AIzaSyATNnIQUjg9P4IYQJMs_QvWnMaaDVlT1PY'
         async with aiohttp.ClientSession() as session:
             dotenv.load_dotenv()

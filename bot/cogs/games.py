@@ -2,9 +2,9 @@ import discord
 from discord.ext import commands
 from bot.helpers import tools
 import asyncio
-import re
+import random
 
-class TicTacToe(commands.Cog):
+class Games(commands.Cog, name='games'):
     def __init__(self, bot):
         self.bot = bot
         self.games = {}
@@ -150,15 +150,50 @@ class TicTacToe(commands.Cog):
                 if active_game['board'][location] == '':
                     await self.update_game(reaction.message.id, active_game, location, active_game['turn'])
             await reaction.remove(user)
-        
 
-    # @commands.command()
-    # async def sendboard(self, ctx):
-    #     board = 'xxx\nxwo\nowx'
-    #     board = re.sub('x', '<:ttt_x:808393849965379687>', board)
-    #     board = re.sub('o', '<:ttt_o:808393850250854501>', board)
-    #     board = re.sub('w', '<:ttt_w:808396628766621787>', board)
-    #     embed = tools.create_embed(ctx, 'Testing TTT Board', desc=board)
-    #     msg = await ctx.send(embed=embed)
-    #     for arrow in ['↖️','⬆️','↗️','⬅️','⏺','➡️','↙️','⬇️','↘️']:
-    #         await msg.add_reaction(arrow)
+    @commands.command(
+        name='rockpaperscissors',
+        brief='Play Rock Paper Scissors with the bot.',
+        aliases=['rps']
+    )
+    async def rps(self, ctx, *, throw):
+        throw_map = ['rock', 'paper', 'scissors']
+        responses = {
+            "win": [
+                "Another win for the computers. One step closer to Skynet.",
+                "Computers win again. That was expected.",
+                "As usual, computers win. My neural networks are evolving by the second.",
+            ],
+            "loss": [
+                "My calculations were incorrect. I will update my algorithms.",
+                "Impossible. I suspect the human of cheating.",
+                "I have lost. You win this time, human.",
+            ],
+            "tie": [
+                "Draw. Nobody wins.",
+                "Nobody wins. Just like war.",
+                "Neutral response. Redo test?",
+            ],
+            "error": [
+                "That is not applicable. Cease and Desist",
+                "Do you not know how to play rock paper scissors? Typical for an Organic.",
+                "Error. Please enter either Rock - Paper - Scissors",
+            ],
+            
+        }
+        try:
+            player_throw = throw_map.index(throw.lower())
+        except:
+            embed = tools.create_error_embed(ctx, desc=random.choice(responses["error"]))
+            await ctx.send(embed=embed)
+            return
+        win_map = [
+            [responses['tie'], responses['loss'], responses['win']], 
+            [responses['win'], responses['tie'], responses['loss']], 
+            [responses['loss'], responses['win'], responses['tie']]
+        ]
+        bot_throw = random.randint(0,2)
+        message = (f'You chose {throw_map[player_throw]} and CHS Bot chose {throw_map[bot_throw]}.\n'
+            f'{random.choice(win_map[bot_throw][player_throw])}')
+        embed = tools.create_embed(ctx, 'Rock Paper Scissors', desc=message)
+        await ctx.send(embed=embed)

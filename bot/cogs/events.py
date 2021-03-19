@@ -18,7 +18,9 @@ class Events(commands.Cog):
     async def on_ready(self):
         print(f'Logged in.\nUser: {self.bot.user}\nID: {self.bot.user.id}\n----------------------')
         if self.bot.user.id == 802211256383438861: # chs bot
-            await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name='be my valentine? | c?help'))
+            await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name=f'lol spring break go brrr | c?help'))
+        elif self.bot.user.id == 821888273936810014: # chs bot beta
+            await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name=f'beta pog | cc?help'))
         elif self.bot.user.id == 796805491186597968: # davidhackerman bot
             await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name='$help | this is a good bot'))
         self.bot.db = await self.create_db_pool()

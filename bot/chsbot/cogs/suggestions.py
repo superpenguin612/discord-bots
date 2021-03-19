@@ -3,7 +3,7 @@ from discord.ext import commands
 from bot.helpers import tools
 import asyncio
 
-class Suggestions(commands.Cog):
+class Suggestions(commands.Cog, name='suggestions', description='A group of commands related to suggesting improvements for a server.'):
     def __init__(self, bot):
         self.bot = bot
 

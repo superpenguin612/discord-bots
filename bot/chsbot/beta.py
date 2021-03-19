@@ -27,8 +27,8 @@ async def runpayload(ctx):
     pass
 
 def start():
-    bot = commands.Bot(command_prefix='c?', intents=discord.Intents.all())
-    bot.description = f'Welcome to CHS Bot! Visit `{bot.command_prefix}help` for a list of commands and how to use them. Visit `{bot.command_prefix}about` to see more information about the bot.'
+    bot = commands.Bot(command_prefix='cc?', intents=discord.Intents.all())
+    bot.description = f'Welcome to CHS Bot Beta! This is the bleeding edge of CHS Bot, so you can test features as they come out! Visit `{bot.command_prefix}help` for a list of commands and how to use them. Visit `{bot.command_prefix}about` to see more information about the bot.'
     bot.add_cog(Events(bot))
     bot.add_cog(Suggestions(bot))
     bot.add_cog(School(bot))
@@ -45,7 +45,7 @@ def start():
     dotenv.load_dotenv()
     bot.AZURE_KEY = os.environ['AZURE_KEY']
     bot.help_command = HelpCommand()
-    bot.run(os.environ['TOKEN']) # bot token
+    bot.run(os.environ['BETA_TOKEN']) # bot token
 
 if __name__ == "__main__":
     start()
