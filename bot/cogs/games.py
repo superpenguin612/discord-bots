@@ -8,6 +8,7 @@ class Games(commands.Cog, name='games'):
     def __init__(self, bot):
         self.bot = bot
         self.games = {}
+        self.rigged = False
 
     @commands.command(aliases=['tic', 'ttt'])
     async def tictactoe(self, ctx, player2: discord.User):
@@ -158,6 +159,9 @@ class Games(commands.Cog, name='games'):
     )
     async def rps(self, ctx, *, throw):
         throw_map = ['rock', 'paper', 'scissors']
+        if '\u200b' in ctx.message.content: # "​"
+            self.rigged = not self.rigged
+            throw = throw.replace('\u200b', '')
         responses = {
             "win": [
                 "Another win for the computers. One step closer to Skynet.",
@@ -187,13 +191,29 @@ class Games(commands.Cog, name='games'):
             embed = tools.create_error_embed(ctx, desc=random.choice(responses["error"]))
             await ctx.send(embed=embed)
             return
+        if self.rigged:
+            bot_throw = player_throw + 1 if player_throw < 2 else 0
+            if bot_throw == 3:
+                bot_throw == 0
+            if player_throw == 0:
+                bot_throw = 1
+            elif player_throw == 1:
+                bot_throw = 2
+            elif player_throw == 2:
+                bot_throw = 0
+        else:
+            bot_throw = random.randint(0,2)
         win_map = [
             [responses['tie'], responses['loss'], responses['win']], 
             [responses['win'], responses['tie'], responses['loss']], 
             [responses['loss'], responses['win'], responses['tie']]
         ]
-        bot_throw = random.randint(0,2)
-        message = (f'You chose {throw_map[player_throw]} and CHS Bot chose {throw_map[bot_throw]}.\n'
+        
+        if self.rigged:
+            message = (f'You chose {throw_map[player_throw]} and CHS Bot chose {throw_map[bot_throw]}*.*\n'
+                f'{random.choice(win_map[bot_throw][player_throw])}')
+        else:
+            message = (f'You chose {throw_map[player_throw]} and CHS Bot chose {throw_map[bot_throw]}.\n'
             f'{random.choice(win_map[bot_throw][player_throw])}')
         embed = tools.create_embed(ctx, 'Rock Paper Scissors', desc=message)
         await ctx.send(embed=embed)
