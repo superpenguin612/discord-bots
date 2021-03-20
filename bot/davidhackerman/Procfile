@@ -1,1 +1,1 @@
-worker: python bot/davidhackerman/main.py
+worker: python3 -m bot.davidhackerman.main
