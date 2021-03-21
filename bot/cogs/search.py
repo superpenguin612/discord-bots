@@ -28,6 +28,7 @@ class Search(commands.Cog, name='search'):
         ],
         guild_ids=[801630163866746901]
     )
+    @commands.has_permissions(manage_messages=True)
     async def _picture_top(self, ctx, search_term):
         await ctx.respond()
         async with aiohttp.ClientSession() as session:
