@@ -4,7 +4,7 @@ from bot.helpers import tools
 import asyncio
 import asyncpg
 
-class ReactionRoles(commands.Cog, name='reaction_roles'):
+class ReactionRoles(commands.Cxog, name='reaction_roles')
     def __init__(self, bot):
         self.bot = bot
 
