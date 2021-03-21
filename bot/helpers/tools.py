@@ -1,6 +1,6 @@
 import discord
 
-def create_embed(ctx, title, desc=None, url=None, color=None, footer_enabled=True):
+def create_embed(ctx, title, desc='', url=None, color=None, footer_enabled=True):
     if not color:
         color = discord.Embed.Empty
     embed = discord.Embed(title=title, description=desc, url=url, color=color)

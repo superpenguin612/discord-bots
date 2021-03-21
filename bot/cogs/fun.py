@@ -1,5 +1,7 @@
 import discord
 from discord.ext import commands
+from discord_slash import cog_ext, SlashContext
+from discord_slash.utils.manage_commands import create_option
 from bot.helpers import tools
 import random
 import aiohttp
@@ -8,10 +10,9 @@ class Fun(commands.Cog, name='fun'):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(
+    @cog_ext.cog_slash(
         name='hello',
-        brief='Greet the bot!',
-        aliases=["hi"]
+        description='Greet the bot!',
     )
     async def hello(self, ctx):
         """Greet the bot!
@@ -28,14 +29,23 @@ class Fun(commands.Cog, name='fun'):
         **Examples**
         `_prefix_pic hello`
         """
+        await ctx.respond()
         embed = tools.create_embed(ctx, 'Hello!', desc=f'How are you, {ctx.author.mention}?')
         await ctx.send(embed=embed)
 
-    @commands.command(
+    @cog_ext.cog_slash(
         name='8ball',
-        brief='Ask the Magic 8 Ball a question.'
+        description='Ask the Magic 8 Ball a question.',
+        options=[
+            create_option(
+                name='request',
+                description='Your request for the 8 Ball.',
+                option_type=3,
+                required=True
+            )
+        ]
     )
-    async def eightball(self, ctx, *, request):
+    async def eightball(self, ctx, request):
         """Ask the Magic 8 Ball a question.
         **Usage**
         `_prefix_8ball <request>`
@@ -50,6 +60,7 @@ class Fun(commands.Cog, name='fun'):
         **Examples**
         `_prefix_8ball am i cool kid?`
         """
+        await ctx.respond()
         responses = [
             [
                 '🟢 As I see it, yes. 🟢',
@@ -95,12 +106,26 @@ class Fun(commands.Cog, name='fun'):
         embed.add_field(name='Answer', value=response, inline=False)
         await ctx.send(embed=embed)
     
-    @commands.command(
+    @cog_ext.cog_slash(
         name='rng',
-        brief='Get a random number.'
+        description='Get a random number.',
+        options=[
+            create_option(
+                name='min_num',
+                description='Lower boundary for the random number to be in.',
+                option_type=4,
+                required=True
+            ),
+            create_option(
+                name='max_num',
+                description='Upper boundary for the random number to be in.',
+                option_type=4,
+                required=True
+            )
+        ]
     )
-    @commands.cooldown(1, 10)
-    async def rng(self, ctx, minnum:int, maxnum: int):
+    # @commands.cooldown(1, 10)
+    async def rng(self, ctx, min_num, max_num):
         """Get a random number.
         **Usage**
         `_prefix_rng <minnum> <maxnum>`
@@ -116,14 +141,15 @@ class Fun(commands.Cog, name='fun'):
         **Examples**
         `_prefix_rng 1 6`
         """
-        embed = tools.create_embed(ctx, 'Random Number', desc=f'`{random.randint(minnum, maxnum)}`')
+        await ctx.respond()
+        embed = tools.create_embed(ctx, 'Random Number', desc=f'`{random.randint(min_num, max_num)}`')
         await ctx.send(embed=embed)
     
-    @commands.command(
+    @cog_ext.cog_slash(
         name='dog',
-        brief='Get a dog picture!'
+        description='Get a dog picture!',
     )
-    @commands.cooldown(1, 3)
+    # @commands.cooldown(1, 3)
     async def dog(self, ctx):
         """Get a dog picture!
         **Usage**
@@ -139,6 +165,7 @@ class Fun(commands.Cog, name='fun'):
         **Examples**
         `_prefix_dog`
         """
+        await ctx.respond()
         async with aiohttp.ClientSession() as session:
             async with session.get('https://dog.ceo/api/breeds/image/random') as r:
                 if r.status == 200:
@@ -147,11 +174,11 @@ class Fun(commands.Cog, name='fun'):
                     embed.set_image(url=js['message'])
                     await ctx.send(embed=embed)
     
-    @commands.command(
+    @cog_ext.cog_slash(
         name='cat',
-        brief='Get a cat picture!'
+        description='Get a cat picture!'
     )
-    @commands.cooldown(1, 3)
+    # @commands.cooldown(1, 3)
     async def cat(self, ctx):
         """Get a cat picture!
         **Usage**
@@ -167,6 +194,7 @@ class Fun(commands.Cog, name='fun'):
         **Examples**
         `_prefix_cat`
         """
+        await ctx.respond()
         async with aiohttp.ClientSession() as session:
             async with session.get('http://aws.random.cat/meow') as r:
                 if r.status == 200:
