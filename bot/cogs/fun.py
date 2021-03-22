@@ -15,20 +15,6 @@ class Fun(commands.Cog, name='fun'):
         description='Greet the bot!',
     )
     async def hello(self, ctx):
-        """Greet the bot!
-        **Usage**
-        `_prefix_pic hello`
-        **Parameters**
-        None
-        **Aliases**
-        `_prefix_hi`
-        **Cooldown**
-        None
-        **Permissions Required**
-        None
-        **Examples**
-        `_prefix_pic hello`
-        """
         await ctx.respond()
         embed = tools.create_embed(ctx, 'Hello!', desc=f'How are you, {ctx.author.mention}?')
         await ctx.send(embed=embed)
@@ -42,24 +28,10 @@ class Fun(commands.Cog, name='fun'):
                 description='Your request for the 8 Ball.',
                 option_type=3,
                 required=True
-            )
-        ]
+            ),
+        ],
     )
     async def eightball(self, ctx, request):
-        """Ask the Magic 8 Ball a question.
-        **Usage**
-        `_prefix_8ball <request>`
-        **Parameters**
-        `<request>`: Your question for the 8 Ball.
-        **Aliases**
-        None
-        **Cooldown**
-        None
-        **Permissions Required**
-        None
-        **Examples**
-        `_prefix_8ball am i cool kid?`
-        """
         await ctx.respond()
         responses = [
             [
@@ -121,26 +93,11 @@ class Fun(commands.Cog, name='fun'):
                 description='Upper boundary for the random number to be in.',
                 option_type=4,
                 required=True
-            )
-        ]
+            ),
+        ],
     )
     # @commands.cooldown(1, 10)
     async def rng(self, ctx, min_num, max_num):
-        """Get a random number.
-        **Usage**
-        `_prefix_rng <minnum> <maxnum>`
-        **Parameters**
-        `<minnum>`: The lower boundary for the random number to be in.
-        `<maxnum>`: The upper boundary for the random number to be in.
-        **Aliases**
-        None
-        **Cooldown**
-        None
-        **Permissions Required**
-        None
-        **Examples**
-        `_prefix_rng 1 6`
-        """
         await ctx.respond()
         embed = tools.create_embed(ctx, 'Random Number', desc=f'`{random.randint(min_num, max_num)}`')
         await ctx.send(embed=embed)
@@ -151,20 +108,6 @@ class Fun(commands.Cog, name='fun'):
     )
     # @commands.cooldown(1, 3)
     async def dog(self, ctx):
-        """Get a dog picture!
-        **Usage**
-        `_prefix_dog`
-        **Parameters**
-        None
-        **Aliases**
-        None
-        **Cooldown**
-        None
-        **Permissions Required**
-        None
-        **Examples**
-        `_prefix_dog`
-        """
         await ctx.respond()
         async with aiohttp.ClientSession() as session:
             async with session.get('https://dog.ceo/api/breeds/image/random') as r:
@@ -180,20 +123,6 @@ class Fun(commands.Cog, name='fun'):
     )
     # @commands.cooldown(1, 3)
     async def cat(self, ctx):
-        """Get a cat picture!
-        **Usage**
-        `_prefix_cat`
-        **Parameters**
-        None
-        **Aliases**
-        None
-        **Cooldown**
-        None
-        **Permissions Required**
-        None
-        **Examples**
-        `_prefix_cat`
-        """
         await ctx.respond()
         async with aiohttp.ClientSession() as session:
             async with session.get('http://aws.random.cat/meow') as r:

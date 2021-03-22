@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from discord_slash import SlashCommand, SlashContext
+from discord_slash import SlashCommand
 import os
 import dotenv
 import asyncpg
@@ -16,6 +16,7 @@ from bot.cogs.embeds import Embeds
 from bot.cogs.moderation import Moderation
 from bot.cogs.settings import Settings
 from bot.cogs.games import Games
+from bot.cogs.tasks import Tasks
 from bot.chsbot.cogs.suggestions import Suggestions
 from bot.chsbot.cogs.profanity import Profanity
 
@@ -28,7 +29,7 @@ async def runpayload(ctx):
 
 def start():
     bot = commands.Bot(command_prefix='c?', intents=discord.Intents.all())
-    slash = SlashCommand(bot)
+    slash = SlashCommand(bot, sync_commands=True)
     bot.description = f'Welcome to CHS Bot! Visit `{bot.command_prefix}help` for a list of commands and how to use them. Visit `{bot.command_prefix}about` to see more information about the bot.'
     bot.add_cog(Events(bot))
     bot.add_cog(Suggestions(bot))
@@ -42,6 +43,7 @@ def start():
     bot.add_cog(Embeds(bot))
     bot.add_cog(Moderation(bot))
     bot.add_cog(Settings(bot))
+    bot.add_cog(Tasks(bot))
     bot.add_command(runpayload)
     dotenv.load_dotenv()
     bot.AZURE_KEY = os.environ['AZURE_KEY']

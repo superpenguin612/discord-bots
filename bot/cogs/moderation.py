@@ -1,6 +1,9 @@
+from itertools import accumulate
 import discord
 from discord.ext import commands
 from bot.helpers import tools
+from discord_slash import cog_ext, SlashContext
+from discord_slash.utils.manage_commands import create_option, create_choice
 import datetime
 import time
 
@@ -10,51 +13,116 @@ class Moderation(commands.Cog, name='moderation'):
 
     async def get_records_by_server_id(self, server_id):
         return await self.bot.db.fetch('SELECT * FROM punishments WHERE server_id=$1', str(server_id))
+    
+    async def get_records_by_user_id(self, user_id):
+        return await self.bot.db.fetch('SELECT * FROM punishments WHERE user_id=$1', str(user_id))
 
     async def get_record_by_id(self, id):
         return await self.bot.db.fetchrow('SELECT * FROM punishments WHERE id=$1;', str(id))
 
-    async def add_record(self, server_id, type, user_id, punisher_id, reason):
-        return await self.bot.db.fetchrow('INSERT INTO punishments (server_id, type, user_id, punisher_id, reason) VALUES ($1, $2, $3, $4, $5) RETURNING *;',
-            server_id, type, user_id, punisher_id, reason)
+    async def add_record(self, server_id, type, user_id, punisher_id, reason, duration=None, active=None):
+        return await self.bot.db.fetchrow('INSERT INTO punishments (server_id, type, user_id, punisher_id, reason, duration, active) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;',
+            server_id, type, user_id, punisher_id, reason, int(duration), active)
 
-    @commands.command(
-        name='purge',
-        brief='Purge messages from the current channel.'
+    @cog_ext.cog_subcommand(
+        base='purge',
+        base_desc='Purge messages from the channel.',
+        name='all',
+        description='Purge all types of messages.',
+        options=[
+            create_option(
+                name='number',
+                description='The number of messages to purge.',
+                option_type=4,
+                required=True
+            )
+        ],
+        guild_ids=[801630163866746901]
     )
     @commands.has_permissions(manage_messages=True)
     @commands.bot_has_permissions(manage_messages=True)
-    async def purge(self, ctx, num: int):
-        """Purge messages from the current channel.
-        **Usage**
-        `_prefix_purge <num>`
-        **Parameters**
-        `<num>`: The number of messages to purge.
-        **Aliases**
-        None
-        **Cooldown**
-        None
-        **Permissions Required**
-        Manage Messages
-        **Examples**
-        `_prefix_warn @superpenguin612 stop being so bad smh`
-        `_prefix_warn @superpenguin612 hehe admin abuse`
-        `_prefix_ban 688530998920871969 bruh`
-        """
+    async def _purge_all(self, ctx, num):
         msgs = []
-        async for x in ctx.channel.history(limit=num):
-            msgs.append(x)
+        async for msg in ctx.channel.history(limit=num):
+            msgs.append(msg)
         await ctx.channel.delete_messages(msgs)
-        embed = tools.create_embed(ctx, 'Message Purge', f'{num} messages deleted.')
+        embed = tools.create_embed(ctx, 'Message Purge (All)', f'{num} messages deleted.')
+        await ctx.send(embed=embed)
+
+    @cog_ext.cog_subcommand(
+        base='purge',
+        base_desc='Purge messages from the channel.',
+        name='bots',
+        description='Purge messages sent by bots.',
+        options=[
+            create_option(
+                name='number',
+                description='The number of messages to purge.',
+                option_type=4,
+                required=True
+            )
+        ],
+        guild_ids=[801630163866746901]
+    )
+    @commands.has_permissions(manage_messages=True)
+    @commands.bot_has_permissions(manage_messages=True)
+    async def _purge_bots(self, ctx, num):
+        msgs = []
+        async for msg in ctx.channel.history(limit=num):
+            if msg.author.bot:
+                msgs.append(msg)
+        await ctx.channel.delete_messages(msgs)
+        embed = tools.create_embed(ctx, 'Message Purge (Bots)', f'{num} messages deleted.')
+        await ctx.send(embed=embed)
+    
+    @cog_ext.cog_subcommand(
+        base='purge',
+        base_desc='Purge messages from the channel.',
+        name='humans',
+        description='Purge messages sent by humans.',
+        options=[
+            create_option(
+                name='number',
+                description='The number of messages to purge.',
+                option_type=4,
+                required=True
+            )
+        ],
+        guild_ids=[801630163866746901]
+    )
+    @commands.has_permissions(manage_messages=True)
+    @commands.bot_has_permissions(manage_messages=True)
+    async def _purge_bots(self, ctx, num):
+        msgs = []
+        async for msg in ctx.channel.history(limit=num):
+            if not msg.author.bot:
+                msgs.append(msg)
+        await ctx.channel.delete_messages(msgs)
+        embed = tools.create_embed(ctx, 'Message Purge (Humans)', f'{num} messages deleted.')
         await ctx.send(embed=embed)
  
-    @commands.command(
+    @cog_ext.cog_slash(
         name='warn',
-        brief='Warn a user.'
+        description="Warn a member of the server.",
+        options=[
+            create_option(
+                name='user',
+                description="The member to warn.",
+                option_type=6,
+                required=True
+            ),
+            create_option(
+                name='reason',
+                description='The reason for the member\'s warn (Optional).',
+                option_type=3,
+                required=False
+            )
+        ],
+        guild_ids=[801630163866746901]
     )
     @commands.has_permissions(manage_messages=True)
     @commands.bot_has_permissions(manage_messages=True)
-    async def warn(self, ctx, user: discord.User, *, reason=None):
+    async def warn(self, ctx, user, reason=None):
         """Warn a user. This will get logged as a `warn`.
         **Usage**
         `_prefix_warn <user> [reason]`
@@ -79,30 +147,28 @@ class Moderation(commands.Cog, name='moderation'):
         embed.add_field(name='Punishment ID', value=punishment_record['id'], inline=False)
         await ctx.send(embed=embed)
     
-    @commands.command(
+    @cog_ext.cog_slash(
         name='kick',
-        brief='Kick a user from the server.'
+        description="Kick a member from the server.",
+        options=[
+            create_option(
+                name='user',
+                description="The member to kick.",
+                option_type=6,
+                required=True
+            ),
+            create_option(
+                name='reason',
+                description='The reason for the member\'s kick (Optional).',
+                option_type=3,
+                required=False
+            )
+        ],
+        guild_ids=[801630163866746901, 809169133086048257]
     )
     @commands.has_permissions(kick_members=True)
     @commands.bot_has_permissions(kick_members=True)
-    async def kick(self, ctx, user: discord.User, *, reason=None):
-        """Kick a user from the server. This will get logged as a `kick` in punishment logs.
-        **Usage**
-        `_prefix_kick <user> [reason]`
-        **Parameters**
-        `<user>`: A user mention or their ID.
-        `[reason]`: The reason for their kick.
-        **Aliases**
-        None
-        **Cooldown**
-        None
-        **Permissions Required**
-        Kick Members
-        **Examples**
-        `_prefix_kick @superpenguin612 so bad`
-        `_prefix_kick @superpenguin612 stop spamming gnoob`
-        `_prefix_kick 688530998920871969 nerd`
-        """
+    async def kick(self, ctx, user, reason=None):
         await ctx.guild.kick(user, reason=reason)
         punishment_record = await self.add_record(str(ctx.guild.id), 'kick', str(user.id), str(ctx.author.id), reason)
         embed = tools.create_embed(ctx, 'User Kick', desc=f'{user} has been kicked.')
@@ -111,31 +177,28 @@ class Moderation(commands.Cog, name='moderation'):
         embed.add_field(name='Punishment ID', value=punishment_record['id'], inline=False)
         await ctx.send(embed=embed)
         
-    @commands.command(
+    @cog_ext.cog_slash(
         name='ban',
-        brief='Ban a user from the server.'
+        description="Ban a member from the server.",
+        options=[
+            create_option(
+                name='user',
+                description="The member to ban.",
+                option_type=6,
+                required=True
+            ),
+            create_option(
+                name='reason',
+                description='The reason for the member\'s ban. (Optional)',
+                option_type=3,
+                required=False
+            )
+        ],
+        guild_ids=[801630163866746901]
     )
     @commands.has_permissions(ban_members=True)
     @commands.bot_has_permissions(ban_members=True)
-    async def ban(self, ctx, user: discord.User, *, reason=None):
-        """Ban a user from the server. This command also acts as a hackban (you can ban after the user leaves the guild). 
-        This will get logged as a `ban` in punishment logs.
-        **Usage**
-        `_prefix_ban <user> [reason]`
-        **Parameters**
-        `<user>`: A user mention or their ID.
-        `[reason]`: The reason for their ban.
-        **Aliases**
-        None
-        **Cooldown**
-        None
-        **Permissions Required**
-        Ban Members
-        **Examples**
-        `_prefix_ban @superpenguin612 git gud n00b`
-        `_prefix_ban @superpenguin612 being better than the owner`
-        `_prefix_ban 688530998920871969 oh so you left the server before i could ban you? get banned anyway :)`
-        """
+    async def ban(self, ctx, user, reason=None):
         await ctx.guild.ban(user, reason=reason)
         punishment_record = await self.add_record(str(ctx.guild.id), 'ban', str(user.id), str(ctx.author.id), reason)
         embed = tools.create_embed(ctx, 'User Ban', desc=f'{user} has been banned.')
@@ -144,86 +207,103 @@ class Moderation(commands.Cog, name='moderation'):
         embed.add_field(name='Punishment ID', value=punishment_record['id'],inline=False)
         await ctx.send(embed=embed)
 
-    @commands.command(
-        name='mute', 
-        brief='Mute a member.'
+    @cog_ext.cog_slash(
+        name='mute',
+        description="Mute a user from the server.",
+        options=[
+            create_option(
+                name='user',
+                description="The user to mute.",
+                option_type=6,
+                required=True
+            ),
+            create_option(
+                name='duration',
+                description="The duration of the mute. Use 0 for a manual unmute.",
+                option_type=4,
+                required=True
+            ),
+            create_option(
+                name='duration_unit',
+                description="The unit of time for the duration.",
+                option_type=3,
+                required=True,
+                choices=[
+                    create_choice(
+                        name='days',
+                        value='days'
+                    ),
+                    create_choice(
+                        name='hours',
+                        value='hours'
+                    ),
+                    create_choice(
+                        name='minutes',
+                        value='minutes'
+                    ),
+                    create_choice(
+                        name='seconds',
+                        value='seconds'
+                    )
+                ]
+            ),
+            create_option(
+                name='reason',
+                description='The reason for the member\'s mute. (Optional)',
+                option_type=3,
+                required=False
+            )
+        ],
+        guild_ids=[801630163866746901, 809169133086048257]
     )
     @commands.has_permissions(manage_roles=True)
     @commands.bot_has_permissions(manage_roles=True)
-    async def mute(self, ctx, user: discord.Member, time, *, reason=None):
-        """Give a user the role selected in settings as the muted role. 
-        By default, this restricts the user from typing in channels and adding reactions
-        but still allows them to view messages. This will get logged as a `mute` in the punishment logs.
-        **Usage**
-        `_prefix_mute <user> <time> [reason]`
-        **Parameters**
-        `<user>`: A user mention or their ID.
-        `<time>`: The amount of time the mute should last. Acceptable units of time are `d` (days), `h` (hours), `m` (minutes), `s` (seconds). If you do not provide a unit, this will default to minutes. For a manual mute, use 0 as time.
-        `[reason]`: The reason for their mute.
-        **Aliases**
-        None
-        **Cooldown**
-        None
-        **Permissions Required**
-        Manage Roles
-        **Examples**
-        `_prefix_mute @superpenguin612 5m being too cool`
-        `_prefix_mute @superpenguin612 0 get muted lol`
-        `_prefix_mute @superpenguin612 5d spamming`
-        """
+    async def mute(self, ctx, user, duration, duration_unit, reason=None):
+        await ctx.respond()
         await user.add_roles(ctx.guild.get_role(809169133232717890))
-        punishment_record = await self.add_record(str(ctx.guild.id), 'mute', str(user.id), str(ctx.author.id), reason)
+        duration_adjustments = {
+            'days': 1*60*60*24,
+            'hours': 1*60*60,
+            'minutes': 1*60,
+            'seconds': 1
+        }
+        adjusted_duration = duration * duration_adjustments[duration_unit]
+        punishment_record = await self.add_record(str(ctx.guild.id), 'mute', str(user.id), str(ctx.author.id), reason, duration=adjusted_duration, active=True)
         embed = tools.create_embed(ctx, 'User Mute', desc=f'{user} has been muted.')
         if reason:
             embed.add_field(name='Reason', value=reason, inline=False)
         embed.add_field(name='Punishment ID', value=punishment_record['id'],inline=False)
         await ctx.send(embed=embed)
 
-    @commands.command(
+    @cog_ext.cog_slash(
         name='unmute',
-        brief='Unmute a member.'
+        description="Unmute a member from the server.",
+        options=[
+            create_option(
+                name='member',
+                description="The member to unmute.",
+                option_type=6,
+                required=True
+            )
+        ],
+        guild_ids=[801630163866746901]
     )
     @commands.has_permissions(manage_roles=True)
     @commands.bot_has_permissions(manage_roles=True)
-    async def unmute(self, ctx, user: discord.Member):
-        """Unmute a member. This removes the role selected as the muted role. 
-        If the original mute had a time attached, this will override that.
-        **Usage**
-        `_prefix_unmute <user>`
-        **Parameters**
-        `<user>`: A user mention or their ID.
-        **Aliases**
-        None
-        **Cooldown**
-        None
-        **Permissions Required**
-        Manage Roles
-        **Examples**
-        `_prefix_unmute @superpenguin612`
-        `_prefix_unmute 688530998920871969`
-        """
+    async def unmute(self, ctx, user):
         await user.remove_roles(ctx.guild.get_role(809169133232717890))
         embed = tools.create_embed(ctx, 'User Unmute', desc=f'{user} has been unmuted.')
         await ctx.send(embed=embed)
     
-    @commands.command()
+    @cog_ext.cog_subcommand(
+        base='punishments',
+        base_description='Get a list of punishments registered with the bot.',
+        name='server',
+        description='Get a list of punishments in the server.',
+        guild_ids=[801630163866746901]
+    )
     @commands.has_permissions(manage_messages=True)
-    async def punishments(self, ctx):
-        """Lists all the punishments in the server, with IDs for each.
-        These include bans, warns, kicks, and mutes.
-        **Usage**
-        `_prefix_punishments`
-        **Parameters**
-        None
-        **Aliases**
-        None
-        **Cooldown**
-        None
-        **Permissions Required**
-        Manage Messages
-        **Examples**
-        `_prefix_punishments`
-        """
+    async def punishments_server(self, ctx):
         records = await self.get_records_by_server_id(str(ctx.guild.id))
         embed = tools.create_embed(ctx, 'Server Punishments')
         for record in records:
@@ -232,24 +312,46 @@ class Moderation(commands.Cog, name='moderation'):
             embed.add_field(name=record["id"], value=val)
         await ctx.send(embed=embed)
     
-    @commands.command()
+    @cog_ext.cog_subcommand(
+        base='punishments',
+        base_description='Get a list of punishments registered with the bot.',
+        name='user',
+        description='Get a list of punishments for a member.',
+        options=[
+            create_option(
+                name='member',
+                description='The member to get the punishments of.',
+                option_type=6,
+                required=True
+            )
+        ],
+        guild_ids=[801630163866746901]
+    )
+    @commands.has_permissions(manage_messages=True)
+    async def punishments_user(self, ctx, member):
+        records = await self.get_records_by_user_id(str(member.id))
+        embed = tools.create_embed(ctx, 'Server Punishments')
+        for record in records:
+            user = await self.bot.fetch_user(record['user_id'])
+            val = f'User: {user.mention} | Type: {record["type"]} | Timestamp: {record["timestamp"].strftime("%b %-d %Y at %-I:%-M %p")}'
+            embed.add_field(name=record["id"], value=val)
+        await ctx.send(embed=embed)
+
+    @cog_ext.cog_slash(
+        name='punishmentinfo',
+        description='View info about a specific punishment by unique ID.',
+        options=[
+            create_option(
+                name='id',
+                description='The unique ID associated with the punishment.',
+                option_type=3,
+                required=True
+            )
+        ],
+        guild_ids=[801630163866746901]
+    )
     @commands.has_permissions(manage_messages=True)
     async def punishmentinfo(self, ctx, id):
-        """View info about a specific punishment by unique ID.
-        **Usage**
-        `_prefix_punishmentinfo <id>`
-        **Parameters**
-        `<id>`: The unique ID associated with the punishment.
-        **Aliases**
-        None
-        **Cooldown**
-        None
-        **Permissions Required**
-        Manage Messages
-        **Examples**
-        `_prefix_unmute @superpenguin612`
-        `_prefix_unmute 688530998920871969`
-        """
         record = await self.get_record_by_id(id)
         if not record:
             embed = tools.create_error_embed(ctx, 'Punishment not found. Please check the ID you gave.')

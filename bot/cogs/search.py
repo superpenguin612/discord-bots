@@ -24,12 +24,10 @@ class Search(commands.Cog, name='search'):
                 description='The search term.',
                 option_type=3,
                 required=True
-            )
+            ),
         ],
-        guild_ids=[801630163866746901]
     )
-    @commands.has_permissions(manage_messages=True)
-    async def _picture_top(self, ctx, search_term):
+    async def picture_top(self, ctx, search_term):
         await ctx.respond()
         async with aiohttp.ClientSession() as session:
             dotenv.load_dotenv()
@@ -64,11 +62,10 @@ class Search(commands.Cog, name='search'):
                 description='The search term.',
                 option_type=3,
                 required=True
-            )
+            ),
         ],
-        guild_ids=[801630163866746901]
     )
-    async def _picture_num(self, ctx, num, search_term):
+    async def picture_num(self, ctx, num, search_term):
         await ctx.respond()
         async with aiohttp.ClientSession() as session:
             dotenv.load_dotenv()
@@ -97,11 +94,10 @@ class Search(commands.Cog, name='search'):
                 description='The search term.',
                 option_type=3,
                 required=True
-            )
+            ),
         ],
-        guild_ids=[801630163866746901]
     )
-    async def _picture_random(self, ctx, search_term):
+    async def picture_random(self, ctx, search_term):
         await ctx.respond()
         async with aiohttp.ClientSession() as session:
             dotenv.load_dotenv()

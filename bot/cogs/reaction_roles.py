@@ -1,6 +1,8 @@
 import discord
 from discord.ext import commands
 from bot.helpers import tools
+from discord_slash import cog_ext, SlashContext
+from discord_slash.utils.manage_commands import create_option
 import asyncio
 import asyncpg
 
@@ -62,16 +64,11 @@ class ReactionRoles(commands.Cog, name='reaction_roles'):
                         await asyncio.sleep(2)
                         await msg.delete()
     
-    @commands.command(
+    @cog_ext.cog_slash(
         name='addreaction',
-        brief='Add a new reaction!',
-        help='help'
+        description='Create a new reaction role. This is a multi-step command, so there are no parameters passed.',
     )
     async def addreaction(self, ctx):
-        """Create a new reaction role. 
-        Reaction roles have a UUID that is created each time one is registered.
-        This UUID is used to edit and view information about the reaction.
-        """
         def check(msg):
             return msg.author == ctx.author and msg.channel == ctx.channel
 
@@ -136,13 +133,19 @@ class ReactionRoles(commands.Cog, name='reaction_roles'):
 
         await sent_msg.edit(embed=embed)
     
-    @commands.command(
+    @cog_ext.cog_slash(
         name='reactioninfo',
-        brief='Get info about a specific reaction role by ID.',
+        description='Get info about a specific reaction role by ID.',
+        options=[
+            create_option(
+                name='id',
+                description='The ID of the reaction role. Get this with /listreactions.',
+                option_type=3,
+                required=True
+            ),
+        ],
     )
-    async def reactioninfo(self, ctx, *, id):
-        """Get info about a specific reaction role by ID.
-        """
+    async def reactioninfo(self, ctx, id):
         record = await self.get_record_by_id(str(id))
         embed = tools.create_embed(ctx, "Reaction Role Info")
         embed.add_field(name='Reaction Role ID', value=record['id'], inline=False)
@@ -152,26 +155,30 @@ class ReactionRoles(commands.Cog, name='reaction_roles'):
         embed.add_field(name='Emoji', value=record['emoji'])
         await ctx.send(embed=embed)
 
-    @commands.command(
+    @cog_ext.cog_slash(
         name='listreactions',
-        brief='List reaction roles in the server',
+        description='List reaction roles in the server',
     )
     async def listreactions(self, ctx):
-        """List reaction roles.
-        """
         embed = tools.create_embed(ctx, "Reaction Roles List")
         records = await self.get_records_by_server_id(str(ctx.guild.id))
         for record in records:
-            embed.add_field(name=record['id'], value=f'Message ID: {record["message_id"]} | Role: {ctx.guild.get_role(int(record["role_id"])).mention} | Emoji: {record["emoji"]}')
+            embed.add_field(name=record['id'], value=f'Message ID: {record["message_id"]} | Role: {ctx.guild.get_role(int(record["role_id"])).mention} | Emoji: {record["emoji"]}', inline=False)
         await ctx.send(embed=embed)
 
-    # @commands.command(
-    #     name='delete',
-    #     brief='List reaction roles.',
+    # @cog_ext.cog_slash(
+    #     name='delreaction',
+    #     description='Delete a reaction role.',
+    #     options=[
+    #         create_option(
+    #             name='id',
+    #             description='The ID of the reaction role. Get this with /listreactions.',
+    #             option_type=3,
+    #             required=True
+    #         ),
+    #     ],
     # )
     # async def deletereaction(self, ctx, id):
-    #     """Delete a reacion by ID.
-    #     """
     #     record = await self.get_record_by_id(str(ctx.guild.id))
     #     embed = tools.create_embed(ctx, "Reaction Role Info")
     #     embed.add_field(name='Reaction Role ID', value=record['id'])
