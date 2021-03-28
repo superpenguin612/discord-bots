@@ -1,38 +1,74 @@
 import discord
 from discord.ext import commands
 from bot.helpers import tools
+from discord_slash import cog_ext, SlashContext
+from discord_slash.utils.manage_commands import create_option, create_choice
+from discord_slash.model import SlashCommandOptionType
 import asyncio
 
 class Suggestions(commands.Cog, name='suggestions', description='A group of commands related to suggesting improvements for a server.'):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.group()
-    @commands.cooldown(1, 900, type=commands.BucketType.user)
-    async def suggest(self, ctx):
-        """Suggest something for the server. 
-        Suggestions will go into #suggestions.
-        The bot will prompt for the reason for the suggestion, then any notes.
-        You may specify "none" for either the reason or the notes.
-        """
-        if ctx.invoked_subcommand is None:
-            embed = tools.create_embed(ctx, 'Suggestion', desc=f'Please specify a category for your suggestion.\nThe available categories are `server`, `bot`, `movie`, and `rule`.\nThe command\'s usage is `{ctx.prefix}suggest <category> <suggestion>`')
-            await ctx.send(embed=embed)
-            self.suggest.reset_cooldown(ctx)
-
-    @suggest.command(name='server')
+    @cog_ext.cog_subcommand(
+        base='suggest',
+        base_desc='Create a suggestion.',
+        name='server',
+        description='Create a server suggestion.',
+        options=[
+            create_option(
+                name='suggestion',
+                description='The suggestion you want to make.',
+                option_type=SlashCommandOptionType.STRING,
+                required=True
+            ),
+            create_option(
+                name='reason',
+                description='The suggestion you want to make.',
+                option_type=SlashCommandOptionType.STRING,
+                required=True
+            ),
+            create_option(
+                name='notes',
+                description='The suggestion you want to make.',
+                option_type=SlashCommandOptionType.STRING,
+                required=True
+            ),
+            create_option(
+                name='suggestion',
+                description='The suggestion you want to make.',
+                option_type=SlashCommandOptionType.STRING,
+                required=True
+            ),
+        ]
+    )
     async def _server(self, ctx, *, suggestion):
         await self.create_suggestion(ctx, suggestion, 'Server Suggestion', color=discord.Color.gold())
 
-    @suggest.command(name='movie')
+    @cog_ext.cog_subcommand(
+        base='suggest',
+        base_desc='Create a suggestion.',
+        name='movie',
+        description='Create a movie suggestion.',
+    )
     async def _movie(self, ctx, *, suggestion):
         await self.create_suggestion(ctx, suggestion, 'Movie Suggestion', color=discord.Color.green(), downvote=False)
 
-    @suggest.command(name='bot')
+    @cog_ext.cog_subcommand(
+        base='suggest',
+        base_desc='Create a suggestion.',
+        name='bot',
+        description='Create a bot suggestion.',
+    )
     async def _bot(self, ctx, *, suggestion):
         await self.create_suggestion(ctx, suggestion, 'Bot Suggestion', color=discord.Color.purple())
 
-    @suggest.command(name='rule')
+    @cog_ext.cog_subcommand(
+        base='suggest',
+        base_desc='Create a suggestion.',
+        name='rule',
+        description='Create a rule suggestion.',
+    )
     async def _rule(self, ctx, *, suggestion):
         await self.create_suggestion(ctx, suggestion, 'Rule Suggestion', color=discord.Color.blue())
 
@@ -42,7 +78,7 @@ class Suggestions(commands.Cog, name='suggestions', description='A group of comm
         
         embed = tools.create_embed(ctx, "Suggestion Reason", "What is the reason for your suggestion?")
         await ctx.send(embed=embed)
-        msg = await self.bot.wait_for("message", check=check, timeout=60)
+        msg = await self.bot.wait_for("message", check=check, timeout=180)
         if msg.content.lower() == "none":
             reason = None
         elif msg.content.lower() == "stop":
@@ -54,7 +90,7 @@ class Suggestions(commands.Cog, name='suggestions', description='A group of comm
 
         embed = tools.create_embed(ctx, "Suggestion Notes", "What else you would like to add? Type \"none\" if you don't have anything else.")
         await ctx.send(embed=embed)
-        msg = await self.bot.wait_for("message", check=check, timeout=60)
+        msg = await self.bot.wait_for("message", check=check, timeout=180)
         if msg.content.lower() == "none":
             notes = None
         elif msg.content.lower() == "stop":
@@ -66,7 +102,7 @@ class Suggestions(commands.Cog, name='suggestions', description='A group of comm
         
         embed = tools.create_embed(ctx, "Suggestion Image", "Do you have an image to attach to the suggestion? Reply with \"none\" if you don't.")
         await ctx.send(embed=embed)
-        msg = await self.bot.wait_for("message", check=check, timeout=60)
+        msg = await self.bot.wait_for("message", check=check, timeout=180)
         if msg.content.lower() == "none":
             image_url = None
         elif msg.content.lower() == "stop":

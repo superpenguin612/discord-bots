@@ -1,6 +1,9 @@
 import discord
+from discord import channel
 from discord.ext import commands
 from bot.helpers import tools
+from discord_slash import cog_ext, SlashContext
+from discord_slash.utils.manage_commands import create_option, create_choice
 import asyncio
 import asyncpg
 
@@ -8,29 +11,91 @@ class Embeds(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
     
-    @commands.command(
+    async def embed_setup(self, ctx, channel_id, message_id=None):
+        def check(msg):
+            return msg.author == ctx.author and msg.channel == ctx.channel
+        
+        if message_id:
+            channel = ctx.guild.get_channel(channel_id)
+            message = channel.fetch_message(message_id)
+            embed_viewer = message.embeds[0]    
+        else:
+            default_embed = discord.Embed(title='Title', description='Description')
+            default_embed.set_footer(text='Footer')
+            default_embed.add_field(name='Field 1 Name', value='Field 1 Value')
+            embed_viewer = default_embed
+
+        embed_creator = [
+            tools.create_embed('Embed Setup', desc=[
+                'Title - :scroll:',
+                'Description - :page_facing_up:',
+                'Footer - :bookmark_tabs:',
+                'Color - :green_square:',
+                'Image - :stars:',
+                'Thumbnail - :paperclip:',
+                'Author - :bust_in_silhouette:',
+                'Author Icon - :busts_in_silhouette:',
+                'Fields - :one:-:nine:'
+            ].join('\n')),
+        ]
+        bot_message = await ctx.send(embeds=[embed_viewer, embed_creator])
+
+        menu_desc = [
+            'Title - :scroll:',
+            'Description - :page_facing_up:',
+            'Footer - :bookmark_tabs:',
+            'Color - :green_square:',
+            'Image - :stars:',
+            'Thumbnail - :paperclip:',
+            'Author - :bust_in_silhouette:',
+            'Author Icon - :busts_in_silhouette:',
+            'Fields - :one:-:nine:'
+        ]
+        reactions_converter = {
+            '📜': 'title',
+            '📄': 'description',
+            '📑': 'footer',
+            '🟩': 'color',
+            '🌠': 'image',
+            '📎': 'thumbnail',
+            '👤': 'author',
+            '👥': 'author_image'
+        }
+        running = True
+        setup_status = 'menu'
+        while running:
+            try:
+                user_reaction = await self.bot.wait_for("reaction", check=check, timeout=180)
+            except asyncio.TimeoutError:
+                await self.creator_message.clear_reactions()
+            
+
+
+            if setup_status == 'menu':
+                desc = menu_desc
+                embed_creator = discord.Embed(title='Embed Creator', description=desc)
+                await bot_message.edit(embeds=[embed_viewer, embed_creator])
+                reactions = ['']
+                for reaction in reactions:
+                    bot_message.add_reaction(reaction)
+
+            
+
+
+    @cog_ext.cog_slash(
         name='sendembed',
-        brief='Send an embed message from the bot.',
+        description='Send an embed message from the bot. This launches embed setup.',
+        options=[
+            create_option(
+                name='channel',
+                description='The channel to send the embed message to.',
+                option_type=6,
+                required=True
+            ),
+        ],
     )
     @commands.has_permissions(administrator=True)
     async def sendembed(self, ctx):
-        """Send an embed message from the bot. 
-        This is a "setup" command, so no arguments are passed when you run it. 
-        The setup instructions will start after the command is run. 
-        You have 3 minutes to reply to each step in the setup process.
-        **Usage**
-        `_prefix_sendembed`
-        **Parameters**
-        None
-        **Aliases**
-        None
-        **Cooldown**
-        None
-        **Permissions Required**
-        Administrator
-        **Examples**
-        `_prefix_sendembed`
-        """
         def check(msg):
             return msg.author == ctx.author and msg.channel == ctx.channel
 

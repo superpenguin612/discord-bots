@@ -1,0 +1,542 @@
+{
+    "global": [
+        {
+            "name": "cat",
+            "description": "Get a cat picture!",
+            "options": []
+        },
+        {
+            "name": "dog",
+            "description": "Get a dog picture!",
+            "options": []
+        },
+        {
+            "name": "8ball",
+            "description": "Ask the Magic 8 Ball a question.",
+            "options": [
+                {
+                    "name": "request",
+                    "description": "Your request for the 8 Ball.",
+                    "type": 3,
+                    "required": true,
+                    "choices": []
+                }
+            ]
+        },
+        {
+            "name": "hello",
+            "description": "Greet the bot!",
+            "options": []
+        },
+        {
+            "name": "rng",
+            "description": "Get a random number.",
+            "options": [
+                {
+                    "name": "min_num",
+                    "description": "Lower boundary for the random number to be in.",
+                    "type": 4,
+                    "required": true,
+                    "choices": []
+                },
+                {
+                    "name": "max_num",
+                    "description": "Upper boundary for the random number to be in.",
+                    "type": 4,
+                    "required": true,
+                    "choices": []
+                }
+            ]
+        },
+        {
+            "name": "about",
+            "description": "View information about the bot.",
+            "options": []
+        },
+        {
+            "name": "help",
+            "description": "Get help for the bot.",
+            "options": []
+        },
+        {
+            "name": "ping",
+            "description": "Get the latency of the connection between the bot and Discord.",
+            "options": []
+        },
+        {
+            "name": "picture",
+            "description": "Search Bing for a picture.",
+            "options": [
+                {
+                    "name": "num",
+                    "description": "Search Bing for a picture and return the result at a certain rank.",
+                    "type": 1,
+                    "options": [
+                        {
+                            "name": "number",
+                            "description": "The number at which the search is located (1 is 1st, 2 is 2nd). The maximum value is 150.",
+                            "type": 4,
+                            "required": true,
+                            "choices": []
+                        },
+                        {
+                            "name": "search_term",
+                            "description": "The search term.",
+                            "type": 3,
+                            "required": true,
+                            "choices": []
+                        }
+                    ]
+                },
+                {
+                    "name": "random",
+                    "description": "Search Bing for a picture and return the result at a random rank.",
+                    "type": 1,
+                    "options": [
+                        {
+                            "name": "search_term",
+                            "description": "The search term.",
+                            "type": 3,
+                            "required": true,
+                            "choices": []
+                        }
+                    ]
+                },
+                {
+                    "name": "top",
+                    "description": "Search Bing for a picture and return the top result.",
+                    "type": 1,
+                    "options": [
+                        {
+                            "name": "search_term",
+                            "description": "The search term.",
+                            "type": 3,
+                            "required": true,
+                            "choices": []
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "reactionroles",
+            "description": "Add, edit, delete, or get info on a reaction role.",
+            "options": [
+                {
+                    "name": "add",
+                    "description": "Create a new reaction role. This is a multi-step command, so there are no parameters passed.",
+                    "type": 1,
+                    "options": []
+                },
+                {
+                    "name": "info",
+                    "description": "Get info about a specific reaction role by ID.",
+                    "type": 1,
+                    "options": [
+                        {
+                            "name": "id",
+                            "description": "The ID of the reaction role. Get this with /listreactions.",
+                            "type": 3,
+                            "required": true,
+                            "choices": []
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "listreactions",
+            "description": "List reaction roles in the server",
+            "options": []
+        },
+        {
+            "name": "sendembed",
+            "description": "Send an embed message from the bot. This launches embed setup.",
+            "options": [
+                {
+                    "name": "channel",
+                    "description": "The channel to send the embed message to.",
+                    "type": 6,
+                    "required": true,
+                    "choices": []
+                }
+            ]
+        },
+        {
+            "name": "purge",
+            "description": "Purge messages from the channel.",
+            "options": [
+                {
+                    "name": "all",
+                    "description": "Purge all types of messages.",
+                    "type": 1,
+                    "options": [
+                        {
+                            "name": "number",
+                            "description": "The number of messages to purge.",
+                            "type": 4,
+                            "required": true,
+                            "choices": []
+                        }
+                    ]
+                },
+                {
+                    "name": "humans",
+                    "description": "Purge messages sent by humans.",
+                    "type": 1,
+                    "options": [
+                        {
+                            "name": "number",
+                            "description": "The number of messages to purge.",
+                            "type": 4,
+                            "required": true,
+                            "choices": []
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "ban",
+            "description": "Ban a member from the server.",
+            "options": [
+                {
+                    "name": "user",
+                    "description": "The member to ban.",
+                    "type": 6,
+                    "required": true,
+                    "choices": []
+                },
+                {
+                    "name": "reason",
+                    "description": "The reason for the member's ban. (Optional)",
+                    "type": 3,
+                    "required": false,
+                    "choices": []
+                }
+            ]
+        },
+        {
+            "name": "kick",
+            "description": "Kick a member from the server.",
+            "options": [
+                {
+                    "name": "user",
+                    "description": "The member to kick.",
+                    "type": 6,
+                    "required": true,
+                    "choices": []
+                },
+                {
+                    "name": "reason",
+                    "description": "The reason for the member's kick (Optional).",
+                    "type": 3,
+                    "required": false,
+                    "choices": []
+                }
+            ]
+        },
+        {
+            "name": "mute",
+            "description": "Mute a user from the server.",
+            "options": [
+                {
+                    "name": "user",
+                    "description": "The user to mute.",
+                    "type": 6,
+                    "required": true,
+                    "choices": []
+                },
+                {
+                    "name": "duration",
+                    "description": "The duration of the mute. Use 0 for a manual unmute.",
+                    "type": 4,
+                    "required": true,
+                    "choices": []
+                },
+                {
+                    "name": "duration_unit",
+                    "description": "The unit of time for the duration.",
+                    "type": 3,
+                    "required": true,
+                    "choices": [
+                        {
+                            "value": "days",
+                            "name": "days"
+                        },
+                        {
+                            "value": "hours",
+                            "name": "hours"
+                        },
+                        {
+                            "value": "minutes",
+                            "name": "minutes"
+                        },
+                        {
+                            "value": "seconds",
+                            "name": "seconds"
+                        }
+                    ]
+                },
+                {
+                    "name": "reason",
+                    "description": "The reason for the member's mute. (Optional)",
+                    "type": 3,
+                    "required": false,
+                    "choices": []
+                }
+            ]
+        },
+        {
+            "name": "punishmentinfo",
+            "description": "View info about a specific punishment by unique ID.",
+            "options": [
+                {
+                    "name": "id",
+                    "description": "The unique ID associated with the punishment.",
+                    "type": 3,
+                    "required": true,
+                    "choices": []
+                }
+            ]
+        },
+        {
+            "name": "punishments",
+            "description": "Get a list of punishments registered with the bot.",
+            "options": [
+                {
+                    "name": "server",
+                    "description": "Get a list of punishments in the server.",
+                    "type": 1,
+                    "options": []
+                },
+                {
+                    "name": "user",
+                    "description": "Get a list of punishments for a member.",
+                    "type": 1,
+                    "options": [
+                        {
+                            "name": "member",
+                            "description": "The member to get the punishments of.",
+                            "type": 6,
+                            "required": true,
+                            "choices": []
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "unmute",
+            "description": "Unmute a member from the server.",
+            "options": [
+                {
+                    "name": "member",
+                    "description": "The member to unmute.",
+                    "type": 6,
+                    "required": true,
+                    "choices": []
+                }
+            ]
+        },
+        {
+            "name": "warn",
+            "description": "Warn a member of the server.",
+            "options": [
+                {
+                    "name": "user",
+                    "description": "The member to warn.",
+                    "type": 6,
+                    "required": true,
+                    "choices": []
+                },
+                {
+                    "name": "reason",
+                    "description": "The reason for the member's warn (Optional).",
+                    "type": 3,
+                    "required": false,
+                    "choices": []
+                }
+            ]
+        },
+        {
+            "name": "editsettings",
+            "description": "Edit the settings for the server.",
+            "options": [
+                {
+                    "name": "dailyreport",
+                    "description": "No Description.",
+                    "type": 2,
+                    "options": [
+                        {
+                            "name": "channel",
+                            "description": "Edit the daily report channel.",
+                            "type": 1,
+                            "options": [
+                                {
+                                    "name": "channel",
+                                    "description": "The new daily report channel.",
+                                    "type": 7,
+                                    "required": true,
+                                    "choices": []
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "starboard",
+                    "description": "No Description.",
+                    "type": 2,
+                    "options": [
+                        {
+                            "name": "channel",
+                            "description": "Edit the starboard channel.",
+                            "type": 1,
+                            "options": [
+                                {
+                                    "name": "channel",
+                                    "description": "The new starboard channel.",
+                                    "type": 7,
+                                    "required": true,
+                                    "choices": []
+                                }
+                            ]
+                        },
+                        {
+                            "name": "numberrequired",
+                            "description": "Edit the number of stars required to add a message to the starboard.",
+                            "type": 1,
+                            "options": [
+                                {
+                                    "name": "number",
+                                    "description": "The new number of stars required for the starboard.",
+                                    "type": 4,
+                                    "required": true,
+                                    "choices": []
+                                }
+                            ]
+                        },
+                        {
+                            "name": "reaction",
+                            "description": "Edit the reaction to use for the starboard.",
+                            "type": 1,
+                            "options": [
+                                {
+                                    "name": "emoji",
+                                    "description": "The new reaction to use for the starboard.",
+                                    "type": 3,
+                                    "required": true,
+                                    "choices": []
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "suggestions",
+                    "description": "No Description.",
+                    "type": 2,
+                    "options": [
+                        {
+                            "name": "channel",
+                            "description": "Edit the suggestions channel.",
+                            "type": 1,
+                            "options": [
+                                {
+                                    "name": "channel",
+                                    "description": "The new suggestions channel.",
+                                    "type": 7,
+                                    "required": true,
+                                    "choices": []
+                                }
+                            ]
+                        },
+                        {
+                            "name": "downemoji",
+                            "description": "Edit the down emoji for suggestions.",
+                            "type": 1,
+                            "options": [
+                                {
+                                    "name": "emoji",
+                                    "description": "The new down emoji for suggestions.",
+                                    "type": 7,
+                                    "required": true,
+                                    "choices": []
+                                }
+                            ]
+                        },
+                        {
+                            "name": "upemoji",
+                            "description": "Edit the up emoji for suggestions.",
+                            "type": 1,
+                            "options": [
+                                {
+                                    "name": "emoji",
+                                    "description": "The new up emoji for suggestions.",
+                                    "type": 7,
+                                    "required": true,
+                                    "choices": []
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "listsettings",
+            "description": "Get the settings for the server.",
+            "options": []
+        },
+        {
+            "name": "starboard",
+            "description": "Force, lock, or remove a starboard message.",
+            "options": [
+                {
+                    "name": "force",
+                    "description": "Force a message to starboard.",
+                    "type": 1,
+                    "options": [
+                        {
+                            "name": "message_id",
+                            "description": "The ID of the message to force to starboard.",
+                            "type": 4,
+                            "required": true,
+                            "choices": []
+                        }
+                    ]
+                },
+                {
+                    "name": "lock",
+                    "description": "Lock a message on the starboard. This prevents it from getting or losing stars.",
+                    "type": 1,
+                    "options": [
+                        {
+                            "name": "message_id",
+                            "description": "The ID of the message to lock on the starboard.",
+                            "type": 4,
+                            "required": true,
+                            "choices": []
+                        }
+                    ]
+                },
+                {
+                    "name": "remove",
+                    "description": "Remove a starboard message. This prevents it from coming back to the starboard.",
+                    "type": 1,
+                    "options": [
+                        {
+                            "name": "message_id",
+                            "description": "The ID of the message to delete from the starboard.",
+                            "type": 4,
+                            "required": true,
+                            "choices": []
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "guild": {}
+}

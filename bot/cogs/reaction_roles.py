@@ -64,11 +64,13 @@ class ReactionRoles(commands.Cog, name='reaction_roles'):
                         await asyncio.sleep(2)
                         await msg.delete()
     
-    @cog_ext.cog_slash(
-        name='addreaction',
+    @cog_ext.cog_subcommand(
+        base='reactionroles',
+        base_desc='Add, edit, delete, or get info on a reaction role.',
+        name='add',
         description='Create a new reaction role. This is a multi-step command, so there are no parameters passed.',
     )
-    async def addreaction(self, ctx):
+    async def reactionroles_add(self, ctx):
         def check(msg):
             return msg.author == ctx.author and msg.channel == ctx.channel
 
@@ -133,8 +135,10 @@ class ReactionRoles(commands.Cog, name='reaction_roles'):
 
         await sent_msg.edit(embed=embed)
     
-    @cog_ext.cog_slash(
-        name='reactioninfo',
+    @cog_ext.cog_subcommand(
+        base='reactionroles',
+        base_desc='Add, edit, delete, or get info on a reaction role.',
+        name='info',
         description='Get info about a specific reaction role by ID.',
         options=[
             create_option(
@@ -145,7 +149,7 @@ class ReactionRoles(commands.Cog, name='reaction_roles'):
             ),
         ],
     )
-    async def reactioninfo(self, ctx, id):
+    async def reactionroles_info(self, ctx, id):
         record = await self.get_record_by_id(str(id))
         embed = tools.create_embed(ctx, "Reaction Role Info")
         embed.add_field(name='Reaction Role ID', value=record['id'], inline=False)
@@ -155,35 +159,32 @@ class ReactionRoles(commands.Cog, name='reaction_roles'):
         embed.add_field(name='Emoji', value=record['emoji'])
         await ctx.send(embed=embed)
 
-    @cog_ext.cog_slash(
-        name='listreactions',
-        description='List reaction roles in the server',
+    @cog_ext.cog_subcommand(
+        base='reactionroles',
+        base_desc='Add, edit, delete, or get info on a reaction role.',
+        name='list',
+        description='List reaction roles in the server.',
     )
-    async def listreactions(self, ctx):
+    async def reactionroles_list(self, ctx):
         embed = tools.create_embed(ctx, "Reaction Roles List")
         records = await self.get_records_by_server_id(str(ctx.guild.id))
         for record in records:
             embed.add_field(name=record['id'], value=f'Message ID: {record["message_id"]} | Role: {ctx.guild.get_role(int(record["role_id"])).mention} | Emoji: {record["emoji"]}', inline=False)
         await ctx.send(embed=embed)
 
-    # @cog_ext.cog_slash(
-    #     name='delreaction',
-    #     description='Delete a reaction role.',
-    #     options=[
-    #         create_option(
-    #             name='id',
-    #             description='The ID of the reaction role. Get this with /listreactions.',
-    #             option_type=3,
-    #             required=True
-    #         ),
-    #     ],
-    # )
-    # async def deletereaction(self, ctx, id):
-    #     record = await self.get_record_by_id(str(ctx.guild.id))
-    #     embed = tools.create_embed(ctx, "Reaction Role Info")
-    #     embed.add_field(name='Reaction Role ID', value=record['id'])
-    #     embed.add_field(name='Channel', value=ctx.guild.get_channel(record['channel_id']).mention)
-    #     embed.add_field(name='Message ID', value=record['message_id'])
-    #     embed.add_field(name='Role', value=ctx.guild.get_role(int(record['role_id'])).mention)
-    #     embed.add_field(name='Emoji', value=record['emoji'])
-    #     await ctx.send(embed=embed)
+    @cog_ext.cog_subcommand(
+        base='reactionroles',
+        base_desc='Add, edit, delete, or get info on a reaction role.',
+        name='delete',
+        description='Delete a reaction role.',
+        options=[
+            create_option(
+                name='id',
+                description='The ID of the reaction role. Get this with /listreactions.',
+                option_type=3,
+                required=True
+            ),
+        ],
+    )
+    async def reactionroles_delete(self, ctx, id):
+        pass

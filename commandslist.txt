@@ -1,0 +1,61 @@
+Moderation
+    purge
+    mute
+    unmute
+    warn
+    kick
+    ban
+    unban
+    moderations
+        list
+            server
+            user
+            punisher
+            type
+        info
+Fun
+    hello
+    8ball
+    rng
+    dog
+    cat
+Search
+    picture
+        top
+        num
+        random
+Games
+    tictactoe
+    rockpaperscissors
+Info
+    ping
+    about
+    help
+Reaction Roles
+    reactionroles
+        add
+        edit
+        list
+        info
+        delete
+Settings
+    settings
+    editsettings
+        starboard
+            channel
+            number_required
+            reaction
+        daily_report
+            channel
+        suggestions
+            channel
+            up_emoji
+            down_emoji
+Starboard
+    starboard
+        force
+        lock
+        remove
+Suggestions
+    suggest
+    removesuggestion

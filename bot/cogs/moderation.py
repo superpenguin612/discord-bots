@@ -1,9 +1,9 @@
-from itertools import accumulate
 import discord
 from discord.ext import commands
 from bot.helpers import tools
 from discord_slash import cog_ext, SlashContext
 from discord_slash.utils.manage_commands import create_option, create_choice
+from discord_slash.model import SlashCommandOptionType
 import datetime
 import time
 
@@ -12,17 +12,20 @@ class Moderation(commands.Cog, name='moderation'):
         self.bot = bot
 
     async def get_records_by_server_id(self, server_id):
-        return await self.bot.db.fetch('SELECT * FROM punishments WHERE server_id=$1', str(server_id))
+        return await self.bot.db.fetch('SELECT * FROM moderations WHERE server_id=$1', str(server_id))
     
-    async def get_records_by_user_id(self, user_id):
-        return await self.bot.db.fetch('SELECT * FROM punishments WHERE user_id=$1', str(user_id))
+    async def get_records_by_user_id(self, server_id, user_id):
+        return await self.bot.db.fetch('SELECT * FROM moderations WHERE server_id=$1 AND user_id=$2', str(server_id), str(user_id))
+    
+    async def get_records_by_type(self, server_id, type):
+        return await self.bot.db.fetch('SELECT * FROM moderations WHERE server_id=$1 AND type=$2', str(server_id), type)
 
-    async def get_record_by_id(self, id):
-        return await self.bot.db.fetchrow('SELECT * FROM punishments WHERE id=$1;', str(id))
+    async def get_record_by_id(self, server_id, id):
+        return await self.bot.db.fetchrow('SELECT * FROM moderations WHERE server_id=$1 AND id=2;', str(server_id), str(id))
 
     async def add_record(self, server_id, type, user_id, punisher_id, reason, duration=None, active=None):
-        return await self.bot.db.fetchrow('INSERT INTO punishments (server_id, type, user_id, punisher_id, reason, duration, active) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;',
-            server_id, type, user_id, punisher_id, reason, int(duration), active)
+        return await self.bot.db.fetchrow('INSERT INTO moderations (server_id, type, user_id, punisher_id, reason, duration, active) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;',
+            server_id, type, user_id, punisher_id, reason, duration, active)
 
     @cog_ext.cog_subcommand(
         base='purge',
@@ -33,17 +36,17 @@ class Moderation(commands.Cog, name='moderation'):
             create_option(
                 name='number',
                 description='The number of messages to purge.',
-                option_type=4,
+                option_type=SlashCommandOptionType.INTEGER,
                 required=True
-            )
+            ),
         ],
-        guild_ids=[801630163866746901]
     )
     @commands.has_permissions(manage_messages=True)
     @commands.bot_has_permissions(manage_messages=True)
-    async def _purge_all(self, ctx, num):
+    async def purge_all(self, ctx, num):
+        await ctx.respond()
         msgs = []
-        async for msg in ctx.channel.history(limit=num):
+        async for msg in ctx.channel.history(limit=num, before=ctx.message):
             msgs.append(msg)
         await ctx.channel.delete_messages(msgs)
         embed = tools.create_embed(ctx, 'Message Purge (All)', f'{num} messages deleted.')
@@ -58,15 +61,15 @@ class Moderation(commands.Cog, name='moderation'):
             create_option(
                 name='number',
                 description='The number of messages to purge.',
-                option_type=4,
+                option_type=SlashCommandOptionType.INTEGER,
                 required=True
-            )
+            ),
         ],
-        guild_ids=[801630163866746901]
     )
     @commands.has_permissions(manage_messages=True)
     @commands.bot_has_permissions(manage_messages=True)
-    async def _purge_bots(self, ctx, num):
+    async def purge_bots(self, ctx, num):
+        await ctx.respond()
         msgs = []
         async for msg in ctx.channel.history(limit=num):
             if msg.author.bot:
@@ -84,15 +87,15 @@ class Moderation(commands.Cog, name='moderation'):
             create_option(
                 name='number',
                 description='The number of messages to purge.',
-                option_type=4,
+                option_type=SlashCommandOptionType.INTEGER,
                 required=True
-            )
+            ),
         ],
-        guild_ids=[801630163866746901]
     )
     @commands.has_permissions(manage_messages=True)
     @commands.bot_has_permissions(manage_messages=True)
-    async def _purge_bots(self, ctx, num):
+    async def purge_humans(self, ctx, num):
+        await ctx.respond()
         msgs = []
         async for msg in ctx.channel.history(limit=num):
             if not msg.author.bot:
@@ -108,38 +111,20 @@ class Moderation(commands.Cog, name='moderation'):
             create_option(
                 name='user',
                 description="The member to warn.",
-                option_type=6,
+                option_type=SlashCommandOptionType.USER,
                 required=True
             ),
             create_option(
                 name='reason',
                 description='The reason for the member\'s warn (Optional).',
-                option_type=3,
+                option_type=SlashCommandOptionType.STRING,
                 required=False
-            )
+            ),
         ],
-        guild_ids=[801630163866746901]
     )
-    @commands.has_permissions(manage_messages=True)
-    @commands.bot_has_permissions(manage_messages=True)
+    # @commands.has_permissions(manage_messages=True)
     async def warn(self, ctx, user, reason=None):
-        """Warn a user. This will get logged as a `warn`.
-        **Usage**
-        `_prefix_warn <user> [reason]`
-        **Parameters**
-        `<user>`: A user mention or their ID.
-        `[reason]`: The reason for their warn.
-        **Aliases**
-        None
-        **Cooldown**
-        None
-        **Permissions Required**
-        Manage Messages
-        **Examples**
-        `_prefix_warn @superpenguin612 stop being so bad smh`
-        `_prefix_warn @superpenguin612 hehe admin abuse`
-        `_prefix_ban 688530998920871969 bruh`
-        """
+        await ctx.respond()
         punishment_record = await self.add_record(str(ctx.guild.id), 'warn', str(user.id), str(ctx.author.id), reason)
         embed = tools.create_embed(ctx, 'User Warn', desc=f'{user} has been warned.')
         if reason:
@@ -154,21 +139,21 @@ class Moderation(commands.Cog, name='moderation'):
             create_option(
                 name='user',
                 description="The member to kick.",
-                option_type=6,
+                option_type=SlashCommandOptionType.USER,
                 required=True
             ),
             create_option(
                 name='reason',
                 description='The reason for the member\'s kick (Optional).',
-                option_type=3,
+                option_type=SlashCommandOptionType.STRING,
                 required=False
-            )
+            ),
         ],
-        guild_ids=[801630163866746901, 809169133086048257]
     )
     @commands.has_permissions(kick_members=True)
     @commands.bot_has_permissions(kick_members=True)
     async def kick(self, ctx, user, reason=None):
+        await ctx.respond()
         await ctx.guild.kick(user, reason=reason)
         punishment_record = await self.add_record(str(ctx.guild.id), 'kick', str(user.id), str(ctx.author.id), reason)
         embed = tools.create_embed(ctx, 'User Kick', desc=f'{user} has been kicked.')
@@ -184,21 +169,21 @@ class Moderation(commands.Cog, name='moderation'):
             create_option(
                 name='user',
                 description="The member to ban.",
-                option_type=6,
+                option_type=SlashCommandOptionType.USER,
                 required=True
             ),
             create_option(
                 name='reason',
                 description='The reason for the member\'s ban. (Optional)',
-                option_type=3,
+                option_type=SlashCommandOptionType.STRING,
                 required=False
-            )
+            ),
         ],
-        guild_ids=[801630163866746901]
     )
     @commands.has_permissions(ban_members=True)
     @commands.bot_has_permissions(ban_members=True)
     async def ban(self, ctx, user, reason=None):
+        await ctx.respond()
         await ctx.guild.ban(user, reason=reason)
         punishment_record = await self.add_record(str(ctx.guild.id), 'ban', str(user.id), str(ctx.author.id), reason)
         embed = tools.create_embed(ctx, 'User Ban', desc=f'{user} has been banned.')
@@ -214,19 +199,19 @@ class Moderation(commands.Cog, name='moderation'):
             create_option(
                 name='user',
                 description="The user to mute.",
-                option_type=6,
+                option_type=SlashCommandOptionType.USER,
                 required=True
             ),
             create_option(
                 name='duration',
                 description="The duration of the mute. Use 0 for a manual unmute.",
-                option_type=4,
+                option_type=SlashCommandOptionType.INTEGER,
                 required=True
             ),
             create_option(
                 name='duration_unit',
                 description="The unit of time for the duration.",
-                option_type=3,
+                option_type=SlashCommandOptionType.STRING,
                 required=True,
                 choices=[
                     create_choice(
@@ -250,11 +235,10 @@ class Moderation(commands.Cog, name='moderation'):
             create_option(
                 name='reason',
                 description='The reason for the member\'s mute. (Optional)',
-                option_type=3,
+                option_type=SlashCommandOptionType.STRING,
                 required=False
-            )
+            ),
         ],
-        guild_ids=[801630163866746901, 809169133086048257]
     )
     @commands.has_permissions(manage_roles=True)
     @commands.bot_has_permissions(manage_roles=True)
@@ -282,77 +266,156 @@ class Moderation(commands.Cog, name='moderation'):
             create_option(
                 name='member',
                 description="The member to unmute.",
-                option_type=6,
+                option_type=SlashCommandOptionType.USER,
                 required=True
-            )
+            ),
         ],
-        guild_ids=[801630163866746901]
     )
     @commands.has_permissions(manage_roles=True)
     @commands.bot_has_permissions(manage_roles=True)
     async def unmute(self, ctx, user):
+        await ctx.respond()
         await user.remove_roles(ctx.guild.get_role(809169133232717890))
         embed = tools.create_embed(ctx, 'User Unmute', desc=f'{user} has been unmuted.')
         await ctx.send(embed=embed)
     
     @cog_ext.cog_subcommand(
-        base='punishments',
-        base_description='Get a list of punishments registered with the bot.',
-        name='server',
-        description='Get a list of punishments in the server.',
-        guild_ids=[801630163866746901]
+        base='moderations',
+        base_desc='Get moderations registered with the bot.',
+        subcommand_group='list',
+        sub_group_desc='Get a list of moderations registered with the bot.',
+        name='all',
+        description='Get a list of all moderations in the server.',
+        guild_ids=[809169133086048257],
     )
     @commands.has_permissions(manage_messages=True)
-    async def punishments_server(self, ctx):
-        records = await self.get_records_by_server_id(str(ctx.guild.id))
-        embed = tools.create_embed(ctx, 'Server Punishments')
-        for record in records:
-            user = await self.bot.fetch_user(record["user_id"])
-            val = f'User: {user.mention} | Type: {record["type"]} | Timestamp: {record["timestamp"].strftime("%b %-d %Y at %-I:%-M %p")}'
-            embed.add_field(name=record["id"], value=val)
-        await ctx.send(embed=embed)
-    
-    @cog_ext.cog_subcommand(
-        base='punishments',
-        base_description='Get a list of punishments registered with the bot.',
-        name='user',
-        description='Get a list of punishments for a member.',
-        options=[
-            create_option(
-                name='member',
-                description='The member to get the punishments of.',
-                option_type=6,
-                required=True
-            )
-        ],
-        guild_ids=[801630163866746901]
-    )
-    @commands.has_permissions(manage_messages=True)
-    async def punishments_user(self, ctx, member):
-        records = await self.get_records_by_user_id(str(member.id))
-        embed = tools.create_embed(ctx, 'Server Punishments')
-        for record in records:
+    async def moderations_list_server(self, ctx):
+        await ctx.respond()
+        records = await self.get_records_by_server_id(ctx.guild.id)
+        embeds = []
+        number_of_pages = -(len(records) // -10)
+        for num in range(number_of_pages):
+            embeds.append(tools.create_embed(ctx, f'Server Moderations (Page {num + 1}/{number_of_pages})', desc=f'Found {len(records)} records.'))
+        for index, record in enumerate(records):
             user = await self.bot.fetch_user(record['user_id'])
             val = f'User: {user.mention} | Type: {record["type"]} | Timestamp: {record["timestamp"].strftime("%b %-d %Y at %-I:%-M %p")}'
-            embed.add_field(name=record["id"], value=val)
-        await ctx.send(embed=embed)
+            embeds[index//10].add_field(name=record["id"], value=val)
+        paginator = tools.EmbedPaginator(self.bot, ctx, embeds)
+        await paginator.run()
+    
+    @cog_ext.cog_subcommand(
+        base='moderations',
+        base_desc='Get moderations registered with the bot.',
+        subcommand_group='list',
+        sub_group_desc='Get moderations registered with the bot.',
+        name='user',
+        description='Get a list of moderations for a user in the server.',
+        options=[
+            create_option(
+                name='user',
+                description='The user to get the moderations of.',
+                option_type=SlashCommandOptionType.USER,
+                required=True
+            ),
+        ],
+        guild_ids=[809169133086048257],
+    )
+    @commands.has_permissions(manage_messages=True)
+    async def moderations_list_user(self, ctx, user):
+        await ctx.respond()
+        records = await self.get_records_by_user_id(ctx.guild.id, user.id)
+        embeds = []
+        number_of_pages = -(len(records) // -10)
+        for num in range(number_of_pages):
+            embeds.append(tools.create_embed(ctx, f'Server Moderations (Page {num + 1}/{number_of_pages})', desc=f'Filtering by user {user.mention}. Found {len(records)} records.'))
+        for index, record in enumerate(records):
+            user = await self.bot.fetch_user(record['user_id'])
+            val = f'User: {user.mention} | Type: {record["type"]} | Timestamp: {record["timestamp"].strftime("%b %-d %Y at %-I:%-M %p")}'
+            embeds[index//10].add_field(name=record["id"], value=val, inline=False)
+        paginator = tools.EmbedPaginator(self.bot, ctx, embeds)
+        await paginator.run()
 
-    @cog_ext.cog_slash(
-        name='punishmentinfo',
-        description='View info about a specific punishment by unique ID.',
+    @cog_ext.cog_subcommand(
+        base='moderations',
+        base_desc='Get moderations registered with the bot.',
+        subcommand_group='list',
+        sub_group_desc='Get a list of moderations registered with the bot.',
+        name='type',
+        description='Get a list of all moderations in the server.',
+        options=[
+            create_option(
+                name='type',
+                description='The type of moderation to search for.',
+                option_type=SlashCommandOptionType.STRING,
+                required=True,
+                choices=[
+                    create_choice(
+                        name='mute',
+                        value='mute',
+                    ),
+                    create_choice(
+                        name='unmute',
+                        value='unmute',
+                    ),
+                    create_choice(
+                        name='warn',
+                        value='warn',
+                    ),
+                    create_choice(
+                        name='kick',
+                        value='kick',
+                    ),
+                    create_choice(
+                        name='ban',
+                        value='ban',
+                    ),
+                    create_choice(
+                        name='unban',
+                        value='unban',
+                    ),
+                    create_choice(
+                        name='purge',
+                        value='purge',
+                    ),
+                ]
+            ),
+        ],
+        guild_ids=[809169133086048257],
+    )
+    @commands.has_permissions(manage_messages=True)
+    async def moderations_list_type(self, ctx, type):
+        await ctx.respond()
+        records = await self.get_records_by_type(ctx.guild.id, type)
+        embeds = []
+        number_of_pages = -(len(records) // -10)
+        for num in range(number_of_pages):
+            embeds.append(tools.create_embed(ctx, f'Server Moderations (Page {num + 1}/{number_of_pages})', desc=f'Filtering by type {type}. Found {len(records)} records.'))
+        for index, record in enumerate(records):
+            user = await self.bot.fetch_user(record['user_id'])
+            val = f'User: {user.mention} | Type: {record["type"]} | Timestamp: {record["timestamp"].strftime("%b %-d %Y at %-I:%-M %p")}'
+            embeds[index//10].add_field(name=record["id"], value=val, inline=False)
+        paginator = tools.EmbedPaginator(self.bot, ctx, embeds)
+        await paginator.run()
+
+    @cog_ext.cog_subcommand(
+        base='moderations',
+        base_desc='Get moderations registered with the bot.',
+        name='info',
+        description='Get a info on a specific moderation.',
         options=[
             create_option(
                 name='id',
-                description='The unique ID associated with the punishment.',
-                option_type=3,
+                description='The unique ID associated with the moderation.',
+                option_type=SlashCommandOptionType.STRING,
                 required=True
-            )
+            ),
         ],
-        guild_ids=[801630163866746901]
+        guild_ids=[809169133086048257, 704819543398285383],
     )
     @commands.has_permissions(manage_messages=True)
-    async def punishmentinfo(self, ctx, id):
-        record = await self.get_record_by_id(id)
+    async def moderations_info(self, ctx, id):
+        await ctx.respond()
+        record = await self.get_record_by_id(ctx.guild.id, id)
         if not record:
             embed = tools.create_error_embed(ctx, 'Punishment not found. Please check the ID you gave.')
             await ctx.send(embed=embed)

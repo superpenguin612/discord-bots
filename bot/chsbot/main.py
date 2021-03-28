@@ -17,6 +17,8 @@ from bot.cogs.moderation import Moderation
 from bot.cogs.settings import Settings
 from bot.cogs.games import Games
 from bot.cogs.tasks import Tasks
+from bot.cogs.starboard import Starboard
+from bot.cogs.logging import Logging
 from bot.chsbot.cogs.suggestions import Suggestions
 from bot.chsbot.cogs.profanity import Profanity
 
@@ -28,10 +30,10 @@ async def runpayload(ctx):
     pass
 
 def start():
-    bot = commands.Bot(command_prefix='c?', intents=discord.Intents.all())
+    bot = commands.Bot(command_prefix='c?', intents=discord.Intents.all(), max_messages=10000, allowed_mentions=discord.AllowedMentions(everyone=False))
     slash = SlashCommand(bot, sync_commands=True)
     bot.description = f'Welcome to CHS Bot! Visit `{bot.command_prefix}help` for a list of commands and how to use them. Visit `{bot.command_prefix}about` to see more information about the bot.'
-    bot.add_cog(Events(bot))
+    bot.add_cog(Events(bot, slash))
     bot.add_cog(Suggestions(bot))
     bot.add_cog(School(bot))
     bot.add_cog(Fun(bot))
@@ -44,6 +46,8 @@ def start():
     bot.add_cog(Moderation(bot))
     bot.add_cog(Settings(bot))
     bot.add_cog(Tasks(bot))
+    bot.add_cog(Starboard(bot))
+    bot.add_cog(Logging(bot))
     bot.add_command(runpayload)
     dotenv.load_dotenv()
     bot.AZURE_KEY = os.environ['AZURE_KEY']

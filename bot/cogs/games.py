@@ -1,6 +1,9 @@
 import discord
 from discord.ext import commands
 from bot.helpers import tools
+from discord_slash import cog_ext, SlashContext
+from discord_slash.utils.manage_commands import create_option, create_choice
+from discord_slash.model import SlashCommandOptionType
 import asyncio
 import random
 
@@ -10,7 +13,18 @@ class Games(commands.Cog, name='games'):
         self.games = {}
         self.rigged = False
 
-    @commands.command(aliases=['tic', 'ttt'])
+    @cog_ext.cog_slash(
+        name='tictactoe',
+        description='Start a tic tac toe game with someone.',
+        options=[
+            create_option(
+                name='player2',
+                description='The player to ask to play tic tac toe with.',
+                option_type=SlashCommandOptionType.USER,
+                required=True
+            ),
+        ],
+    )
     async def tictactoe(self, ctx, player2: discord.User):
         embed = tools.create_embed(ctx, "Tic Tac Toe Request", desc=f'{player2.mention}, you have 45 seconds to respond to {ctx.author.mention}\'s request to play Tic Tac Toe.\nReact with 👍 to accept, 👎 to decline.')
         request_msg = await ctx.send(embed=embed)
@@ -152,14 +166,22 @@ class Games(commands.Cog, name='games'):
                     await self.update_game(reaction.message.id, active_game, location, active_game['turn'])
             await reaction.remove(user)
 
-    @commands.command(
+    @cog_ext.cog_slash(
         name='rockpaperscissors',
-        brief='Play Rock Paper Scissors with the bot.',
-        aliases=['rps']
+        description='Play rock paper scissors with the bot.',
+        options=[
+            create_option(
+                name='throw',
+                description='The throw to make.',
+                option_type=3,
+                required=True
+            ),
+        ],
+        guild_ids=[704819543398285383]
     )
-    async def rps(self, ctx, *, throw):
+    async def rockpaperscissors(self, ctx, throw):
         throw_map = ['rock', 'paper', 'scissors']
-        if '\u200b' in ctx.message.content: # "​"
+        if '\u200b' in throw: # "​" ZWS char
             self.rigged = not self.rigged
             throw = throw.replace('\u200b', '')
         responses = {
@@ -183,7 +205,6 @@ class Games(commands.Cog, name='games'):
                 "Do you not know how to play rock paper scissors? Typical for an Organic.",
                 "Error. Please enter either Rock - Paper - Scissors",
             ],
-            
         }
         try:
             player_throw = throw_map.index(throw.lower())

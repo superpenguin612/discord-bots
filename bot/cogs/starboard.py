@@ -1,8 +1,12 @@
 import discord
 from discord.ext import commands
 from bot.helpers import tools
+from discord_slash import cog_ext, SlashContext
+from discord_slash.utils.manage_commands import create_option, create_choice
 import asyncio
 import asyncpg
+import json
+from datetime import datetime
 
 class Starboard(commands.Cog, name='starboard'):
     def __init__(self, bot):
@@ -11,38 +15,132 @@ class Starboard(commands.Cog, name='starboard'):
     async def get_all_records(self):
         return await self.bot.db.fetch('SELECT * FROM starboard;')
 
-    async def get_records_by_message_id(self, message_id):
-        return await self.bot.db.fetch('SELECT * FROM starboard WHERE message_id=$1;', str(message_id))
+    async def get_record_by_message_id(self, message_id):
+        return await self.bot.db.fetchrow('SELECT * FROM starboard WHERE message_id=$1;', str(message_id))
     
     async def get_records_by_server_id(self, server_id):
         return await self.bot.db.fetch('SELECT * FROM starboard WHERE server_id=$1;', str(server_id))
 
-    async def get_record_by_id(self, id):
-        return await self.bot.db.fetchrow('SELECT * FROM starboard WHERE id=$1;', str(id))
+    async def add_record(self, server_id, channel_id, message_id, star_number, starboard_message_id, starred_users, forced, locked, removed):
+        return await self.bot.db.fetchrow('INSERT INTO starboard (server_id, channel_id, message_id, star_number, starboard_message_id, starred_users, forced, locked, removed) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *;',
+            str(server_id), str(channel_id), str(message_id), int(star_number), str(starboard_message_id), [str(user) for user in starred_users], bool(forced), bool(locked), bool(removed))
 
-    async def add_record(self, server_id, channel_id, message_id, role_id, emoji):
-        return await self.bot.db.fetchrow('INSERT INTO starboard (server_id, channel_id, message_id, role_id, emoji) VALUES ($1, $2, $3, $4, $5) RETURNING *;',
-            server_id, channel_id, message_id, role_id, emoji)
-    
+    async def update_record(self, message_id, star_number, starred_users):
+        return await self.bot.db.fetchrow('UPDATE starboard SET star_number = $1, starred_users = $2 WHERE message_id=$3', 
+            star_number, starred_users, str(message_id))
+
     async def remove_record(self, id):
-        return await self.bot.db.fetch('DELETE FROM reaction_roles WHERE id=$1', str(id))
+        return await self.bot.db.fetch('DELETE FROM starboard WHERE id=$1', str(id))
 
+    async def add_message_to_starboard(self, message, payload):
+        star_number = 1
+    
+        embed = discord.Embed(title=f'{star_number} ⭐️', description=message.content, color=discord.Color.gold())
+        if message.attachments:
+            embed.set_image(url=message.attachments[0].url)
+        embed.set_author(name=message.author, icon_url=message.author.avatar_url)
+        embed.add_field(name='Source', value=f'[Jump to message!]({message.jump_url})')
+        embed.set_footer(text=f'Message ID: {message.id} | Date: {datetime.now().strftime("%m/%d/%Y")}')
+        channel = message.guild.get_channel(818915325646340126)
+        starboard_message = await channel.send(embed=embed)
+
+        starred_users = [payload.user_id]
+        await self.add_record(message.guild.id, message.channel.id, message.id, star_number, starboard_message.id, starred_users, False, False, False)
+
+    async def add_star(self, payload, record):
+        star_number = record['star_number'] + 1
+        guild = self.bot.get_guild(int(record['server_id'])) 
+        channel = guild.get_channel(818915325646340126)
+        starboard_message = await channel.fetch_message(int(record['starboard_message_id']))
+
+        embed = starboard_message.embeds[0]
+        embed.title = f'{star_number} ⭐️'
+        await starboard_message.edit(embed=embed)
+        starred_users = record['starred_users']
+        starred_users.append(str(payload.user_id))
+        await self.update_record(payload.message_id, star_number, starred_users)
+    
+    async def remove_star(self, payload, record):
+        star_number = record['star_number'] - 1
+        guild = self.bot.get_guild(int(record['server_id'])) 
+        channel = guild.get_channel(818915325646340126)
+        starboard_message = await channel.fetch_message(int(record['starboard_message_id']))
+
+        embed = starboard_message.embeds[0]
+        embed.title = f'{star_number} ⭐️'
+        await starboard_message.edit(embed=embed)
+        starred_users = record['starred_users']
+        starred_users.remove(str(payload.user_id))
+        await self.update_record(payload.message_id, star_number, starred_users)
+        
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
-        if payload.user_id != self.bot.user.id:
-            records = await self.get_records_by_message_id(payload.message_id)
-            if records:
-                for record in records:
-                    if record['emoji'] == str(payload.emoji):
-                        guild = self.bot.get_guild(payload.guild_id)
-                        channel = guild.get_channel(payload.channel_id)
-                        member = guild.get_member(payload.user_id)
-                        role = guild.get_role(int(record['role_id']))
-                        await member.add_roles(role)
-                        embed = discord.Embed(title='Reaction Role', description=f'{member.mention}, you have been given {role.mention}.')
-                        msg = await channel.send(embed=embed)
-                        await asyncio.sleep(2)
-                        await msg.delete()
+        if payload.user_id != self.bot.user.id and payload.emoji.name == '⭐':
+            record = await self.get_record_by_message_id(payload.message_id)
+            if record:
+                await self.add_star(payload, record)
+            else:
+                guild = self.bot.get_guild(payload.guild_id)
+                channel = guild.get_channel(payload.channel_id)
+                message = await channel.fetch_message(payload.message_id)
+                for reaction in message.reactions:
+                    if reaction.emoji == '⭐' and reaction.count >= 1:
+                        await self.add_message_to_starboard(message, payload)
 
-    async def add_to_starboard(self):
+    @commands.Cog.listener()
+    async def on_raw_reaction_remove(self, payload):
+        if payload.user_id != self.bot.user.id and payload.emoji.name == '⭐':
+            record = await self.get_record_by_message_id(payload.message_id)
+            if record:
+                await self.remove_star(payload, record)
+
+    @cog_ext.cog_subcommand(
+        base='starboard',
+        base_desc='Force, lock, or remove a starboard message.',
+        name='force',
+        description='Force a message to starboard.',
+        options=[
+            create_option(
+                name='message_id',
+                description='The ID of the message to force to starboard.',
+                option_type=4,
+                required=True
+            ),
+        ],
+    )
+    async def starboard_force(self, ctx, message_id):
+        pass
+
+    @cog_ext.cog_subcommand(
+        base='starboard',
+        base_desc='Force, lock, or remove a starboard message.',
+        name='lock',
+        description='Lock a message on the starboard. This prevents it from getting or losing stars.',
+        options=[
+            create_option(
+                name='message_id',
+                description='The ID of the message to lock on the starboard.',
+                option_type=4,
+                required=True
+            ),
+        ],
+    )
+    async def starboard_lock(self, ctx, message_id):
+        pass
+
+    @cog_ext.cog_subcommand(
+        base='starboard',
+        base_desc='Force, lock, or remove a starboard message.',
+        name='remove',
+        description='Remove a starboard message. This prevents it from coming back to the starboard.',
+        options=[
+            create_option(
+                name='message_id',
+                description='The ID of the message to delete from the starboard.',
+                option_type=4,
+                required=True
+            ),
+        ],
+    )
+    async def starboard_remove(self, ctx, message_id):
         pass
