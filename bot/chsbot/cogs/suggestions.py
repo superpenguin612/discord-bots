@@ -42,7 +42,7 @@ class Suggestions(commands.Cog, name='suggestions', description='A group of comm
         
         embed = tools.create_embed(ctx, "Suggestion Reason", "What is the reason for your suggestion?")
         await ctx.send(embed=embed)
-        msg = await self.bot.wait_for("message", check=check, timeout=60)
+        msg = await self.bot.wait_for("message", check=check, timeout=180)
         if msg.content.lower() == "none":
             reason = None
         elif msg.content.lower() == "stop":
@@ -54,7 +54,7 @@ class Suggestions(commands.Cog, name='suggestions', description='A group of comm
 
         embed = tools.create_embed(ctx, "Suggestion Notes", "What else you would like to add? Type \"none\" if you don't have anything else.")
         await ctx.send(embed=embed)
-        msg = await self.bot.wait_for("message", check=check, timeout=60)
+        msg = await self.bot.wait_for("message", check=check, timeout=180)
         if msg.content.lower() == "none":
             notes = None
         elif msg.content.lower() == "stop":
@@ -66,7 +66,7 @@ class Suggestions(commands.Cog, name='suggestions', description='A group of comm
         
         embed = tools.create_embed(ctx, "Suggestion Image", "Do you have an image to attach to the suggestion? Reply with \"none\" if you don't.")
         await ctx.send(embed=embed)
-        msg = await self.bot.wait_for("message", check=check, timeout=60)
+        msg = await self.bot.wait_for("message", check=check, timeout=180)
         if msg.content.lower() == "none":
             image_url = None
         elif msg.content.lower() == "stop":
