@@ -26,11 +26,7 @@ import aiohttp, json
 
 # https://discord.com/api/oauth2/authorize?client_id=796805491186597968&permissions=2147483639&scope=bot
 
-@commands.command()
-@commands.has_permissions(administrator=True)
-async def runpayload(ctx):
-    embed = Tasks.create_daily_report()
-    await ctx.send(embed=embed)
+
         
 def start():
     bot = commands.Bot(command_prefix='c?', intents=discord.Intents.all(), max_messages=10000, allowed_mentions=discord.AllowedMentions(everyone=False))
@@ -51,7 +47,7 @@ def start():
     bot.add_cog(Tasks(bot))
     bot.add_cog(Starboard(bot))
     bot.add_cog(Logging(bot))
-    bot.add_command(runpayload)
+    # bot.add_command(runpayload)
     dotenv.load_dotenv()
     bot.AZURE_KEY = os.environ['AZURE_KEY']
     bot.help_command = HelpCommand()

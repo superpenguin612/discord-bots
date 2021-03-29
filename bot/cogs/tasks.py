@@ -4,8 +4,9 @@ from bot.helpers import tools
 from datetime import datetime, timedelta
 import asyncpg
 import json
-import datetime
+from datetime import datetime, date
 from .search import Search
+import random
 
 class Tasks(commands.Cog, name='tasks'):
     def __init__(self, bot: commands.Bot):
@@ -14,7 +15,7 @@ class Tasks(commands.Cog, name='tasks'):
         self.daily_report.start()
         self.timed_unmute.start()
 
-    async def create_daily_report(self):
+    async def create_daily_report(self, guild):
         with open("bot/helpers/school_info.json") as f:
             self.SCHOOL_INFO_DICT = json.load(f)
 
@@ -23,21 +24,31 @@ class Tasks(commands.Cog, name='tasks'):
         
         school_day_val = (
             f'Today is {datetime.now().strftime("%A, %B %d, %Y")}.\n'
-            f'It\'s a {school_days[0]} for the Carmel cohort, and a {school_days[1]} for the Greyhound cohort.'
-            'To view more details, run `/schoolday` or `c?schoolday` (legacy command).'
+            f'It\'s a {school_days[0]} for the Carmel cohort, and a {school_days[1]} for the Greyhound cohort.\n'
+            '(To view more details, run `/schoolday` or `c?schoolday` (legacy command).)'
         )
-        embed.add_field(name='School Day', value=school_day_val)
-        food_items = await Search.get_mv_list()
+        embed.add_field(name='School Day', value=school_day_val, inline=False)
+        search = self.bot.get_cog('search')
+        food_items = await search.get_mv_list(date.today())
         lunch_menu_val = (
             '*Freshmen Center*\n' + 
-            '\n'.join([f'{x} - {x["item_Name"]}' for x in food_items[0]]) +
-            '\n*Greyhound Station*\n' + 
-            '\n'.join([f'{x} - {x["item_Name"]}' for x in food_items[1]]) +
-            '\n*Main Cafeteria*\n' +
-            '\n'.join([f'{x} - {x["item_Name"]}' for x in food_items[2]]) 
+            '\n'.join([f'{index} - {val["item_Name"]}' for index, val in enumerate(food_items[0])]) +
+            '\n\n*Greyhound Station*\n' + 
+            '\n'.join([f'{index} - {val["item_Name"]}' for index, val in enumerate(food_items[1])]) +
+            '\n\n*Main Cafeteria*\n' +
+            '\n'.join([f'{index} - {val["item_Name"]}' for index, val in enumerate(food_items[2])]) +
+            '\n(To view more details, run `c?mealviewer item <cafeteria> <item_id>`. The item ID is the number that appears to the right of the food item.)'
         )
-        embed.add_field(name='Lunch Menu', value=lunch_menu_val)
+        embed.add_field(name='Lunch Menu', value=lunch_menu_val, inline=False)
+        embed.set_footer(text='Note: This report is for informational purposes only. Although we will try to make sure this report is up to date, we cannot guarantee it.')
+        embed.set_thumbnail(url=guild.icon_url)
         return embed
+    
+    @commands.command()
+    @commands.has_permissions(administrator=True)
+    async def runpayload(self, ctx):
+        embed = await self.create_daily_report(ctx.guild)
+        await ctx.send(embed=embed)
 
     @tasks.loop(seconds=1.0)
     async def daily_report(self):
@@ -46,7 +57,7 @@ class Tasks(commands.Cog, name='tasks'):
             channel = guild.get_channel(819546169985597440)
             role = guild.get_role(821386697727410238)
 
-            embed = await self.create_daily_report()
+            embed = await self.create_daily_report(guild)
             msg = await channel.send(content=role.mention, embed=embed)
             await msg.publish()
 
