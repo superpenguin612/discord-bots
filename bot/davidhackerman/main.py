@@ -1,37 +1,46 @@
 import discord
 from discord.ext import commands
+from discord_slash import SlashCommand
 import os
 import dotenv
-import random
+import asyncpg
 
 from bot.cogs.events import Events
 from bot.cogs.school import School
 from bot.cogs.fun import Fun
-from bot.cogs.help import HelpCommand
 from bot.cogs.info import Info
 from bot.cogs.search import Search
-from bot.games.tictactoe import TicTacToe
-from bot.davidhackerman.cogs.economy import Economy
-from bot.davidhackerman.cogs.links import Links
+from bot.cogs.help import HelpCommand
+from bot.cogs.reaction_roles import ReactionRoles
 from bot.cogs.moderation import Moderation
-from bot.davidhackerman.cogs.bottling import Bottling
+from bot.cogs.settings import Settings
+from bot.cogs.games import Games
+from bot.cogs.tasks import Tasks
+from bot.cogs.starboard import Starboard
+from bot.cogs.logging import Logging
+from bot.chsbot.cogs.suggestions import Suggestions
+from bot.chsbot.cogs.profanity import Profanity
 
 # https://discord.com/api/oauth2/authorize?client_id=796805491186597968&permissions=2147483639&scope=bot
 
 def start():
-    intents = discord.Intents.default()
-    intents.members = True
-    bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
-    bot.add_cog(Events(bot))
+    bot = commands.Bot(command_prefix='c?', intents=discord.Intents.all(), max_messages=10000, allowed_mentions=discord.AllowedMentions(everyone=False))
+    slash = SlashCommand(bot, sync_commands=True)
+    bot.description = f'Welcome to CHS Bot! Visit `{bot.command_prefix}help` for a list of commands and how to use them. Visit `{bot.command_prefix}about` to see more information about the bot.'
+    bot.add_cog(Events(bot, slash))
+    bot.add_cog(Suggestions(bot))
     bot.add_cog(School(bot))
     bot.add_cog(Fun(bot))
     bot.add_cog(Info(bot))
+    bot.add_cog(Games(bot))
+    bot.add_cog(Profanity(bot))
     bot.add_cog(Search(bot))
-    bot.add_cog(Links(bot))
-    bot.add_cog(Economy(bot))
+    bot.add_cog(ReactionRoles(bot))
     bot.add_cog(Moderation(bot))
-    bot.add_cog(TicTacToe(bot))
-    bot.add_cog(Bottling(bot))
+    bot.add_cog(Settings(bot))
+    bot.add_cog(Tasks(bot))
+    bot.add_cog(Starboard(bot))
+    bot.add_cog(Logging(bot))
     dotenv.load_dotenv()
     bot.AZURE_KEY = os.environ['AZURE_KEY']
     bot.help_command = HelpCommand()

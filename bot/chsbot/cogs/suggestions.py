@@ -24,53 +24,152 @@ class Suggestions(commands.Cog, name='suggestions', description='A group of comm
             ),
             create_option(
                 name='reason',
-                description='The suggestion you want to make.',
+                description='The reason for your suggestion.',
                 option_type=SlashCommandOptionType.STRING,
-                required=True
+                required=False
             ),
             create_option(
                 name='notes',
-                description='The suggestion you want to make.',
+                description='The notes you want to add to the suggestion.',
                 option_type=SlashCommandOptionType.STRING,
-                required=True
+                required=False
             ),
             create_option(
-                name='suggestion',
-                description='The suggestion you want to make.',
+                name='image_url',
+                description='The URL of the image to attach to the suggestion.',
                 option_type=SlashCommandOptionType.STRING,
-                required=True
+                required=False
             ),
-        ]
+        ],
+        guild_ids=[704819543398285383]
     )
-    async def _server(self, ctx, *, suggestion):
-        await self.create_suggestion(ctx, suggestion, 'Server Suggestion', color=discord.Color.gold())
+    async def _server(self, ctx, suggestion, reason=None, notes=None, image_url=None):
+        await self.create_suggestion_slash(ctx, suggestion, reason, notes, image_url, 'Server Suggestion', color=discord.Color.gold())
 
     @cog_ext.cog_subcommand(
         base='suggest',
         base_desc='Create a suggestion.',
         name='movie',
         description='Create a movie suggestion.',
+        options=[
+            create_option(
+                name='suggestion',
+                description='The suggestion you want to make.',
+                option_type=SlashCommandOptionType.STRING,
+                required=True
+            ),
+            create_option(
+                name='reason',
+                description='The reason for your suggestion.',
+                option_type=SlashCommandOptionType.STRING,
+                required=False
+            ),
+            create_option(
+                name='notes',
+                description='The notes you want to add to the suggestion.',
+                option_type=SlashCommandOptionType.STRING,
+                required=False
+            ),
+            create_option(
+                name='image_url',
+                description='The URL of the image to attach to the suggestion.',
+                option_type=SlashCommandOptionType.STRING,
+                required=False
+            ),
+        ],
+        guild_ids=[704819543398285383]
     )
-    async def _movie(self, ctx, *, suggestion):
-        await self.create_suggestion(ctx, suggestion, 'Movie Suggestion', color=discord.Color.green(), downvote=False)
+    async def _movie(self, ctx, suggestion, reason=None, notes=None, image_url=None):
+        await self.create_suggestion_slash(ctx, suggestion,  reason, notes, image_url, 'Movie Suggestion', color=discord.Color.green())
 
     @cog_ext.cog_subcommand(
         base='suggest',
         base_desc='Create a suggestion.',
         name='bot',
         description='Create a bot suggestion.',
+        options=[
+            create_option(
+                name='suggestion',
+                description='The suggestion you want to make.',
+                option_type=SlashCommandOptionType.STRING,
+                required=True
+            ),
+            create_option(
+                name='reason',
+                description='The reason for your suggestion.',
+                option_type=SlashCommandOptionType.STRING,
+                required=False
+            ),
+            create_option(
+                name='notes',
+                description='The notes you want to add to the suggestion.',
+                option_type=SlashCommandOptionType.STRING,
+                required=False
+            ),
+            create_option(
+                name='image_url',
+                description='The URL of the image to attach to the suggestion.',
+                option_type=SlashCommandOptionType.STRING,
+                required=False
+            ),
+        ],
+        guild_ids=[704819543398285383]
     )
-    async def _bot(self, ctx, *, suggestion):
-        await self.create_suggestion(ctx, suggestion, 'Bot Suggestion', color=discord.Color.purple())
+    async def _bot(self, ctx, suggestion, reason=None, notes=None, image_url=None):
+        await self.create_suggestion_slash(ctx, suggestion,  reason, notes, image_url, 'Bot Suggestion', color=discord.Color.purple())
 
     @cog_ext.cog_subcommand(
         base='suggest',
         base_desc='Create a suggestion.',
         name='rule',
         description='Create a rule suggestion.',
+        options=[
+            create_option(
+                name='suggestion',
+                description='The suggestion you want to make.',
+                option_type=SlashCommandOptionType.STRING,
+                required=True
+            ),
+            create_option(
+                name='reason',
+                description='The reason for your suggestion.',
+                option_type=SlashCommandOptionType.STRING,
+                required=False
+            ),
+            create_option(
+                name='notes',
+                description='The notes you want to add to the suggestion.',
+                option_type=SlashCommandOptionType.STRING,
+                required=False
+            ),
+            create_option(
+                name='image_url',
+                description='The URL of the image to attach to the suggestion.',
+                option_type=SlashCommandOptionType.STRING,
+                required=False
+            ),
+        ],
+        guild_ids=[704819543398285383]
     )
-    async def _rule(self, ctx, *, suggestion):
-        await self.create_suggestion(ctx, suggestion, 'Rule Suggestion', color=discord.Color.blue())
+    async def _rule(self, ctx, suggestion, reason=None, notes=None, image_url=None):
+        await self.create_suggestion_slash(ctx, suggestion,  reason, notes, image_url, 'Rule Suggestion', color=discord.Color.blue())
+
+    async def create_suggestion_slash(self, ctx, suggestion, reason, notes, image_url, title, color, downvote=True):
+        suggestions_channel = self.bot.get_channel(710959620667211817)
+        embed = tools.create_embed(ctx, title, desc=suggestion, footer_enabled=False, color=color)
+        if reason:
+            embed.add_field(name="Reason", value=reason, inline=False)
+        if notes:
+            embed.add_field(name="Notes", value=notes, inline=False)
+        if image_url:
+            embed.set_image(url=image_url)
+        msg = await suggestions_channel.send(embed=embed)
+        await msg.add_reaction('<:upvote:711333713316937819>')
+        if downvote:
+            await msg.add_reaction('<:downvote:711333713354686484>')
+
+        embed = tools.create_embed(ctx, title, desc="Your suggestion has been submitted successfully!", color=color)
+        await ctx.send(embed=embed)
 
     async def create_suggestion(self, ctx, suggestion, title, color, downvote=True):
         def check(msg):

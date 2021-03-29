@@ -3,21 +3,52 @@ from discord.ext import commands, tasks
 from bot.helpers import tools
 from datetime import datetime, timedelta
 import asyncpg
-from bot.cogs.settings import Settings
+import json
+import datetime
+from .search import Search
 
 class Tasks(commands.Cog, name='tasks'):
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
+        
         self.daily_report.start()
         self.timed_unmute.start()
 
-    def create_daily_report():
-        pass
+    async def create_daily_report(self):
+        with open("bot/helpers/school_info.json") as f:
+            self.SCHOOL_INFO_DICT = json.load(f)
+
+        embed = discord.Embed(title='Daily Report', description='Good morning everyone! Here\'s your report for the day.')
+        school_days = self.SCHOOL_INFO_DICT["days"]["carmel"][datetime.now().strftime("%m/%d/%Y")], self.SCHOOL_INFO_DICT["days"]["greyhound"][datetime.now().strftime("%m/%d/%Y")]
+        
+        school_day_val = (
+            f'Today is {datetime.now().strftime("%A, %B %d, %Y")}.\n'
+            f'It\'s a {school_days[0]} for the Carmel cohort, and a {school_days[1]} for the Greyhound cohort.'
+            'To view more details, run `/schoolday` or `c?schoolday` (legacy command).'
+        )
+        embed.add_field(name='School Day', value=school_day_val)
+        food_items = await Search.get_mv_list()
+        lunch_menu_val = (
+            '*Freshmen Center*\n' + 
+            '\n'.join([f'{x} - {x["item_Name"]}' for x in food_items[0]]) +
+            '\n*Greyhound Station*\n' + 
+            '\n'.join([f'{x} - {x["item_Name"]}' for x in food_items[1]]) +
+            '\n*Main Cafeteria*\n' +
+            '\n'.join([f'{x} - {x["item_Name"]}' for x in food_items[2]]) 
+        )
+        embed.add_field(name='Lunch Menu', value=lunch_menu_val)
+        return embed
 
     @tasks.loop(seconds=1.0)
     async def daily_report(self):
         if datetime.now().strftime("%H:%M:%S") == "07:00:00":
-            pass
+            guild = self.bot.get_guild(809169133086048257)
+            channel = guild.get_channel(819546169985597440)
+            role = guild.get_role(821386697727410238)
+
+            embed = await self.create_daily_report()
+            msg = await channel.send(content=role.mention, embed=embed)
+            await msg.publish()
 
     @tasks.loop(seconds=1.0)
     async def timed_unmute(self):

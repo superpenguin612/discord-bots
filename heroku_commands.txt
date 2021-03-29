@@ -1,4 +1,0 @@
-heroku ps:scale worker=0 -a davidhackerman-bot
-heroku ps:scale worker=1 -a davidhackerman-bot
-heroku ps:scale worker=0 -a chs-freshmen-bot
-heroku ps:scale worker=1 -a chs-freshmen-bot

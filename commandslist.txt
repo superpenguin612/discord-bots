@@ -58,4 +58,7 @@ Starboard
         remove
 Suggestions
     suggest
+        server
+        bot
+        rule
     removesuggestion

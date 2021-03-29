@@ -23,9 +23,9 @@ class Moderation(commands.Cog, name='moderation'):
     async def get_record_by_id(self, server_id, id):
         return await self.bot.db.fetchrow('SELECT * FROM moderations WHERE server_id=$1 AND id=2;', str(server_id), str(id))
 
-    async def add_record(self, server_id, type, user_id, punisher_id, reason, duration=None, active=None):
-        return await self.bot.db.fetchrow('INSERT INTO moderations (server_id, type, user_id, punisher_id, reason, duration, active) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;',
-            server_id, type, user_id, punisher_id, reason, duration, active)
+    async def add_record(self, server_id, type, user_id, punisher_id, reason, duration=None, active=None, channel=None, count=None):
+        return await self.bot.db.fetchrow('INSERT INTO moderations (server_id, type, user_id, punisher_id, reason, duration, active) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *;',
+            server_id, type, user_id, punisher_id, reason, duration, active, channel, count)
 
     @cog_ext.cog_subcommand(
         base='purge',
@@ -45,6 +45,9 @@ class Moderation(commands.Cog, name='moderation'):
     @commands.bot_has_permissions(manage_messages=True)
     async def purge_all(self, ctx, num):
         await ctx.respond()
+        moderation_record = await self.bot.db.fetchrow('INSERT INTO moderations (server_id, type, moderator_id, channel, count) VALUES ($1, $2, $3, $4, $5) RETURNING *;',
+            str(ctx.guild.id), 'purge', str(ctx.author.id), str(ctx.author.id), )
+
         msgs = []
         async for msg in ctx.channel.history(limit=num, before=ctx.message):
             msgs.append(msg)
@@ -127,8 +130,6 @@ class Moderation(commands.Cog, name='moderation'):
         await ctx.respond()
         punishment_record = await self.add_record(str(ctx.guild.id), 'warn', str(user.id), str(ctx.author.id), reason)
         embed = tools.create_embed(ctx, 'User Warn', desc=f'{user} has been warned.')
-        if reason:
-            embed.add_field(name='Reason', value=reason, inline=False)
         embed.add_field(name='Punishment ID', value=punishment_record['id'], inline=False)
         await ctx.send(embed=embed)
     
@@ -157,8 +158,6 @@ class Moderation(commands.Cog, name='moderation'):
         await ctx.guild.kick(user, reason=reason)
         punishment_record = await self.add_record(str(ctx.guild.id), 'kick', str(user.id), str(ctx.author.id), reason)
         embed = tools.create_embed(ctx, 'User Kick', desc=f'{user} has been kicked.')
-        if reason:
-            embed.add_field(name='Reason', value=reason, inline=False)
         embed.add_field(name='Punishment ID', value=punishment_record['id'], inline=False)
         await ctx.send(embed=embed)
         
@@ -185,11 +184,9 @@ class Moderation(commands.Cog, name='moderation'):
     async def ban(self, ctx, user, reason=None):
         await ctx.respond()
         await ctx.guild.ban(user, reason=reason)
-        punishment_record = await self.add_record(str(ctx.guild.id), 'ban', str(user.id), str(ctx.author.id), reason)
+        # punishment_record = await self.add_record(str(ctx.guild.id), 'ban', str(user.id), str(ctx.author.id), reason)
         embed = tools.create_embed(ctx, 'User Ban', desc=f'{user} has been banned.')
-        if reason:
-            embed.add_field(name='Reason', value=reason, inline=False)
-        embed.add_field(name='Punishment ID', value=punishment_record['id'],inline=False)
+        # embed.add_field(name='Punishment ID', value=punishment_record['id'],inline=False)
         await ctx.send(embed=embed)
 
     @cog_ext.cog_slash(
@@ -254,8 +251,6 @@ class Moderation(commands.Cog, name='moderation'):
         adjusted_duration = duration * duration_adjustments[duration_unit]
         punishment_record = await self.add_record(str(ctx.guild.id), 'mute', str(user.id), str(ctx.author.id), reason, duration=adjusted_duration, active=True)
         embed = tools.create_embed(ctx, 'User Mute', desc=f'{user} has been muted.')
-        if reason:
-            embed.add_field(name='Reason', value=reason, inline=False)
         embed.add_field(name='Punishment ID', value=punishment_record['id'],inline=False)
         await ctx.send(embed=embed)
 
@@ -286,7 +281,6 @@ class Moderation(commands.Cog, name='moderation'):
         sub_group_desc='Get a list of moderations registered with the bot.',
         name='all',
         description='Get a list of all moderations in the server.',
-        guild_ids=[809169133086048257],
     )
     @commands.has_permissions(manage_messages=True)
     async def moderations_list_server(self, ctx):
@@ -318,7 +312,6 @@ class Moderation(commands.Cog, name='moderation'):
                 required=True
             ),
         ],
-        guild_ids=[809169133086048257],
     )
     @commands.has_permissions(manage_messages=True)
     async def moderations_list_user(self, ctx, user):
@@ -380,7 +373,6 @@ class Moderation(commands.Cog, name='moderation'):
                 ]
             ),
         ],
-        guild_ids=[809169133086048257],
     )
     @commands.has_permissions(manage_messages=True)
     async def moderations_list_type(self, ctx, type):
@@ -410,7 +402,6 @@ class Moderation(commands.Cog, name='moderation'):
                 required=True
             ),
         ],
-        guild_ids=[809169133086048257, 704819543398285383],
     )
     @commands.has_permissions(manage_messages=True)
     async def moderations_info(self, ctx, id):

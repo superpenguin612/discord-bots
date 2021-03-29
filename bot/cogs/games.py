@@ -177,7 +177,6 @@ class Games(commands.Cog, name='games'):
                 required=True
             ),
         ],
-        guild_ids=[704819543398285383]
     )
     async def rockpaperscissors(self, ctx, throw):
         throw_map = ['rock', 'paper', 'scissors']

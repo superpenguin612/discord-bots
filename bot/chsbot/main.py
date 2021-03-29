@@ -12,7 +12,7 @@ from bot.cogs.info import Info
 from bot.cogs.search import Search
 from bot.cogs.help import HelpCommand
 from bot.cogs.reaction_roles import ReactionRoles
-from bot.cogs.embeds import Embeds
+# from bot.cogs.embeds import EmbedCreator
 from bot.cogs.moderation import Moderation
 from bot.cogs.settings import Settings
 from bot.cogs.games import Games
@@ -22,13 +22,16 @@ from bot.cogs.logging import Logging
 from bot.chsbot.cogs.suggestions import Suggestions
 from bot.chsbot.cogs.profanity import Profanity
 
+import aiohttp, json
+
 # https://discord.com/api/oauth2/authorize?client_id=796805491186597968&permissions=2147483639&scope=bot
 
 @commands.command()
 @commands.has_permissions(administrator=True)
 async def runpayload(ctx):
-    pass
-
+    embed = Tasks.create_daily_report()
+    await ctx.send(embed=embed)
+        
 def start():
     bot = commands.Bot(command_prefix='c?', intents=discord.Intents.all(), max_messages=10000, allowed_mentions=discord.AllowedMentions(everyone=False))
     slash = SlashCommand(bot, sync_commands=True)
@@ -42,7 +45,7 @@ def start():
     bot.add_cog(Profanity(bot))
     bot.add_cog(Search(bot))
     bot.add_cog(ReactionRoles(bot))
-    bot.add_cog(Embeds(bot))
+    # bot.add_cog(Embeds(bot))
     bot.add_cog(Moderation(bot))
     bot.add_cog(Settings(bot))
     bot.add_cog(Tasks(bot))

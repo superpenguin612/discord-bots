@@ -120,14 +120,6 @@ class Logging(commands.Cog, name='logging'):
             await log_channel.send(embed=embed)
 
     @commands.Cog.listener()
-    async def on_member_ban(guild, user):
-        pass
-
-    @commands.Cog.listener()
-    async def on_member_unban(guild, user):
-        pass
-
-    @commands.Cog.listener()
     async def on_invite_create(invite):
         pass
 
