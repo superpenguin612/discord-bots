@@ -1,6 +1,5 @@
 import discord
 import asyncio
-import disputils
 
 def create_embed(ctx, title, desc='', url=None, color=None, footer_enabled=True):
     if not color:
