@@ -160,9 +160,9 @@ class Suggestions(commands.Cog, name='suggestions', description='A group of comm
         if image_url:
             embed.set_image(url=image_url)
         msg = await suggestions_channel.send(embed=embed)
-        await msg.add_reaction('<:upvote:711333713316937819>')
+        await msg.add_reaction('<:upvote:818940395320639488>')
         if downvote:
-            await msg.add_reaction('<:downvote:711333713354686484>')
+            await msg.add_reaction('<:downvote:818940394967924767>')
 
         embed = tools.create_embed(ctx, title, desc="Your suggestion has been submitted successfully!", color=color)
         await ctx.send(embed=embed)
@@ -250,9 +250,9 @@ class Suggestions(commands.Cog, name='suggestions', description='A group of comm
         if image_url:
             embed.set_image(url=image_url)
         msg = await suggestions_channel.send(embed=embed)
-        await msg.add_reaction('<:upvote:711333713316937819>')
+        await msg.add_reaction('<:upvote:818940395320639488>')
         if downvote:
-            await msg.add_reaction('<:downvote:711333713354686484>')
+            await msg.add_reaction('<:downvote:818940394967924767>')
 
         embed = tools.create_embed(ctx, title, desc="Your suggestion has been submitted successfully!", color=color)
         await ctx.send(embed=embed)
