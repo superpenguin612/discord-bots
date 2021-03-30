@@ -14,3 +14,6 @@ class Bottling(commands.Cog):
                 await message.add_reaction('🍾')
                 await message.channel.send(f'{message.author.mention} lol get bottled')
                 await self.bot.process_commands(message)
+
+def setup(bot):
+    bot.add_cog(Bottling(bot))

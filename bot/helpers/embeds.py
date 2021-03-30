@@ -154,23 +154,7 @@ class EmbedCreator():
                     self.bot_message.add_reaction(reaction)
 
             await self.bot_message.edit(embeds=[self.embed_viewer, self.embed_creator])
-
-    @cog_ext.cog_slash(
-        name='sendembed',
-        description='Send an embed message from the bot. This launches embed setup.',
-        options=[
-            create_option(
-                name='channel',
-                description='The channel to send the embed message to.',
-                option_type=6,
-                required=True
-            ),
             
-        ],
-    )
-    @commands.has_permissions(administrator=True)
-    async def sendembed(self, ctx):
-
     #     def check(msg):
     #         return msg.author == ctx.author and msg.channel == ctx.channel
 

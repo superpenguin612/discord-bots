@@ -70,6 +70,7 @@ class ReactionRoles(commands.Cog, name='reaction_roles'):
         name='add',
         description='Create a new reaction role. This is a multi-step command, so there are no parameters passed.',
     )
+    @commands.has_permissions(manage_messages=True)
     async def reactionroles_add(self, ctx):
         def check(msg):
             return msg.author == ctx.author and msg.channel == ctx.channel
@@ -187,4 +188,124 @@ class ReactionRoles(commands.Cog, name='reaction_roles'):
         ],
     )
     async def reactionroles_delete(self, ctx, id):
-        pass
+        await ctx.send('This command has not been created yet.')
+
+    # --------------------------------------------
+    # LEGACY COMMANDS
+    # --------------------------------------------
+
+    @commands.command(
+        name='addreaction',
+        brief='Add a new reaction!',
+        help='help'
+    )
+    @commands.has_permissions(manage_messages=True)
+    async def addreaction(self, ctx):
+        """Create a new reaction role. 
+        Reaction roles have a UUID that is created each time one is registered.
+        This UUID is used to edit and view information about the reaction.
+        """
+        def check(msg):
+            return msg.author == ctx.author and msg.channel == ctx.channel
+
+        embed = tools.create_embed(ctx, "Reaction Role Setup 1/4", "Tag the channel that contains the message you want to be reacted to.")
+        sent_msg = await ctx.send(embed=embed)
+        user_msg = await self.bot.wait_for("message", check=check, timeout=60)
+        await user_msg.delete()
+        if user_msg.content.lower() == "stop":
+            embed = tools.create_error_embed(ctx, "Reaction role add has been aborted.")
+            await ctx.send(embed=embed)
+            return
+        else:
+            channel_id = user_msg.raw_channel_mentions[0]
+
+        embed = tools.create_embed(ctx, "Reaction Role Setup 2/4", "Paste the message ID of the message you want reacted to. Make sure the message is in the channel you provided in the previous step.")
+        await sent_msg.edit(embed=embed)
+        user_msg = await self.bot.wait_for("message", check=check, timeout=60)
+        await user_msg.delete()
+        if user_msg.content.lower() == "stop":
+            embed = tools.create_error_embed(ctx, "Reaction role add has been aborted.")
+            await ctx.send(embed=embed)
+            return
+        else:
+            message_id = user_msg.content
+
+        embed = tools.create_embed(ctx, "Reaction Role Setup 3/4", "Tag the role that you want added, or paste the role ID.")
+        await sent_msg.edit(embed=embed)
+        user_msg = await self.bot.wait_for("message", check=check, timeout=60)
+        await user_msg.delete()
+        if user_msg.content.lower() == "stop":
+            embed = tools.create_error_embed(ctx, "Reaction role add has been aborted.")
+            await ctx.send(embed=embed)
+            return
+        else:
+            if user_msg.raw_role_mentions:
+                role_id = user_msg.raw_role_mentions[0]
+            else:
+                role_id = user_msg.content
+
+        embed = tools.create_embed(ctx, "Reaction Role Setup 4/4", "What emoji would you like to react with?")
+        await sent_msg.edit(embed=embed)
+        user_msg = await self.bot.wait_for("message", check=check, timeout=60)
+        await user_msg.delete()
+        if user_msg.content.lower() == "stop":
+            embed = tools.create_error_embed(ctx, "Reaction role add has been aborted.")
+            await ctx.send(embed=embed)
+            return
+        else:
+            emoji = user_msg.content
+
+        record = await self.add_record(str(ctx.guild.id), str(channel_id), str(message_id), str(role_id), emoji)
+        channel = self.bot.get_channel(int(channel_id))
+        message = channel.get_partial_message(int(message_id))
+        await message.add_reaction(emoji)
+
+        embed = tools.create_embed(ctx, "Reaction Role", "Reaction role has been added successfully!")
+        embed.add_field(name='Reaction Role ID', value=record['id'])
+        embed.add_field(name='Channel ID', value=channel_id)
+        embed.add_field(name='Message ID', value=message_id)
+        embed.add_field(name='Role ID', value=role_id)
+        embed.add_field(name='Emoji', value=emoji)
+
+        await sent_msg.edit(embed=embed)
+    
+    @commands.command(
+        name='reactioninfo',
+        brief='Get info about a specific reaction role by ID.',
+    )
+    async def reactioninfo(self, ctx, *, id):
+        """Get info about a specific reaction role by ID.
+        """
+        record = await self.get_record_by_id(str(id))
+        embed = tools.create_embed(ctx, "Reaction Role Info")
+        embed.add_field(name='Reaction Role ID', value=record['id'], inline=False)
+        embed.add_field(name='Channel', value=ctx.guild.get_channel(int(record['channel_id'])).mention, inline=False)
+        embed.add_field(name='Message ID', value=record['message_id'], inline=False)
+        embed.add_field(name='Role', value=ctx.guild.get_role(int(record['role_id'])).mention)
+        embed.add_field(name='Emoji', value=record['emoji'])
+        await ctx.send(embed=embed)
+
+    @commands.command(
+        name='listreactions',
+        brief='List reaction roles in the server',
+    )
+    async def listreactions(self, ctx):
+        """List reaction roles.
+        """
+        embed = tools.create_embed(ctx, "Reaction Roles List")
+        records = await self.get_records_by_server_id(str(ctx.guild.id))
+        for record in records:
+            embed.add_field(name=record['id'], value=f'Message ID: {record["message_id"]} | Role: {ctx.guild.get_role(int(record["role_id"])).mention} | Emoji: {record["emoji"]}')
+        await ctx.send(embed=embed)
+
+    @commands.command(
+        name='deletereaction',
+        brief='List reaction roles.',
+    )
+    async def deletereaction(self, ctx, id):
+        """Delete a reacion by ID.
+        """
+        await ctx.send('This command has not been created yet.')
+
+def setup(bot):
+    bot.add_cog(ReactionRoles(bot))

@@ -37,7 +37,7 @@ class Tasks(commands.Cog, name='tasks'):
             '\n'.join([f'{index} - {val["item_Name"]}' for index, val in enumerate(food_items[1])]) +
             '\n\n*Main Cafeteria*\n' +
             '\n'.join([f'{index} - {val["item_Name"]}' for index, val in enumerate(food_items[2])]) +
-            '\n(To view more details, run `c?mealviewer item <cafeteria> <item_id>`. The item ID is the number that appears to the right of the food item.)'
+            '\n(To view more details, run `/mealviewer item <cafeteria> <item_id>`. The item ID is the number that appears to the right of the food item.)'
         )
         embed.add_field(name='Lunch Menu', value=lunch_menu_val, inline=False)
         embed.set_footer(text='Note: This report is for informational purposes only. Although we will try to make sure this report is up to date, we cannot guarantee it.')
@@ -79,3 +79,6 @@ class Tasks(commands.Cog, name='tasks'):
     @timed_unmute.before_loop
     async def before_timed_unmute(self):
         await self.bot.wait_until_ready()
+
+def setup(bot):
+    bot.add_cog(Tasks(bot))

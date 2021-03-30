@@ -26,3 +26,6 @@ class Links(commands.Cog):
         embed = tools.create_embed(ctx, 'Sister Golden Hair', url='https://www.youtube.com/watch?v=XIycEe59Auc')
         await ctx.send(embed=embed)
         await self.bot.get_cog('Economy').command_coins(ctx)
+
+def setup(bot):
+    bot.add_cog(Links(bot))

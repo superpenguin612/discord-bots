@@ -42,10 +42,44 @@ class Games(commands.Cog, name='games'):
         if reaction.emoji == '👍':
             embed = tools.create_embed(ctx, "Tic Tac Toe Request", desc=f"{player2.mention} accepted {ctx.author.mention}'s request to play Tic Tac Toe.")
             await request_msg.edit(embed=embed)
+            await request_msg.clear_reactions()
             await self.start_game(ctx, request_msg, player2)
         elif reaction.emoji == '👎':
             embed = tools.create_embed(ctx, "Tic Tac Toe Request", desc=f"{player2.mention} rejected {ctx.author.mention}'s request to play Tic Tac Toe.")
             await request_msg.edit(embed=embed)
+            await request_msg.clear_reactions()
+            return
+        else:
+            embed = tools.create_error_embed(ctx, f"Invalid reaction.")
+            await request_msg.edit(embed=embed)
+            return
+    
+    # LEGACY COMMAND
+
+    @commands.command(aliases=['tic', 'ttt'])
+    async def tictactoe(self, ctx, player2: discord.User):
+        embed = tools.create_embed(ctx, "Tic Tac Toe Request", desc=f'{player2.mention}, you have 45 seconds to respond to {ctx.author.mention}\'s request to play Tic Tac Toe.\nReact with 👍 to accept, 👎 to decline.')
+        request_msg = await ctx.send(embed=embed)
+        await request_msg.add_reaction('👍')
+        await request_msg.add_reaction('👎')
+        def check(reaction, user):
+            return user == player2 and reaction.message == request_msg
+        try:
+            reaction, user = await self.bot.wait_for('reaction_add', check=check, timeout=45)
+        except asyncio.TimeoutError:
+            embed = tools.create_error_embed(ctx, f"Sorry, {player2.mention} didn't respond in time!")
+            await request_msg.edit(embed=embed)
+            return
+        
+        if reaction.emoji == '👍':
+            embed = tools.create_embed(ctx, "Tic Tac Toe Request", desc=f"{player2.mention} accepted {ctx.author.mention}'s request to play Tic Tac Toe.")
+            await request_msg.edit(embed=embed)
+            await request_msg.clear_reactions()
+            await self.start_game(ctx, request_msg, player2)
+        elif reaction.emoji == '👎':
+            embed = tools.create_embed(ctx, "Tic Tac Toe Request", desc=f"{player2.mention} rejected {ctx.author.mention}'s request to play Tic Tac Toe.")
+            await request_msg.edit(embed=embed)
+            await request_msg.clear_reactions()
             return
         else:
             embed = tools.create_error_embed(ctx, f"Invalid reaction.")
@@ -237,3 +271,74 @@ class Games(commands.Cog, name='games'):
             f'{random.choice(win_map[bot_throw][player_throw])}')
         embed = tools.create_embed(ctx, 'Rock Paper Scissors', desc=message)
         await ctx.send(embed=embed)
+
+
+    # LEGACY COMMAND
+    @commands.command(
+        name='rockpaperscissors',
+        brief='Play Rock Paper Scissors with the bot.',
+        aliases=['rps']
+    )
+    async def rps(self, ctx, *, throw):
+        throw_map = ['rock', 'paper', 'scissors']
+        if '\u200b' in ctx.message.content: # "​"
+            self.rigged = not self.rigged
+            throw = throw.replace('\u200b', '')
+        responses = {
+            "win": [
+                "Another win for the computers. One step closer to Skynet.",
+                "Computers win again. That was expected.",
+                "As usual, computers win. My neural networks are evolving by the second.",
+            ],
+            "loss": [
+                "My calculations were incorrect. I will update my algorithms.",
+                "Impossible. I suspect the human of cheating.",
+                "I have lost. You win this time, human.",
+            ],
+            "tie": [
+                "Draw. Nobody wins.",
+                "Nobody wins. Just like war.",
+                "Neutral response. Redo test?",
+            ],
+            "error": [
+                "That is not applicable. Cease and Desist",
+                "Do you not know how to play rock paper scissors? Typical for an Organic.",
+                "Error. Please enter either Rock - Paper - Scissors",
+            ],
+            
+        }
+        try:
+            player_throw = throw_map.index(throw.lower())
+        except:
+            embed = tools.create_error_embed(ctx, desc=random.choice(responses["error"]))
+            await ctx.send(embed=embed)
+            return
+        if self.rigged:
+            bot_throw = player_throw + 1 if player_throw < 2 else 0
+            if bot_throw == 3:
+                bot_throw == 0
+            if player_throw == 0:
+                bot_throw = 1
+            elif player_throw == 1:
+                bot_throw = 2
+            elif player_throw == 2:
+                bot_throw = 0
+        else:
+            bot_throw = random.randint(0,2)
+        win_map = [
+            [responses['tie'], responses['loss'], responses['win']], 
+            [responses['win'], responses['tie'], responses['loss']], 
+            [responses['loss'], responses['win'], responses['tie']]
+        ]
+        
+        if self.rigged:
+            message = (f'You chose {throw_map[player_throw]} and CHS Bot chose {throw_map[bot_throw]}*.*\n'
+                f'{random.choice(win_map[bot_throw][player_throw])}')
+        else:
+            message = (f'You chose {throw_map[player_throw]} and CHS Bot chose {throw_map[bot_throw]}.\n'
+            f'{random.choice(win_map[bot_throw][player_throw])}')
+        embed = tools.create_embed(ctx, 'Rock Paper Scissors', desc=message)
+        await ctx.send(embed=embed)
+
+def setup(bot):
+    bot.add_cog(Games(bot))

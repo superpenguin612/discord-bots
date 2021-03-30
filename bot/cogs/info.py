@@ -44,3 +44,27 @@ class Info(commands.Cog):
             'Explanation text will show for each parameter for a command. If a parameter is optional, it will not appear by default. Press `Tab` when an optional parameter is highlighted to add a value for it.', inline=False)
         embed.add_field(name='"This Interaction Failed"', value='If this message appears, it means that the bot is most likely offline. Commands will still appear when the bot is offline, but they won\'t be runnable. If the bot isn\'t offline, ping the Developer role for help.', inline=False)
         await ctx.send(embed=embed)
+
+    # --------------------------------------------
+    # LEGACY COMMANDS
+    # --------------------------------------------
+
+    @commands.command()
+    async def ping(self, ctx):
+        """Get the latency of the connection between the bot and Discord."""
+        embed = tools.create_embed(ctx, 'Pong!', desc=f'`{round(self.bot.latency * 1000, 1)}ms`')
+        await ctx.send(embed=embed)
+
+    @commands.command()
+    async def about(self, ctx):
+        """View information about the bot."""
+        embed = tools.create_embed(ctx, 'About')
+        author = await ctx.guild.fetch_member(688530998920871969)
+        embed.add_field(name='Author', value=f'{author.mention}', inline=False)
+        embed.add_field(name='Language', value='Python', inline=False)
+        embed.add_field(name='Version', value='1.4', inline=False)
+        embed.add_field(name='GitHub', value='https://github.com/davidracovan/discord-bots')
+        await ctx.send(embed=embed)
+
+def setup(bot):
+    bot.add_cog(Info(bot))

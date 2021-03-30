@@ -35,20 +35,21 @@ class Logging(commands.Cog, name='logging'):
     
     @commands.Cog.listener()
     async def on_raw_message_delete(self, payload):
-        guild = self.bot.get_guild(payload.guild_id)
-        log_channel = guild.get_channel(821887861439332362)
-        message_channel = guild.get_channel(payload.channel_id)
+        if payload.data['author']['id'] != self.bot.user.id:
+            guild = self.bot.get_guild(payload.guild_id)
+            log_channel = guild.get_channel(821887861439332362)
+            message_channel = guild.get_channel(payload.channel_id)
 
-        if payload.cached_message:
-            if payload.cached_message.author.id != self.bot.user.id:
-                embed = discord.Embed(title=f'Message Delete', description=payload.cached_message.content, color=discord.Color.red())
-                embed.set_author(name=payload.cached_message.author, icon_url=payload.cached_message.author.avatar_url)
-                embed.set_footer(text=f'Channel: {message_channel} | Author ID: {payload.cached_message.author.id} | Message ID: {payload.message_id}')
+            if payload.cached_message:
+                if payload.cached_message.author.id != self.bot.user.id:
+                    embed = discord.Embed(title=f'Message Delete', description=payload.cached_message.content, color=discord.Color.red())
+                    embed.set_author(name=payload.cached_message.author, icon_url=payload.cached_message.author.avatar_url)
+                    embed.set_footer(text=f'Channel: {message_channel} | Author ID: {payload.cached_message.author.id} | Message ID: {payload.message_id}')
+                    await log_channel.send(embed=embed)
+            else:
+                embed = discord.Embed(title=f'Message Delete', description='Message content was not cached.', color=discord.Color.red())
+                embed.set_footer(text=f'Channel: {message_channel} | Message ID: {payload.message_id}')
                 await log_channel.send(embed=embed)
-        else:
-            embed = discord.Embed(title=f'Message Delete', description='Message content was not cached.', color=discord.Color.red())
-            embed.set_footer(text=f'Channel: {message_channel} | Message ID: {payload.message_id}')
-            await log_channel.send(embed=embed)
         
     @commands.Cog.listener()
     async def on_guild_channel_create(self, channel):
@@ -142,3 +143,6 @@ class Logging(commands.Cog, name='logging'):
     @commands.Cog.listener()
     async def on_guild_role_update(before, after):
         pass
+
+def setup(bot):
+    bot.add_cog(Logging(bot))

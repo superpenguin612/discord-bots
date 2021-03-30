@@ -41,9 +41,8 @@ class Suggestions(commands.Cog, name='suggestions', description='A group of comm
                 required=False
             ),
         ],
-        guild_ids=[704819543398285383]
     )
-    async def _server(self, ctx, suggestion, reason=None, notes=None, image_url=None):
+    async def suggest_server(self, ctx, suggestion, reason=None, notes=None, image_url=None):
         await self.create_suggestion_slash(ctx, suggestion, reason, notes, image_url, 'Server Suggestion', color=discord.Color.gold())
 
     @cog_ext.cog_subcommand(
@@ -76,10 +75,9 @@ class Suggestions(commands.Cog, name='suggestions', description='A group of comm
                 option_type=SlashCommandOptionType.STRING,
                 required=False
             ),
-        ],
-        guild_ids=[704819543398285383]
+        ]
     )
-    async def _movie(self, ctx, suggestion, reason=None, notes=None, image_url=None):
+    async def suggest_movie(self, ctx, suggestion, reason=None, notes=None, image_url=None):
         await self.create_suggestion_slash(ctx, suggestion,  reason, notes, image_url, 'Movie Suggestion', color=discord.Color.green())
 
     @cog_ext.cog_subcommand(
@@ -113,9 +111,8 @@ class Suggestions(commands.Cog, name='suggestions', description='A group of comm
                 required=False
             ),
         ],
-        guild_ids=[704819543398285383]
     )
-    async def _bot(self, ctx, suggestion, reason=None, notes=None, image_url=None):
+    async def suggest_bot(self, ctx, suggestion, reason=None, notes=None, image_url=None):
         await self.create_suggestion_slash(ctx, suggestion,  reason, notes, image_url, 'Bot Suggestion', color=discord.Color.purple())
 
     @cog_ext.cog_subcommand(
@@ -149,13 +146,12 @@ class Suggestions(commands.Cog, name='suggestions', description='A group of comm
                 required=False
             ),
         ],
-        guild_ids=[704819543398285383]
     )
-    async def _rule(self, ctx, suggestion, reason=None, notes=None, image_url=None):
+    async def suggest_rule(self, ctx, suggestion, reason=None, notes=None, image_url=None):
         await self.create_suggestion_slash(ctx, suggestion,  reason, notes, image_url, 'Rule Suggestion', color=discord.Color.blue())
 
     async def create_suggestion_slash(self, ctx, suggestion, reason, notes, image_url, title, color, downvote=True):
-        suggestions_channel = self.bot.get_channel(710959620667211817)
+        suggestions_channel = self.bot.get_channel(818901195023843368)
         embed = tools.create_embed(ctx, title, desc=suggestion, footer_enabled=False, color=color)
         if reason:
             embed.add_field(name="Reason", value=reason, inline=False)
@@ -170,6 +166,40 @@ class Suggestions(commands.Cog, name='suggestions', description='A group of comm
 
         embed = tools.create_embed(ctx, title, desc="Your suggestion has been submitted successfully!", color=color)
         await ctx.send(embed=embed)
+
+
+    # --------------------------------------------
+    # LEGACY COMMANDS
+    # --------------------------------------------
+
+    @commands.group()
+    @commands.cooldown(1, 900, type=commands.BucketType.user)
+    async def suggest(self, ctx):
+        """Suggest something for the server. 
+        Suggestions will go into #suggestions.
+        The bot will prompt for the reason for the suggestion, then any notes.
+        You may specify "none" for either the reason or the notes.
+        """
+        if ctx.invoked_subcommand is None:
+            embed = tools.create_embed(ctx, 'Suggestion', desc=f'Please specify a category for your suggestion.\nThe available categories are `server`, `bot`, `movie`, and `rule`.\nThe command\'s usage is `{ctx.prefix}suggest <category> <suggestion>`')
+            await ctx.send(embed=embed)
+            self.suggest.reset_cooldown(ctx)
+
+    @suggest.command(name='server')
+    async def _server(self, ctx, *, suggestion):
+        await self.create_suggestion(ctx, suggestion, 'Server Suggestion', color=discord.Color.gold())
+
+    @suggest.command(name='movie')
+    async def _movie(self, ctx, *, suggestion):
+        await self.create_suggestion(ctx, suggestion, 'Movie Suggestion', color=discord.Color.green(), downvote=False)
+
+    @suggest.command(name='bot')
+    async def _bot(self, ctx, *, suggestion):
+        await self.create_suggestion(ctx, suggestion, 'Bot Suggestion', color=discord.Color.purple())
+
+    @suggest.command(name='rule')
+    async def _rule(self, ctx, *, suggestion):
+        await self.create_suggestion(ctx, suggestion, 'Rule Suggestion', color=discord.Color.blue())
 
     async def create_suggestion(self, ctx, suggestion, title, color, downvote=True):
         def check(msg):
@@ -211,7 +241,7 @@ class Suggestions(commands.Cog, name='suggestions', description='A group of comm
         else:
             image_url = msg.attachments[0].url
         
-        suggestions_channel = self.bot.get_channel(710959620667211817)
+        suggestions_channel = self.bot.get_channel(818901195023843368)
         embed = tools.create_embed(ctx, title, desc=suggestion, footer_enabled=False, color=color)
         if reason:
             embed.add_field(name="Reason", value=reason, inline=False)
@@ -227,14 +257,17 @@ class Suggestions(commands.Cog, name='suggestions', description='A group of comm
         embed = tools.create_embed(ctx, title, desc="Your suggestion has been submitted successfully!", color=color)
         await ctx.send(embed=embed)
 
-    @commands.command()
-    @commands.has_permissions(manage_messages=True)
-    async def removesuggestion(self, ctx, id: int):
-        """This command allows for anyone with the "Manage Messages" 
-        permission to remove a suggestion."""
-        suggestions_channel = self.bot.get_channel(710959620667211817)
-        msg = await suggestions_channel.fetch_message(id)
-        await msg.delete()
-        desc = f"Suggestion with ID {id} has been removed."
-        embed = tools.create_embed(ctx, "Suggestion Removal", desc=desc)
-        await ctx.send(embed=embed)
+    # @commands.command()
+    # @commands.has_permissions(manage_messages=True)
+    # async def removesuggestion(self, ctx, id: int):
+    #     """This command allows for anyone with the "Manage Messages" 
+    #     permission to remove a suggestion."""
+    #     suggestions_channel = self.bot.get_channel(818901195023843368)
+    #     msg = await suggestions_channel.fetch_message(id)
+    #     await msg.delete()
+    #     desc = f"Suggestion with ID {id} has been removed."
+    #     embed = tools.create_embed(ctx, "Suggestion Removal", desc=desc)
+    #     await ctx.send(embed=embed)
+
+def setup(bot):
+    bot.add_cog(Suggestions(bot))

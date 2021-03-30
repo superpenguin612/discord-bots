@@ -144,3 +144,6 @@ class Starboard(commands.Cog, name='starboard'):
     )
     async def starboard_remove(self, ctx, message_id):
         pass
+
+def setup(bot):
+    bot.add_cog(Starboard(bot))

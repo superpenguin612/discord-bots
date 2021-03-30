@@ -4,53 +4,38 @@ from discord_slash import SlashCommand
 import os
 import dotenv
 import asyncpg
-
-from bot.cogs.events import Events
-from bot.cogs.school import School
-from bot.cogs.fun import Fun
-from bot.cogs.info import Info
-from bot.cogs.search import Search
 from bot.cogs.help import HelpCommand
-from bot.cogs.reaction_roles import ReactionRoles
-# from bot.cogs.embeds import EmbedCreator
-from bot.cogs.moderation import Moderation
-from bot.cogs.settings import Settings
-from bot.cogs.games import Games
-from bot.cogs.tasks import Tasks
-from bot.cogs.starboard import Starboard
-from bot.cogs.logging import Logging
-from bot.chsbot.cogs.suggestions import Suggestions
-from bot.chsbot.cogs.profanity import Profanity
-
 import aiohttp, json
 
-# https://discord.com/api/oauth2/authorize?client_id=796805491186597968&permissions=2147483639&scope=bot
+# https://discord.com/api/oauth2/authorize?client_id=802211256383438861&permissions=4294967295&scope=bot%20applications.commands
 
+EXTENSIONS = [
+    'bot.cogs.events',
+    'bot.cogs.school',
+    'bot.cogs.fun',
+    'bot.cogs.info',
+    'bot.cogs.search',
+    'bot.cogs.reaction_roles',
+    'bot.cogs.moderation',
+    'bot.cogs.settings',
+    'bot.cogs.games',
+    'bot.cogs.tasks',
+    'bot.cogs.starboard',
+    'bot.cogs.logging',
+    'bot.chsbot.cogs.suggestions',
+    'bot.chsbot.cogs.profanity',
+]
 
-        
+bot = commands.Bot(command_prefix='c?', intents=discord.Intents.all(), max_messages=10000, allowed_mentions=discord.AllowedMentions(everyone=False))
+slash = SlashCommand(bot)
+bot.description = f'Welcome to CHS Bot! Visit `{bot.command_prefix}help` for a list of commands and how to use them. Visit `{bot.command_prefix}about` to see more information about the bot.'
+bot.help_command = HelpCommand()
+dotenv.load_dotenv()
+bot.AZURE_KEY = os.environ['AZURE_KEY']
+ 
 def start():
-    bot = commands.Bot(command_prefix='c?', intents=discord.Intents.all(), max_messages=10000, allowed_mentions=discord.AllowedMentions(everyone=False))
-    slash = SlashCommand(bot, sync_commands=True)
-    bot.description = f'Welcome to CHS Bot! Visit `{bot.command_prefix}help` for a list of commands and how to use them. Visit `{bot.command_prefix}about` to see more information about the bot.'
-    bot.add_cog(Events(bot, slash))
-    bot.add_cog(Suggestions(bot))
-    bot.add_cog(School(bot))
-    bot.add_cog(Fun(bot))
-    bot.add_cog(Info(bot))
-    bot.add_cog(Games(bot))
-    bot.add_cog(Profanity(bot))
-    bot.add_cog(Search(bot))
-    bot.add_cog(ReactionRoles(bot))
-    # bot.add_cog(Embeds(bot))
-    bot.add_cog(Moderation(bot))
-    bot.add_cog(Settings(bot))
-    bot.add_cog(Tasks(bot))
-    bot.add_cog(Starboard(bot))
-    bot.add_cog(Logging(bot))
-    # bot.add_command(runpayload)
-    dotenv.load_dotenv()
-    bot.AZURE_KEY = os.environ['AZURE_KEY']
-    bot.help_command = HelpCommand()
+    for extension in EXTENSIONS:
+        bot.load_extension(extension)
     bot.run(os.environ['TOKEN']) # bot token
 
 if __name__ == "__main__":

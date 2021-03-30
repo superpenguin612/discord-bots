@@ -253,3 +253,6 @@ class Settings(commands.Cog, name='settings'):
         await self.edit_record(ctx.guild.id, json.dumps(server_settings))
         embed = tools.create_embed(ctx, 'Edit Settings', desc='The down emoji for suggestions has been updated successfully.')
         await ctx.send(embed=embed)
+
+def setup(bot):
+    bot.add_cog(Settings(bot))
