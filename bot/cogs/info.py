@@ -14,7 +14,6 @@ class Info(commands.Cog):
         description='Get the latency of the connection between the bot and Discord.',
     )
     async def ping(self, ctx):
-        await ctx.respond()
         embed = tools.create_embed(ctx, 'Pong!', desc=f'`{round(self.bot.latency * 1000, 1)}ms`')
         await ctx.send(embed=embed)
 
@@ -23,7 +22,6 @@ class Info(commands.Cog):
         description='View information about the bot.',
     )
     async def about(self, ctx):
-        await ctx.respond()
         embed = tools.create_embed(ctx, 'About')
         author = await ctx.guild.fetch_member(688530998920871969)
         embed.add_field(name='Author', value=f'{author.mention}', inline=False)
@@ -37,7 +35,6 @@ class Info(commands.Cog):
         description='Get help for the bot.',
     )
     async def help(self, ctx):
-        await ctx.respond()
         embed = tools.create_embed(ctx, 'Bot Help', 'Welcome to the Slash Commands module of CHS Bot! This is a new feature created by Discord allowing members to use bots more effectively. Thanks for using the bot!')
         embed.add_field(name='How to Use', value='Slash Commands are simple to use! Just type a `/` to see a list of all CHS Bot commands.\n'
             'Press `Tab` whenever the `TAB` icon appears in the message bar to auto-complete the selected command and to complete a command parameter.\n'

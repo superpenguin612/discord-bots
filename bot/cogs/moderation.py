@@ -47,7 +47,7 @@ class Moderation(commands.Cog, name='moderation'):
             msgs.append(msg)
         await ctx.channel.delete_messages(msgs)
 
-        await ctx.respond()
+        
         embed = tools.create_embed(ctx, 'Message Purge (All)', f'{num} messages deleted.')
         embed.add_field(name='moderation ID', value=moderation_record['id'],inline=False)
         await ctx.send(embed=embed)
@@ -83,7 +83,7 @@ class Moderation(commands.Cog, name='moderation'):
                 msgs.append(msg)
         await ctx.channel.delete_messages(msgs)
 
-        await ctx.respond()
+        
         embed = tools.create_embed(ctx, 'Message Purge (Bots)', f'{num} messages deleted.')
         embed.add_field(name='moderation ID', value=moderation_record['id'],inline=False)
         await ctx.send(embed=embed)
@@ -119,7 +119,7 @@ class Moderation(commands.Cog, name='moderation'):
                 msgs.append(msg)
         await ctx.channel.delete_messages(msgs)
 
-        await ctx.respond()
+        
         embed = tools.create_embed(ctx, 'Message Purge (Humans)', f'{number} messages deleted.')
         embed.add_field(name='Moderation ID', value=moderation_record['id'],inline=False)
         await ctx.send(embed=embed)
@@ -144,7 +144,7 @@ class Moderation(commands.Cog, name='moderation'):
     )
     @commands.has_permissions(manage_messages=True)
     async def warn(self, ctx, user, reason=None):
-        await ctx.respond()
+        
         moderation_record = await self.bot.db.fetchrow('INSERT INTO moderations (server_id, type, user_id, moderator_id, reason) VALUES ($1, $2, $3, $4, $5) RETURNING *;',
             str(ctx.guild.id), 'warn', str(user.id), str(ctx.author.id), reason)
         embed = tools.create_embed(ctx, 'User Warn', desc=f'{user} has been warned.')
@@ -172,7 +172,7 @@ class Moderation(commands.Cog, name='moderation'):
     @commands.has_permissions(kick_members=True)
     @commands.bot_has_permissions(kick_members=True)
     async def kick(self, ctx, user, reason=None):
-        await ctx.respond()
+        
         await ctx.guild.kick(user, reason=reason)
         moderation_record = await self.bot.db.fetchrow('INSERT INTO moderations (server_id, type, user_id, moderator_id, reason) VALUES ($1, $2, $3, $4, $5) RETURNING *;',
             str(ctx.guild.id), 'kick', str(user.id), str(ctx.author.id), reason)
@@ -201,7 +201,7 @@ class Moderation(commands.Cog, name='moderation'):
     @commands.has_permissions(ban_members=True)
     @commands.bot_has_permissions(ban_members=True)
     async def ban(self, ctx, user, reason=None):
-        await ctx.respond()
+        
         await ctx.guild.ban(user, reason=reason)
         moderation_record = await self.bot.db.fetchrow('INSERT INTO moderations (server_id, type, user_id, moderator_id, reason) VALUES ($1, $2, $3, $4, $5) RETURNING *;',
             str(ctx.guild.id), 'ban', str(user.id), str(ctx.author.id), reason)
@@ -260,7 +260,7 @@ class Moderation(commands.Cog, name='moderation'):
     @commands.has_permissions(manage_roles=True)
     @commands.bot_has_permissions(manage_roles=True)
     async def mute(self, ctx, user, duration, duration_unit, reason=None):
-        await ctx.respond()
+        
         await user.add_roles(ctx.guild.get_role(809169133232717890))
         duration_adjustments = {
             'days': 1*60*60*24,
@@ -296,7 +296,7 @@ class Moderation(commands.Cog, name='moderation'):
     @commands.has_permissions(manage_roles=True)
     @commands.bot_has_permissions(manage_roles=True)
     async def unmute(self, ctx, user, reason=None):
-        await ctx.respond()
+        
         moderation_record = await self.bot.db.fetchrow('INSERT INTO moderations (server_id, type, user_id, moderator_id, reason) VALUES ($1, $2, $3, $4, $5) RETURNING *;',
             str(ctx.guild.id), 'unmute', str(user.id), str(ctx.author.id), reason)
         await user.remove_roles(ctx.guild.get_role(809169133232717890))

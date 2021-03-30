@@ -29,7 +29,6 @@ class Search(commands.Cog, name='search'):
         ],
     )
     async def picture_top(self, ctx, search_term):
-        await ctx.respond()
         async with aiohttp.ClientSession() as session:
             dotenv.load_dotenv()
             mkt = 'en-US'
@@ -67,7 +66,6 @@ class Search(commands.Cog, name='search'):
         ],
     )
     async def picture_num(self, ctx, num, search_term):
-        await ctx.respond()
         async with aiohttp.ClientSession() as session:
             dotenv.load_dotenv()
             mkt = 'en-US'
@@ -99,7 +97,6 @@ class Search(commands.Cog, name='search'):
         ],
     )
     async def picture_random(self, ctx, search_term):
-        await ctx.respond()
         async with aiohttp.ClientSession() as session:
             dotenv.load_dotenv()
             mkt = 'en-US'

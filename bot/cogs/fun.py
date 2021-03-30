@@ -15,7 +15,6 @@ class Fun(commands.Cog, name='fun'):
         description='Greet the bot!',
     )
     async def hello(self, ctx):
-        await ctx.respond()
         embed = tools.create_embed(ctx, 'Hello!', desc=f'How are you, {ctx.author.mention}?')
         await ctx.send(embed=embed)
 
@@ -32,7 +31,6 @@ class Fun(commands.Cog, name='fun'):
         ],
     )
     async def eightball(self, ctx, request):
-        await ctx.respond()
         responses = [
             [
                 '🟢 As I see it, yes. 🟢',
@@ -98,7 +96,6 @@ class Fun(commands.Cog, name='fun'):
     )
     # @commands.cooldown(1, 10)
     async def rng(self, ctx, min_num, max_num):
-        await ctx.respond()
         embed = tools.create_embed(ctx, 'Random Number', desc=f'`{random.randint(min_num, max_num)}`')
         await ctx.send(embed=embed)
     
@@ -108,7 +105,6 @@ class Fun(commands.Cog, name='fun'):
     )
     # @commands.cooldown(1, 3)
     async def dog(self, ctx):
-        await ctx.respond()
         async with aiohttp.ClientSession() as session:
             async with session.get('https://dog.ceo/api/breeds/image/random') as r:
                 if r.status == 200:
@@ -123,7 +119,6 @@ class Fun(commands.Cog, name='fun'):
     )
     # @commands.cooldown(1, 3)
     async def cat(self, ctx):
-        await ctx.respond()
         async with aiohttp.ClientSession() as session:
             async with session.get('http://aws.random.cat/meow') as r:
                 if r.status == 200:
