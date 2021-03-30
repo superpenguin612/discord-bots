@@ -28,7 +28,7 @@ EXTENSIONS = [
 
 bot = commands.Bot(command_prefix='c?', intents=discord.Intents.all(), max_messages=10000, allowed_mentions=discord.AllowedMentions(everyone=False))
 slash = SlashCommand(bot)
-bot.description = f'Welcome to CHS Bot! Visit `{bot.command_prefix}help` for a list of commands and how to use them. Visit `{bot.command_prefix}about` to see more information about the bot.'
+bot.description = f'Welcome to davidhackerman! Visit `{bot.command_prefix}help` for a list of commands and how to use them. Visit `{bot.command_prefix}about` to see more information about the bot.'
 bot.help_command = HelpCommand()
 dotenv.load_dotenv()
 bot.AZURE_KEY = os.environ['AZURE_KEY']
