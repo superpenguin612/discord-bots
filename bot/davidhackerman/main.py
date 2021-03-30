@@ -1,40 +1,41 @@
 import discord
 from discord.ext import commands
+from discord_slash import SlashCommand
 import os
 import dotenv
-import random
+import asyncpg
 
-from bot.cogs.events import Events
-from bot.cogs.school import School
-from bot.cogs.fun import Fun
 from bot.cogs.help import HelpCommand
-from bot.cogs.info import Info
-from bot.cogs.search import Search
-from bot.cogs.games import Games
-from bot.davidhackerman.cogs.economy import Economy
-from bot.davidhackerman.cogs.links import Links
-from bot.cogs.moderation import Moderation
-from bot.davidhackerman.cogs.bottling import Bottling
 
 # https://discord.com/api/oauth2/authorize?client_id=796805491186597968&permissions=2147483639&scope=bot
 
+EXTENSIONS = [
+    'bot.cogs.events',
+    'bot.cogs.school',
+    'bot.cogs.fun',
+    'bot.cogs.info',
+    'bot.cogs.search',
+    'bot.cogs.reaction_roles',
+    'bot.cogs.moderation',
+    'bot.cogs.settings',
+    'bot.cogs.games',
+    'bot.cogs.tasks',
+    'bot.cogs.starboard',
+    'bot.cogs.logging',
+    'bot.davidhackerman.cogs.bottling',
+    'bot.davidhackerman.cogs.links',
+]
+
+bot = commands.Bot(command_prefix='c?', intents=discord.Intents.all(), max_messages=10000, allowed_mentions=discord.AllowedMentions(everyone=False))
+slash = SlashCommand(bot)
+bot.description = f'Welcome to davidhackerman! Visit `{bot.command_prefix}help` for a list of commands and how to use them. Visit `{bot.command_prefix}about` to see more information about the bot.'
+bot.help_command = HelpCommand()
+dotenv.load_dotenv()
+bot.AZURE_KEY = os.environ['AZURE_KEY']
+ 
 def start():
-    intents = discord.Intents.default()
-    intents.members = True
-    bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
-    bot.add_cog(Events(bot))
-    bot.add_cog(School(bot))
-    bot.add_cog(Fun(bot))
-    bot.add_cog(Info(bot))
-    bot.add_cog(Search(bot))
-    bot.add_cog(Links(bot))
-    bot.add_cog(Economy(bot))
-    bot.add_cog(Moderation(bot))
-    bot.add_cog(Games(bot))
-    bot.add_cog(Bottling(bot))
-    dotenv.load_dotenv()
-    bot.AZURE_KEY = os.environ['AZURE_KEY']
-    bot.help_command = HelpCommand()
+    for extension in EXTENSIONS:
+        bot.load_extension(extension)
     bot.run(os.environ['TOKEN']) # bot token
 
 if __name__ == "__main__":

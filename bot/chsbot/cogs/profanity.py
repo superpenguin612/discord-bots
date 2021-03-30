@@ -27,3 +27,6 @@ class Profanity(commands.Cog):
             embed.set_author(name=message.author, icon_url=message.author.avatar_url)
             await message.channel.send(embed=embed)
             await message.delete()
+
+def setup(bot):
+    bot.add_cog(Profanity(bot))

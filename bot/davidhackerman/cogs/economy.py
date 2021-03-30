@@ -46,3 +46,6 @@ class Economy(commands.Cog):
         bal = self._get_currency_dict(ctx)
         embed = tools.create_embed(ctx, 'Balance', f'You have {bal[str(ctx.author.id)]} coins.')
         await ctx.send(embed=embed)
+
+def setup(bot):
+    bot.add_cog(Economy(bot))
