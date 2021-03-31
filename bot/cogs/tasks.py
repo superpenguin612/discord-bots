@@ -29,17 +29,20 @@ class Tasks(commands.Cog, name='tasks'):
         )
         embed.add_field(name='School Day', value=school_day_val, inline=False)
         search = self.bot.get_cog('search')
-        food_items = await search.get_mv_list(date.today())
-        lunch_menu_val = (
-            '*Freshmen Center*\n' + 
-            '\n'.join([f'{index} - {val["item_Name"]}' for index, val in enumerate(food_items[0])]) +
-            '\n\n*Greyhound Station*\n' + 
-            '\n'.join([f'{index} - {val["item_Name"]}' for index, val in enumerate(food_items[1])]) +
-            '\n\n*Main Cafeteria*\n' +
-            '\n'.join([f'{index} - {val["item_Name"]}' for index, val in enumerate(food_items[2])]) +
-            '\n(To view more details, run `/mealviewer item <cafeteria> <item_id>`. The item ID is the number that appears to the right of the food item.)'
+        food_items = await search.get_mv_list(date.today().strftime('%m-%d-%Y'))
+        lunch_menu_val_1 = (
+            '\n'.join([f'`{index}` - {val["item_Name"]}' for index, val in enumerate(food_items[0])])
         )
-        embed.add_field(name='Lunch Menu', value=lunch_menu_val, inline=False)
+        lunch_menu_val_2 = (
+            '\n'.join([f'`{index}` - {val["item_Name"]}' for index, val in enumerate(food_items[1])])
+        )
+        lunch_menu_val_3 = (
+            '\n'.join([f'`{index}` - {val["item_Name"]}' for index, val in enumerate(food_items[2])]) + 
+            '\n\n(To view more details, run `/mealviewer item <cafeteria> <item_id>`. The item ID is the number that appears to the right of the food item.)'
+        )
+        embed.add_field(name='Freshmen Center Lunch Menu', value=lunch_menu_val_1, inline=False)
+        embed.add_field(name='Greyhound Station Lunch Menu', value=lunch_menu_val_2, inline=False)
+        embed.add_field(name='Main Cafeteria Lunch Menu', value=lunch_menu_val_3, inline=False)
         embed.set_footer(text='Note: This report is for informational purposes only. Although we will try to make sure this report is up to date, we cannot guarantee it.')
         embed.set_thumbnail(url=guild.icon_url)
         return embed
@@ -52,13 +55,15 @@ class Tasks(commands.Cog, name='tasks'):
 
     @tasks.loop(seconds=1.0)
     async def daily_report(self):
-        if datetime.now().strftime("%H:%M:%S") == "07:00:00":
+        print(datetime.now().strftime("%H:%M:%S"))
+        if datetime.now().strftime("%H:%M:%S") == "11:00:00":
             guild = self.bot.get_guild(809169133086048257)
             channel = guild.get_channel(819546169985597440)
             role = guild.get_role(821386697727410238)
 
             embed = await self.create_daily_report(guild)
-            msg = await channel.send(content=role.mention, embed=embed)
+            # msg = await channel.send(content=role.mention, embed=embed)
+            msg = await channel.send(embed=embed)
             await msg.publish()
 
     @tasks.loop(seconds=1.0)

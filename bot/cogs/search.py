@@ -66,6 +66,7 @@ class Search(commands.Cog, name='search'):
         ],
     )
     async def picture_num(self, ctx, num, search_term):
+        
         async with aiohttp.ClientSession() as session:
             dotenv.load_dotenv()
             mkt = 'en-US'
@@ -97,6 +98,7 @@ class Search(commands.Cog, name='search'):
         ],
     )
     async def picture_random(self, ctx, search_term):
+        
         async with aiohttp.ClientSession() as session:
             dotenv.load_dotenv()
             mkt = 'en-US'
@@ -215,11 +217,10 @@ class Search(commands.Cog, name='search'):
     # --------------------------------------------
     
     @commands.group(
-        name='pic',
         aliases = ['picture']
     )
     @commands.cooldown(1, 10, type=commands.BucketType.user)
-    async def pic_legacy(self, ctx):
+    async def pic(self, ctx):
         """Search Bing for a picture. It should be noted that this command only returns the help command for the command group. 
         You must use one of the subcommands (`top`, `random`, or `num`) to specify the search type. 
         See the help text for the subcommands for more information.
@@ -239,8 +240,8 @@ class Search(commands.Cog, name='search'):
         if ctx.invoked_subcommand is None:
             await ctx.send_help(ctx.command)
     
-    @pic_legacy.command(name='top')
-    async def pic_top_legacy(self, ctx, *, arg):
+    @pic.command(name='top')
+    async def pic_top(self, ctx, *, arg):
         """Search Bing for a picture and show the top result.
         **Usage**
         `_prefix_pic top <search_term>`
@@ -271,8 +272,8 @@ class Search(commands.Cog, name='search'):
                     embed.set_image(url=url)
                 await ctx.send(embed=embed)
     
-    @pic_legacy.command(name='num')
-    async def pic_num_legacy(self, ctx, num: int, *, arg: str):
+    @pic.command(name='num')
+    async def pic_num(self, ctx, num: int, *, arg: str):
         """Search Bing for a picture and return the result at a certain rank.
         **Usage**
         `_prefix_pic num <number> <search_term>`
@@ -305,8 +306,8 @@ class Search(commands.Cog, name='search'):
                     embed.set_image(url=url)
                 await ctx.send(embed=embed)
     
-    @pic_legacy.command(name='random')
-    async def pic_rand_legacy(self, ctx, *, arg):
+    @pic.command(name='random')
+    async def pic_rand(self, ctx, *, arg):
         """Search Bing for a picture and return the result at a random rank.
         **Usage**
         `_prefix_pic random <search_term>`
@@ -338,68 +339,68 @@ class Search(commands.Cog, name='search'):
                     embed.set_image(url=url)
                 await ctx.send(embed=embed)
 
-    async def get_mv_list(self):
-        async with aiohttp.ClientSession() as session:
-            food_items = []
-            search_url = "https://api.mealviewer.com/api/v4/school/CCHSFreshmanCenter/03-08-2021/03-08-2021/"
-            async with session.get(search_url) as r:
-                js = await r.json()
-                food_items.append(js['menuSchedules'][0]['menuBlocks'][0]['cafeteriaLineList']['data'][0]['foodItemList']['data'])
-            search_url = "https://api.mealviewer.com/api/v4/school/CCHSGreyhoundStation/03-08-2021/03-08-2021/"
-            async with session.get(search_url) as r:
-                js = await r.json()
-                food_items.append(js['menuSchedules'][0]['menuBlocks'][0]['cafeteriaLineList']['data'][0]['foodItemList']['data'])
-            search_url = "https://api.mealviewer.com/api/v4/school/CarmelHigh/03-08-2021/03-08-2021/"
-            async with session.get(search_url) as r:
-                js = await r.json()
-                main_caf = []
-                for item in js['menuSchedules'][0]['menuBlocks'][0]['cafeteriaLineList']['data']:
-                    main_caf += item['foodItemList']['data']
-                food_items.append(main_caf)
-            return food_items
+    # async def get_mv_list_legacy(self):
+    #     async with aiohttp.ClientSession() as session:
+    #         food_items = []
+    #         search_url = "https://api.mealviewer.com/api/v4/school/CCHSFreshmanCenter/03-08-2021/03-08-2021/"
+    #         async with session.get(search_url) as r:
+    #             js = await r.json()
+    #             food_items.append(js['menuSchedules'][0]['menuBlocks'][0]['cafeteriaLineList']['data'][0]['foodItemList']['data'])
+    #         search_url = "https://api.mealviewer.com/api/v4/school/CCHSGreyhoundStation/03-08-2021/03-08-2021/"
+    #         async with session.get(search_url) as r:
+    #             js = await r.json()
+    #             food_items.append(js['menuSchedules'][0]['menuBlocks'][0]['cafeteriaLineList']['data'][0]['foodItemList']['data'])
+    #         search_url = "https://api.mealviewer.com/api/v4/school/CarmelHigh/03-08-2021/03-08-2021/"
+    #         async with session.get(search_url) as r:
+    #             js = await r.json()
+    #             main_caf = []
+    #             for item in js['menuSchedules'][0]['menuBlocks'][0]['cafeteriaLineList']['data']:
+    #                 main_caf += item['foodItemList']['data']
+    #             food_items.append(main_caf)
+    #         return food_items
 
-    @commands.group(name='mealviewer')
-    async def mealviewer_legacy(self, ctx):
-        if ctx.invoked_subcommand is None:
-            async with aiohttp.ClientSession() as session:
-                dotenv.load_dotenv()
-                search_url = "https://api.mealviewer.com/api/v4/school/CCHSFreshmanCenter/03-09-2021/03-09-2021/"
-                async with session.get(search_url) as r:
-                    js = await r.json()
-                    food_item = js['menuSchedules'][0]['menuBlocks'][0]['cafeteriaLineList']['data'][0]['foodItemList']['data'][num]
-                    # js = xmltodict.parse(xml)
-                    embed = tools.create_embed(ctx, 'MealViewer Item')
-                    if food_item["imageFileName"]:
-                        embed.set_image(url=f'https://appassets.mealviewer.com/fooditemimages/{food_item["imageFileName"]}')
-                    embed.add_field(name='Name', value=food_item['item_Name'])
-                    embed.add_field(name='Location', value=food_item['physical_Location_Name'])
-                    embed.add_field(name='Calories', value=food_item['nutritionals'][0]['value'])
-                    embed.add_field(name='Total Fat', value=food_item['nutritionals'][1]['value'])
-                    embed.add_field(name='Protein', value=food_item['nutritionals'][5]['value'])
-                    await ctx.send(embed=embed)
+    # @commands.group()
+    # async def mealviewer_legacy(self, ctx):
+    #     if ctx.invoked_subcommand is None:
+    #         async with aiohttp.ClientSession() as session:
+    #             dotenv.load_dotenv()
+    #             search_url = "https://api.mealviewer.com/api/v4/school/CCHSFreshmanCenter/03-09-2021/03-09-2021/"
+    #             async with session.get(search_url) as r:
+    #                 js = await r.json()
+    #                 food_item = js['menuSchedules'][0]['menuBlocks'][0]['cafeteriaLineList']['data'][0]['foodItemList']['data'][num]
+    #                 # js = xmltodict.parse(xml)
+    #                 embed = tools.create_embed(ctx, 'MealViewer Item')
+    #                 if food_item["imageFileName"]:
+    #                     embed.set_image(url=f'https://appassets.mealviewer.com/fooditemimages/{food_item["imageFileName"]}')
+    #                 embed.add_field(name='Name', value=food_item['item_Name'])
+    #                 embed.add_field(name='Location', value=food_item['physical_Location_Name'])
+    #                 embed.add_field(name='Calories', value=food_item['nutritionals'][0]['value'])
+    #                 embed.add_field(name='Total Fat', value=food_item['nutritionals'][1]['value'])
+    #                 embed.add_field(name='Protein', value=food_item['nutritionals'][5]['value'])
+    #                 await ctx.send(embed=embed)
 
-    @mealviewer_legacy.command(name='list')
-    async def mealviewer_list_legacy(self, ctx):
-        food_items = await self.get_mv_list()
-        embed = tools.create_embed(ctx, 'MealViewer Items')
-        embed.add_field(name='Freshmen Center', value='\n'.join([x['item_Name'] for x in food_items[0]]))
-        embed.add_field(name='Greyhound Station', value='\n'.join([x['item_Name'] for x in food_items[1]]))
-        embed.add_field(name='Main Cafeteria', value='\n'.join([x['item_Name'] for x in food_items[2]]))
-        await ctx.send(embed=embed)
+    # @mealviewer.command(name='list')
+    # async def mealviewer_list(self, ctx):
+    #     food_items = await self.get_mv_list_legacy()
+    #     embed = tools.create_embed(ctx, 'MealViewer Items')
+    #     embed.add_field(name='Freshmen Center', value='\n'.join([x['item_Name'] for x in food_items[0]]))
+    #     embed.add_field(name='Greyhound Station', value='\n'.join([x['item_Name'] for x in food_items[1]]))
+    #     embed.add_field(name='Main Cafeteria', value='\n'.join([x['item_Name'] for x in food_items[2]]))
+    #     await ctx.send(embed=embed)
     
-    @mealviewer_legacy.command(name='item')
-    async def mealviewer_item_legacy(self, ctx, cafeteria:int, item_number:int):
-        food_items = await self.get_mv_list()
-        food_item = food_items[cafeteria][item_number]
-        embed = tools.create_embed(ctx, 'MealViewer Item')
-        if food_item["imageFileName"]:
-            embed.set_image(url=f'https://appassets.mealviewer.com/fooditemimages/{food_item["imageFileName"]}')
-        embed.add_field(name='Name', value=food_item['item_Name'])
-        embed.add_field(name='Location', value=food_item['physical_Location_Name'])
-        embed.add_field(name='Calories', value=food_item['nutritionals'][0]['value'])
-        embed.add_field(name='Total Fat', value=food_item['nutritionals'][1]['value'])
-        embed.add_field(name='Protein', value=food_item['nutritionals'][5]['value'])
-        await ctx.send(embed=embed)
+    # @mealviewer.command(name='item')
+    # async def mealviewer_item(self, ctx, cafeteria:int, item_number:int):
+    #     food_items = await self.get_mv_list_legacy()
+    #     food_item = food_items[cafeteria][item_number]
+    #     embed = tools.create_embed(ctx, 'MealViewer Item')
+    #     if food_item["imageFileName"]:
+    #         embed.set_image(url=f'https://appassets.mealviewer.com/fooditemimages/{food_item["imageFileName"]}')
+    #     embed.add_field(name='Name', value=food_item['item_Name'])
+    #     embed.add_field(name='Location', value=food_item['physical_Location_Name'])
+    #     embed.add_field(name='Calories', value=food_item['nutritionals'][0]['value'])
+    #     embed.add_field(name='Total Fat', value=food_item['nutritionals'][1]['value'])
+    #     embed.add_field(name='Protein', value=food_item['nutritionals'][5]['value'])
+    #     await ctx.send(embed=embed)
 
 def setup(bot):
     bot.add_cog(Search(bot))
