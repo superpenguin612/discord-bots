@@ -74,7 +74,8 @@ class Tasks(commands.Cog, name='tasks'):
                     await self.bot.db.execute('UPDATE moderations SET active=FALSE WHERE id=$1', record['id'])
                     
                     moderation = self.bot.get_cog('moderation')
-                    await moderation.add_record(record['server_id'], 'unmute', record['user_id'], str(self.bot.user.id), 'Auto unmute by CHS Bot.')
+                    await self.bot.db.execute('INSERT INTO moderations (server_id, type, user_id, moderator_id, reason, duration) VALUES ($1, $2, $3, $4);',
+                        record['server_id'], 'unmute', record['user_id'], str(self.bot.user.id), 'Auto unmute by CHS Bot.')
 
     @timed_unmute.before_loop
     async def before_timed_unmute(self):
