@@ -47,13 +47,13 @@ class Info(commands.Cog):
     # --------------------------------------------
 
     @commands.command()
-    async def ping(self, ctx):
+    async def ping_legacy(self, ctx):
         """Get the latency of the connection between the bot and Discord."""
         embed = tools.create_embed(ctx, 'Pong!', desc=f'`{round(self.bot.latency * 1000, 1)}ms`')
         await ctx.send(embed=embed)
 
     @commands.command()
-    async def about(self, ctx):
+    async def about_legacy(self, ctx):
         """View information about the bot."""
         embed = tools.create_embed(ctx, 'About')
         author = await ctx.guild.fetch_member(688530998920871969)

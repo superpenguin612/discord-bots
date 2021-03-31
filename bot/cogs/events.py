@@ -25,7 +25,6 @@ class Events(commands.Cog):
         elif self.bot.user.id == 796805491186597968: # davidhackerman bot
             await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name='$help | this is a good bot'))
         self.bot.db = await self.create_db_pool()
-
         
     @commands.Cog.listener()
     async def on_slash_command_error(self, ctx, error):

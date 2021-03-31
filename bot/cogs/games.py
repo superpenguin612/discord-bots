@@ -57,7 +57,7 @@ class Games(commands.Cog, name='games'):
     # LEGACY COMMAND
 
     @commands.command(aliases=['tic', 'ttt'])
-    async def tictactoe(self, ctx, player2: discord.User):
+    async def tictactoe_legacy(self, ctx, player2: discord.User):
         embed = tools.create_embed(ctx, "Tic Tac Toe Request", desc=f'{player2.mention}, you have 45 seconds to respond to {ctx.author.mention}\'s request to play Tic Tac Toe.\nReact with 👍 to accept, 👎 to decline.')
         request_msg = await ctx.send(embed=embed)
         await request_msg.add_reaction('👍')
@@ -279,7 +279,7 @@ class Games(commands.Cog, name='games'):
         brief='Play Rock Paper Scissors with the bot.',
         aliases=['rps']
     )
-    async def rps(self, ctx, *, throw):
+    async def rps_legacy(self, ctx, *, throw):
         throw_map = ['rock', 'paper', 'scissors']
         if '\u200b' in ctx.message.content: # "​"
             self.rigged = not self.rigged

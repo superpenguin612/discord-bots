@@ -136,7 +136,7 @@ class Fun(commands.Cog, name='fun'):
         brief='Greet the bot!',
         aliases=["hi"]
     )
-    async def hello(self, ctx):
+    async def hello_legacy(self, ctx):
         """Greet the bot!
         **Usage**
         `_prefix_pic hello`
@@ -158,7 +158,7 @@ class Fun(commands.Cog, name='fun'):
         name='8ball',
         brief='Ask the Magic 8 Ball a question.'
     )
-    async def eightball(self, ctx, *, request):
+    async def eightball_legacy(self, ctx, *, request):
         """Ask the Magic 8 Ball a question.
         **Usage**
         `_prefix_8ball <request>`
@@ -223,7 +223,7 @@ class Fun(commands.Cog, name='fun'):
         brief='Get a random number.'
     )
     @commands.cooldown(1, 10)
-    async def rng(self, ctx, minnum:int, maxnum: int):
+    async def rng_legacy(self, ctx, minnum:int, maxnum: int):
         """Get a random number.
         **Usage**
         `_prefix_rng <minnum> <maxnum>`
@@ -247,7 +247,7 @@ class Fun(commands.Cog, name='fun'):
         brief='Get a dog picture!'
     )
     @commands.cooldown(1, 3)
-    async def dog(self, ctx):
+    async def dog_legacy(self, ctx):
         """Get a dog picture!
         **Usage**
         `_prefix_dog`
@@ -275,7 +275,7 @@ class Fun(commands.Cog, name='fun'):
         brief='Get a cat picture!'
     )
     @commands.cooldown(1, 3)
-    async def cat(self, ctx):
+    async def cat_legacy(self, ctx):
         """Get a cat picture!
         **Usage**
         `_prefix_cat`

@@ -76,7 +76,7 @@ class ReactionRoles(commands.Cog, name='reaction_roles'):
             return msg.author == ctx.author and msg.channel == ctx.channel
 
         embed = tools.create_embed(ctx, "Reaction Role Setup 1/4", "Tag the channel that contains the message you want to be reacted to.")
-        sent_msg = await ctx.send(embed=embed)
+        sent_msg = await ctx.channel.send(embed=embed)
         user_msg = await self.bot.wait_for("message", check=check, timeout=60)
         await user_msg.delete()
         if user_msg.content.lower() == "stop":

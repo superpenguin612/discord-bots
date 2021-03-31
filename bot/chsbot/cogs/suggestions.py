@@ -174,7 +174,7 @@ class Suggestions(commands.Cog, name='suggestions', description='A group of comm
 
     @commands.group()
     @commands.cooldown(1, 900, type=commands.BucketType.user)
-    async def suggest(self, ctx):
+    async def suggest_legacy(self, ctx):
         """Suggest something for the server. 
         Suggestions will go into #suggestions.
         The bot will prompt for the reason for the suggestion, then any notes.
@@ -183,22 +183,22 @@ class Suggestions(commands.Cog, name='suggestions', description='A group of comm
         if ctx.invoked_subcommand is None:
             embed = tools.create_embed(ctx, 'Suggestion', desc=f'Please specify a category for your suggestion.\nThe available categories are `server`, `bot`, `movie`, and `rule`.\nThe command\'s usage is `{ctx.prefix}suggest <category> <suggestion>`')
             await ctx.send(embed=embed)
-            self.suggest.reset_cooldown(ctx)
+            ctx.command.reset_cooldown(ctx)
 
-    @suggest.command(name='server')
-    async def _server(self, ctx, *, suggestion):
+    @suggest_legacy.command(name='server')
+    async def suggest_server_legacy(self, ctx, *, suggestion):
         await self.create_suggestion(ctx, suggestion, 'Server Suggestion', color=discord.Color.gold())
 
-    @suggest.command(name='movie')
-    async def _movie(self, ctx, *, suggestion):
+    @suggest_legacy.command(name='movie')
+    async def suggest_movie_legacy(self, ctx, *, suggestion):
         await self.create_suggestion(ctx, suggestion, 'Movie Suggestion', color=discord.Color.green(), downvote=False)
 
-    @suggest.command(name='bot')
-    async def _bot(self, ctx, *, suggestion):
+    @suggest_legacy.command(name='bot')
+    async def suggest_bot_legacy(self, ctx, *, suggestion):
         await self.create_suggestion(ctx, suggestion, 'Bot Suggestion', color=discord.Color.purple())
 
-    @suggest.command(name='rule')
-    async def _rule(self, ctx, *, suggestion):
+    @suggest_legacy.command(name='rule')
+    async def suggest_rule_legacy(self, ctx, *, suggestion):
         await self.create_suggestion(ctx, suggestion, 'Rule Suggestion', color=discord.Color.blue())
 
     async def create_suggestion(self, ctx, suggestion, title, color, downvote=True):

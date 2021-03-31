@@ -215,10 +215,11 @@ class Search(commands.Cog, name='search'):
     # --------------------------------------------
     
     @commands.group(
+        name='pic',
         aliases = ['picture']
     )
     @commands.cooldown(1, 10, type=commands.BucketType.user)
-    async def pic(self, ctx):
+    async def pic_legacy(self, ctx):
         """Search Bing for a picture. It should be noted that this command only returns the help command for the command group. 
         You must use one of the subcommands (`top`, `random`, or `num`) to specify the search type. 
         See the help text for the subcommands for more information.
@@ -238,8 +239,8 @@ class Search(commands.Cog, name='search'):
         if ctx.invoked_subcommand is None:
             await ctx.send_help(ctx.command)
     
-    @pic.command(name='top')
-    async def pic_top(self, ctx, *, arg):
+    @pic_legacy.command(name='top')
+    async def pic_top_legacy(self, ctx, *, arg):
         """Search Bing for a picture and show the top result.
         **Usage**
         `_prefix_pic top <search_term>`
@@ -270,8 +271,8 @@ class Search(commands.Cog, name='search'):
                     embed.set_image(url=url)
                 await ctx.send(embed=embed)
     
-    @pic.command(name='num')
-    async def pic_num(self, ctx, num: int, *, arg: str):
+    @pic_legacy.command(name='num')
+    async def pic_num_legacy(self, ctx, num: int, *, arg: str):
         """Search Bing for a picture and return the result at a certain rank.
         **Usage**
         `_prefix_pic num <number> <search_term>`
@@ -304,8 +305,8 @@ class Search(commands.Cog, name='search'):
                     embed.set_image(url=url)
                 await ctx.send(embed=embed)
     
-    @pic.command(name='random')
-    async def pic_rand(self, ctx, *, arg):
+    @pic_legacy.command(name='random')
+    async def pic_rand_legacy(self, ctx, *, arg):
         """Search Bing for a picture and return the result at a random rank.
         **Usage**
         `_prefix_pic random <search_term>`
@@ -357,8 +358,8 @@ class Search(commands.Cog, name='search'):
                 food_items.append(main_caf)
             return food_items
 
-    @commands.group()
-    async def mealviewer(self, ctx):
+    @commands.group(name='mealviewer')
+    async def mealviewer_legacy(self, ctx):
         if ctx.invoked_subcommand is None:
             async with aiohttp.ClientSession() as session:
                 dotenv.load_dotenv()
@@ -377,8 +378,8 @@ class Search(commands.Cog, name='search'):
                     embed.add_field(name='Protein', value=food_item['nutritionals'][5]['value'])
                     await ctx.send(embed=embed)
 
-    @mealviewer.command(name='list')
-    async def mealviewer_list(self, ctx):
+    @mealviewer_legacy.command(name='list')
+    async def mealviewer_list_legacy(self, ctx):
         food_items = await self.get_mv_list()
         embed = tools.create_embed(ctx, 'MealViewer Items')
         embed.add_field(name='Freshmen Center', value='\n'.join([x['item_Name'] for x in food_items[0]]))
@@ -386,8 +387,8 @@ class Search(commands.Cog, name='search'):
         embed.add_field(name='Main Cafeteria', value='\n'.join([x['item_Name'] for x in food_items[2]]))
         await ctx.send(embed=embed)
     
-    @mealviewer.command(name='item')
-    async def mealviewer_item(self, ctx, cafeteria:int, item_number:int):
+    @mealviewer_legacy.command(name='item')
+    async def mealviewer_item_legacy(self, ctx, cafeteria:int, item_number:int):
         food_items = await self.get_mv_list()
         food_item = food_items[cafeteria][item_number]
         embed = tools.create_embed(ctx, 'MealViewer Item')

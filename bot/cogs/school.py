@@ -155,8 +155,8 @@ class School(commands.Cog):
     # LEGACY COMMANDS
     # --------------------------------------------
 
-    @commands.command()
-    async def schoolday(self, ctx):
+    @commands.command(name='schoolday')
+    async def schoolday_legacy(self, ctx):
         """Tells you information about today (Blue/Gold, In Person/Virtual, Late Start, weekends, breaks, etc.).
         The `all` argument is optional, and it will display information for both cohorts.
         """
@@ -167,8 +167,8 @@ class School(commands.Cog):
         embed.add_field(name='Greyhound', value=school_days[1])
         await ctx.send(embed=embed)
 
-    @commands.command()
-    async def schoolweek(self, ctx):
+    @commands.command(name='schoolweek')
+    async def schoolweek_legacy(self, ctx):
         """Tells you information about the next seven days.
         The `all` argument is optional, and it will display information for both cohorts.
         """
@@ -184,8 +184,8 @@ class School(commands.Cog):
         embed.add_field(name='Greyhound Cohort', value='\n'.join(school_weeks[1]))
         await ctx.send(embed=embed)
         
-    @commands.command()
-    async def schooldate(self, ctx, date):
+    @commands.command(name='schooldate')
+    async def schooldate_legacy(self, ctx, date):
         """Tells you information about a specified date.
         The `date` argument is required, and must be in the form `mm/dd/yyyy`.
         The `all` argument is optional, and it will display information for both cohorts.
