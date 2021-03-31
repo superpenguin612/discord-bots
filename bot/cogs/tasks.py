@@ -55,8 +55,7 @@ class Tasks(commands.Cog, name='tasks'):
 
     @tasks.loop(seconds=1.0)
     async def daily_report(self):
-        print(datetime.now().strftime("%H:%M:%S"))
-        if datetime.now().strftime("%H:%M:%S") == "11:00:00":
+        if datetime.utcnow().strftime("%H:%M:%S") == "11:00:00":
             guild = self.bot.get_guild(809169133086048257)
             channel = guild.get_channel(819546169985597440)
             role = guild.get_role(821386697727410238)
