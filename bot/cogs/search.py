@@ -7,7 +7,6 @@ import dotenv
 import json
 import aiohttp
 import random
-import xmltodict
 import datetime
 
 class Search(commands.Cog, name='search'):

@@ -6,4 +6,4 @@ flask
 gunicorn
 python-dotenv
 asyncpg
-xmltodict
+sympy
