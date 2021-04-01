@@ -61,8 +61,7 @@ class Tasks(commands.Cog, name='tasks'):
             role = guild.get_role(821386697727410238)
 
             embed = await self.create_daily_report(guild)
-            # msg = await channel.send(content=role.mention, embed=embed)
-            msg = await channel.send(embed=embed)
+            msg = await channel.send(content=role.mention, embed=embed)
             await msg.publish()
 
     @tasks.loop(seconds=1.0)
