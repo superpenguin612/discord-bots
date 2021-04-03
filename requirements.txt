@@ -7,3 +7,5 @@ gunicorn
 python-dotenv
 asyncpg
 sympy
+numpy
+matplotlib

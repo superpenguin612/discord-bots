@@ -4,47 +4,56 @@ from discord_slash import SlashCommand
 import os
 import dotenv
 import asyncpg
-
-from bot.cogs.events import Events
-from bot.cogs.school import School
-from bot.cogs.fun import Fun
-from bot.cogs.info import Info
-from bot.cogs.search import Search
 from bot.cogs.help import HelpCommand
-from bot.cogs.reaction_roles import ReactionRoles
-from bot.cogs.embeds import Embeds
-from bot.cogs.moderation import Moderation
-from bot.cogs.settings import Settings
-from bot.cogs.games import Games
-from bot.chsbot.cogs.suggestions import Suggestions
-from bot.chsbot.cogs.profanity import Profanity
+from bot.cogs.events import Events
+import aiohttp, json
 
-# https://discord.com/api/oauth2/authorize?client_id=796805491186597968&permissions=2147483639&scope=bot
+# https://discord.com/api/oauth2/authorize?client_id=802211256383438861&permissions=4294967295&scope=bot%20applications.commands
 
-@commands.command()
+EXTENSIONS = [
+    'bot.cogs.events',
+    'bot.cogs.school',
+    'bot.cogs.fun',
+    'bot.cogs.info',
+    'bot.cogs.search',
+    'bot.cogs.reaction_roles',
+    'bot.cogs.moderation',
+    'bot.cogs.settings',
+    'bot.cogs.games',
+    'bot.cogs.tasks',
+    'bot.cogs.starboard',
+    'bot.cogs.logging',
+    'bot.cogs.embeds',
+    # 'bot.cogs.owner',
+    'bot.cogs.music1',
+    # 'bot.cogs.math',
+    'bot.chsbot.cogs.suggestions',
+    'bot.chsbot.cogs.profanity',
+]
+
+bot = commands.Bot(command_prefix='c?', intents=discord.Intents.all(), max_messages=10000, allowed_mentions=discord.AllowedMentions(everyone=False))
+slash = SlashCommand(bot, sync_commands=True)
+bot.description = f'Welcome to CHS Bot! Visit `{bot.command_prefix}help` for a list of commands and how to use them. Visit `{bot.command_prefix}about` to see more information about the bot.'
+bot.help_command = HelpCommand()
+bot.owner_id = 688530998920871969
+dotenv.load_dotenv()
+bot.AZURE_KEY = os.environ['AZURE_KEY']
+
+@bot.command()
 @commands.has_permissions(administrator=True)
-async def runpayload(ctx):
-    pass
+async def run_payload(ctx):
+    guild = bot.get_guild(809169133086048257)
+    channel = guild.get_channel(818883380422508554)
+    desc = '''React with :red_circle: to get the <@&819914381290766336> role.
+React with :green_circle: to get the <@&819914510830927942> role.
+React with :blue_circle: to get the <@&819914637108969503> role.
+'''
+    embed = discord.Embed(title='Color Roles', description=desc)
+    await channel.send(embed=embed)
 
 def start():
-    bot = commands.Bot(command_prefix='cc?', intents=discord.Intents.all(), help_command=None)
-    slash = SlashCommand(bot, sync_commands=True)
-    bot.description = f'Welcome to CHS Bot Beta! This is the bleeding edge of CHS Bot, so you can test features as they come out! Visit `{bot.command_prefix}help` for a list of commands and how to use them. Visit `{bot.command_prefix}about` to see more information about the bot.'
-    bot.add_cog(Events(bot))
-    bot.add_cog(Suggestions(bot))
-    bot.add_cog(School(bot))
-    bot.add_cog(Fun(bot))
-    bot.add_cog(Info(bot))
-    bot.add_cog(Games(bot))
-    bot.add_cog(Profanity(bot))
-    bot.add_cog(Search(bot))
-    bot.add_cog(ReactionRoles(bot))
-    bot.add_cog(Embeds(bot))
-    bot.add_cog(Moderation(bot))
-    bot.add_cog(Settings(bot))
-    bot.add_command(runpayload)
-    dotenv.load_dotenv()
-    bot.AZURE_KEY = os.environ['AZURE_KEY']
+    for extension in EXTENSIONS:
+        bot.load_extension(extension)
     bot.run(os.environ['BETA_TOKEN']) # bot token
 
 if __name__ == "__main__":

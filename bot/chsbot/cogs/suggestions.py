@@ -172,7 +172,7 @@ class Suggestions(commands.Cog, name='suggestions', description='A group of comm
     # LEGACY COMMANDS
     # --------------------------------------------
 
-    @commands.group()
+    @commands.group(name='suggest')
     @commands.cooldown(1, 900, type=commands.BucketType.user)
     async def suggest_legacy(self, ctx):
         """Suggest something for the server. 

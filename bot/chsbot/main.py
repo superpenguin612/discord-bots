@@ -23,6 +23,10 @@ EXTENSIONS = [
     'bot.cogs.tasks',
     'bot.cogs.starboard',
     'bot.cogs.logging',
+    'bot.cogs.embeds',
+    # 'bot.cogs.owner',
+    # 'bot.cogs.music1',
+    'bot.cogs.math',
     'bot.chsbot.cogs.suggestions',
     'bot.chsbot.cogs.profanity',
 ]
@@ -31,9 +35,15 @@ bot = commands.Bot(command_prefix='c?', intents=discord.Intents.all(), max_messa
 slash = SlashCommand(bot, sync_commands=True)
 bot.description = f'Welcome to CHS Bot! Visit `{bot.command_prefix}help` for a list of commands and how to use them. Visit `{bot.command_prefix}about` to see more information about the bot.'
 bot.help_command = HelpCommand()
+bot.owner_id = 688530998920871969
 dotenv.load_dotenv()
 bot.AZURE_KEY = os.environ['AZURE_KEY']
- 
+
+@bot.command()
+@commands.has_permissions(administrator=True)
+async def run_payload(ctx):
+    pass
+
 def start():
     for extension in EXTENSIONS:
         bot.load_extension(extension)
