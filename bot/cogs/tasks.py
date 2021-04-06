@@ -12,7 +12,7 @@ class Tasks(commands.Cog, name='tasks'):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         
-        self.daily_report.start()
+        # self.daily_report.start()
         self.timed_unmute.start()
 
     async def create_daily_report(self, guild):
