@@ -321,7 +321,9 @@ class ReactionRoles(commands.Cog, name="reaction_roles"):
         message = channel.get_partial_message(int(message_id))
         await message.add_reaction(emoji)
 
-        embed = tools.create_embed(ctx, "Reaction Role", "Reaction role has been added successfully!")
+        embed = tools.create_embed(
+            ctx, "Reaction Role", "Reaction role has been added successfully!"
+        )
         embed.add_field(name="Reaction Role ID", value=record["id"])
         embed.add_field(name="Channel ID", value=channel_id)
         embed.add_field(name="Message ID", value=message_id)
