@@ -9,6 +9,8 @@ import json
 from datetime import datetime
 
 class Starboard(commands.Cog, name='starboard'):
+    STAR_THRESHOLD = 3
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -33,7 +35,7 @@ class Starboard(commands.Cog, name='starboard'):
         return await self.bot.db.fetch('DELETE FROM starboard WHERE id=$1', str(id))
 
     async def add_message_to_starboard(self, message, payload):
-        star_number = 1
+        star_number = self.STAR_THRESHOLD
     
         embed = discord.Embed(title=f'{star_number} ⭐️', description=message.content, color=discord.Color.gold())
         if message.attachments:
@@ -84,7 +86,7 @@ class Starboard(commands.Cog, name='starboard'):
                 channel = guild.get_channel(payload.channel_id)
                 message = await channel.fetch_message(payload.message_id)
                 for reaction in message.reactions:
-                    if reaction.emoji == '⭐' and reaction.count >= 1:
+                    if reaction.emoji == '⭐' and reaction.count >= self.STAR_THRESHOLD:
                         await self.add_message_to_starboard(message, payload)
 
     @commands.Cog.listener()
