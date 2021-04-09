@@ -12,7 +12,7 @@ from datetime import datetime
 class Starboard(commands.Cog, name="starboard"):
     STAR_THRESHOLD = 3
 
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     async def get_all_records(self):

@@ -12,7 +12,7 @@ class Suggestions(
     name="suggestions",
     description="A group of commands related to suggesting improvements for a server.",
 ):
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     @cog_ext.cog_subcommand(
@@ -48,8 +48,13 @@ class Suggestions(
         ],
     )
     async def suggest_server(
-        self, ctx, suggestion, reason=None, notes=None, image_url=None
-    ):
+        self,
+        ctx: SlashContext,
+        suggestion: str,
+        reason: str = None,
+        notes: str = None,
+        image_url: str = None,
+    ) -> None:
         await self.create_suggestion_slash(
             ctx,
             suggestion,
@@ -93,8 +98,13 @@ class Suggestions(
         ],
     )
     async def suggest_movie(
-        self, ctx, suggestion, reason=None, notes=None, image_url=None
-    ):
+        self,
+        ctx: SlashContext,
+        suggestion: str,
+        reason: str = None,
+        notes: str = None,
+        image_url: str = None,
+    ) -> None:
         await self.create_suggestion_slash(
             ctx,
             suggestion,
@@ -138,8 +148,13 @@ class Suggestions(
         ],
     )
     async def suggest_bot(
-        self, ctx, suggestion, reason=None, notes=None, image_url=None
-    ):
+        self,
+        ctx: SlashContext,
+        suggestion: str,
+        reason: str = None,
+        notes: str = None,
+        image_url: str = None,
+    ) -> None:
         await self.create_suggestion_slash(
             ctx,
             suggestion,
@@ -183,8 +198,13 @@ class Suggestions(
         ],
     )
     async def suggest_rule(
-        self, ctx, suggestion, reason=None, notes=None, image_url=None
-    ):
+        self,
+        ctx: SlashContext,
+        suggestion: str,
+        reason: str = None,
+        notes: str = None,
+        image_url: str = None,
+    ) -> None:
         await self.create_suggestion_slash(
             ctx,
             suggestion,
@@ -196,8 +216,16 @@ class Suggestions(
         )
 
     async def create_suggestion_slash(
-        self, ctx, suggestion, reason, notes, image_url, title, color, downvote=True
-    ):
+        self,
+        ctx: SlashContext,
+        suggestion: str,
+        reason: str,
+        notes: str,
+        image_url: str,
+        title: str,
+        color: discord.Colour,
+        downvote: bool = True,
+    ) -> None:
         suggestions_channel = self.bot.get_channel(818901195023843368)
         embed = tools.create_embed(
             ctx, title, desc=suggestion, footer_enabled=False, color=color
@@ -227,7 +255,7 @@ class Suggestions(
 
     @commands.group(name="suggest")
     @commands.cooldown(1, 900, type=commands.BucketType.user)
-    async def suggest_legacy(self, ctx):
+    async def suggest_legacy(self, ctx: commands.Context) -> None:
         """Suggest something for the server.
         Suggestions will go into #suggestions.
         The bot will prompt for the reason for the suggestion, then any notes.
@@ -243,13 +271,17 @@ class Suggestions(
             ctx.command.reset_cooldown(ctx)
 
     @suggest_legacy.command(name="server")
-    async def suggest_server_legacy(self, ctx, *, suggestion):
+    async def suggest_server_legacy(
+        self, ctx: commands.Context, *, suggestion: str
+    ) -> None:
         await self.create_suggestion(
             ctx, suggestion, "Server Suggestion", color=discord.Color.gold()
         )
 
     @suggest_legacy.command(name="movie")
-    async def suggest_movie_legacy(self, ctx, *, suggestion):
+    async def suggest_movie_legacy(
+        self, ctx: commands.Context, *, suggestion: str
+    ) -> None:
         await self.create_suggestion(
             ctx,
             suggestion,
@@ -259,18 +291,29 @@ class Suggestions(
         )
 
     @suggest_legacy.command(name="bot")
-    async def suggest_bot_legacy(self, ctx, *, suggestion):
+    async def suggest_bot_legacy(
+        self, ctx: commands.Context, *, suggestion: str
+    ) -> None:
         await self.create_suggestion(
             ctx, suggestion, "Bot Suggestion", color=discord.Color.purple()
         )
 
     @suggest_legacy.command(name="rule")
-    async def suggest_rule_legacy(self, ctx, *, suggestion):
+    async def suggest_rule_legacy(
+        self, ctx: commands.Context, *, suggestion: str
+    ) -> None:
         await self.create_suggestion(
             ctx, suggestion, "Rule Suggestion", color=discord.Color.blue()
         )
 
-    async def create_suggestion(self, ctx, suggestion, title, color, downvote=True):
+    async def create_suggestion(
+        self,
+        ctx: commands.Context,
+        suggestion: str,
+        title: str,
+        color: discord.Color,
+        downvote: bool = True,
+    ) -> None:
         def check(msg):
             return msg.author == ctx.author and msg.channel == ctx.channel
 
@@ -356,5 +399,5 @@ class Suggestions(
     #     await ctx.send(embed=embed)
 
 
-def setup(bot):
+def setup(bot: commands.Bot):
     bot.add_cog(Suggestions(bot))
