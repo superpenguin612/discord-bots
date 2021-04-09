@@ -38,7 +38,7 @@ EXTENSIONS = [
 ]
 
 bot = commands.Bot(
-    command_prefix="c?",
+    command_prefix="$",
     intents=discord.Intents.all(),
     max_messages=10000,
     allowed_mentions=discord.AllowedMentions(everyone=False),

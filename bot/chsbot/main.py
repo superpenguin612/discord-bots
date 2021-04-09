@@ -7,10 +7,6 @@ import asyncpg
 from bot.cogs.help import HelpCommand
 from bot.cogs.events import Events
 import aiohttp, json
-import logging
-
-logging.basicConfig(level=logging.INFO)
-
 
 # ----------------
 # All perms
