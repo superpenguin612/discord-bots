@@ -15,7 +15,9 @@ def create_embed(
 ) -> discord.Embed:
     if not color:
         color = discord.Embed.Empty
-    embed = discord.Embed(title=title, description=desc, url=url, color=color)
+    embed = discord.Embed(title=title, description=desc, color=color)
+    if url:
+        embed.url = url
     embed.set_author(name=ctx.author, icon_url=ctx.author.avatar_url)
     if footer_enabled:
         if ctx.channel.type is not discord.ChannelType.private:
