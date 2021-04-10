@@ -49,7 +49,7 @@ bot = commands.Bot(
     allowed_mentions=discord.AllowedMentions(everyone=False),
 )
 slash = SlashCommand(bot, sync_commands=True)
-bot.description = f"Welcome to CHS Bot! Visit `{bot.command_prefix}help` for a list of commands and how to use them. Visit `{bot.command_prefix}about` to see more information about the bot."
+bot.description = f"Welcome to CHS Bot Beta! Visit `{bot.command_prefix}help` for a list of commands and how to use them. Visit `{bot.command_prefix}about` to see more information about the bot."
 bot.help_command = HelpCommand()
 bot.owner_id = 688530998920871969
 dotenv.load_dotenv()
@@ -72,7 +72,7 @@ React with :blue_circle: to get the <@&819914637108969503> role.
 def start():
     for extension in EXTENSIONS:
         bot.load_extension(extension)
-    bot.run(os.environ["BETA_TOKEN"])  # bot token
+    bot.run(os.environ["CHSBOT_BETA_TOKEN"])  # bot token
 
 
 if __name__ == "__main__":

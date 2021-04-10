@@ -38,7 +38,7 @@ EXTENSIONS = [
 ]
 
 bot = commands.Bot(
-    command_prefix="c?",
+    command_prefix="$",
     intents=discord.Intents.all(),
     max_messages=10000,
     allowed_mentions=discord.AllowedMentions(everyone=False),
@@ -53,7 +53,7 @@ bot.AZURE_KEY = os.environ["AZURE_KEY"]
 def start():
     for extension in EXTENSIONS:
         bot.load_extension(extension)
-    bot.run(os.environ["TOKEN"])  # bot token
+    bot.run(os.environ["DAVIDHACKERMAN_TOKEN"])  # bot token
 
 
 if __name__ == "__main__":
