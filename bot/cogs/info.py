@@ -59,6 +59,75 @@ class Info(commands.Cog):
         )
         await ctx.send(embed=embed)
 
+    @cog_ext.cog_subcommand(
+        base="server",
+        base_desc="Get information related to the server.",
+        name="info",
+        description="Get server info.",
+    )
+    async def server_info(self, ctx: SlashContext) -> None:
+        embed = tools.create_embed(ctx, "Server Info")
+        embed.add_field(name="Name", value=ctx.guild.name, inline=False)
+        embed.add_field(name="Owner", value=ctx.guild.owner)
+        embed.add_field(name="Channels", value=len(ctx.guild.channels))
+        embed.add_field(name="Roles", value=len(ctx.guild.roles))
+        embed.add_field(name="Members", value=ctx.guild.member_count)
+        embed.add_field(name="ID", value=ctx.guild.id)
+        embed.set_thumbnail(url=str(ctx.guild.icon_url))
+        await ctx.send(embed=embed)
+
+    @cog_ext.cog_subcommand(
+        base="server",
+        base_desc="Get information related to the server.",
+        name="roles",
+        description="Get server roles.",
+    )
+    async def server_roles(self, ctx: SlashContext) -> None:
+        embed = tools.create_embed(
+            ctx,
+            "Server Roles",
+            "\n".join(
+                reversed([role.mention for role in ctx.guild.roles])
+            ),  # [::1] reverses roles
+        )
+        await ctx.send(embed=embed)
+
+    @cog_ext.cog_subcommand(
+        base="server",
+        base_desc="Get information related to the server.",
+        name="channels",
+        description="Get server channels.",
+    )
+    async def server_channels(self, ctx: SlashContext) -> None:
+        embed = tools.create_embed(
+            ctx,
+            "Server Channels",
+        )
+        embed.add_field(
+            name="Categories",
+            value=len([category for category in ctx.guild.categories]),
+        )
+        embed.add_field(
+            name="Text Channels",
+            value=len([channel for channel in ctx.guild.text_channels])
+            if ctx.guild.text_channels
+            else None,
+        )
+        embed.add_field(
+            name="Voice Channels",
+            value=len([channel for channel in ctx.guild.voice_channels])
+            if ctx.guild.voice_channels
+            else None,
+        )
+        embed.add_field(
+            name="Stage Channels",
+            value=len([channel for channel in ctx.guild.stage_channels])
+            if ctx.guild.stage_channels
+            else None,
+        )
+
+        await ctx.send(embed=embed)
+
     # --------------------------------------------
     # LEGACY COMMANDS
     # --------------------------------------------
