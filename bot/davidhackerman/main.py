@@ -53,7 +53,7 @@ bot.AZURE_KEY = os.environ["AZURE_KEY"]
 def start():
     for extension in EXTENSIONS:
         bot.load_extension(extension)
-    bot.run(os.environ["TOKEN"])  # bot token
+    bot.run(os.environ["DAVIDHACKERMAN_TOKEN"])  # bot token
 
 
 if __name__ == "__main__":
