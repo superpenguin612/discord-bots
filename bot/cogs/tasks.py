@@ -13,7 +13,7 @@ class Tasks(commands.Cog, name="tasks"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-        # self.daily_report.start()
+        self.daily_report.start()
         self.timed_unmute.start()
 
     async def create_daily_report(self, guild):
@@ -83,16 +83,16 @@ class Tasks(commands.Cog, name="tasks"):
         embed = await self.create_daily_report(ctx.guild)
         await ctx.send(embed=embed)
 
-    # @tasks.loop(seconds=1.0)
-    # async def daily_report(self):
-    #     if datetime.utcnow().strftime("%H:%M:%S") == "11:00:00":
-    #         guild = self.bot.get_guild(809169133086048257)
-    #         channel = guild.get_channel(819546169985597440)
-    #         role = guild.get_role(821386697727410238)
+    @tasks.loop(seconds=1.0)
+    async def daily_report(self):
+        if datetime.utcnow().strftime("%H:%M:%S") == "11:00:00":
+            guild = self.bot.get_guild(809169133086048257)
+            channel = guild.get_channel(819546169985597440)
+            role = guild.get_role(821386697727410238)
 
-    #         embed = await self.create_daily_report(guild)
-    #         msg = await channel.send(content=role.mention, embed=embed)
-    #         await msg.publish()
+            embed = await self.create_daily_report(guild)
+            msg = await channel.send(content=role.mention, embed=embed)
+            await msg.publish()
 
     @tasks.loop(seconds=1.0)
     async def timed_unmute(self):
@@ -112,14 +112,13 @@ class Tasks(commands.Cog, name="tasks"):
                         "UPDATE moderations SET active=FALSE WHERE id=$1", record["id"]
                     )
 
-                    moderation = self.bot.get_cog("moderation")
                     await self.bot.db.execute(
                         "INSERT INTO moderations (server_id, type, user_id, moderator_id, reason, duration) VALUES ($1, $2, $3, $4);",
                         record["server_id"],
                         "unmute",
                         record["user_id"],
                         str(self.bot.user.id),
-                        "Auto unmute by CHS Bot.",
+                        "Automatic unmute by the bot.",
                     )
 
     @timed_unmute.before_loop
