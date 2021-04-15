@@ -75,7 +75,7 @@ class Tasks(commands.Cog, name="tasks"):
                 [
                     ["blue", "gold", "orange"] in day.lower()
                     for day in self.SCHOOL_INFO_DICT["days"]["carmel"][
-                        datetime.now().strftime("%m/%d/%Y") + timedelta(days=day)
+                        (datetime.now() + timedelta(days=day)).strftime("%m/%d/%Y")
                     ]
                 ]
             ):
