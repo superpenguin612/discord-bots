@@ -64,7 +64,9 @@ class Tasks(commands.Cog, name="tasks"):
         embed.add_field(
             name="Main Cafeteria Lunch Menu", value=lunch_menu_val_3, inline=False
         )
-        number_of_days = (datetime.strptime("05/26/2021", "%m/%d/%Y") - datetime.now()).days
+        number_of_days = (
+            datetime.strptime("05/26/2021", "%m/%d/%Y") - datetime.now()
+        ).days
         embed.add_field(name="Total Days Until The End of School", value=number_of_days)
         number_of_school_days = 0
         for day in range(number_of_days):
