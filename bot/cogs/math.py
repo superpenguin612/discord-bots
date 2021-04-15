@@ -57,7 +57,7 @@ class Math(commands.Cog, name="math"):
                 ctx, "Could not compile LaTeX. Check your code and try again."
             )
             await ctx.send(embed=embed)
-            raise e
+            return
         embed = tools.create_embed(ctx, "LaTeX")
         file = discord.File("texout.png", filename="texout.png")
         embed.set_image(url="attachment://texout.png")
