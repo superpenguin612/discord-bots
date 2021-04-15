@@ -16,7 +16,7 @@ class Tasks(commands.Cog, name="tasks"):
         self.daily_report.start()
         self.timed_unmute.start()
 
-    async def create_daily_report(self, guild):
+    async def create_daily_report(self, guild: discord.Guild) -> discord.Embed:
         with open("bot/helpers/school_info.json") as f:
             self.SCHOOL_INFO_DICT = json.load(f)
 
@@ -47,12 +47,6 @@ class Tasks(commands.Cog, name="tasks"):
                 for index, val in enumerate(food_items[0])
             ]
         )
-        lunch_menu_val_2 = "\n".join(
-            [
-                f'`{index}` - {val["item_Name"]}'
-                for index, val in enumerate(food_items[1])
-            ]
-        )
         lunch_menu_val_3 = (
             "\n".join(
                 [
@@ -63,13 +57,29 @@ class Tasks(commands.Cog, name="tasks"):
             + "\n\n(To view more details, run `/mealviewer item <cafeteria> <item_id>`. The item ID is the number that appears to the right of the food item.)"
         )
         embed.add_field(
-            name="Freshmen Center Lunch Menu", value=lunch_menu_val_1, inline=False
-        )
-        embed.add_field(
-            name="Greyhound Station Lunch Menu", value=lunch_menu_val_2, inline=False
+            name="Freshmen Center/Greyhound Station Lunch Menu",
+            value=lunch_menu_val_1,
+            inline=False,
         )
         embed.add_field(
             name="Main Cafeteria Lunch Menu", value=lunch_menu_val_3, inline=False
+        )
+        number_of_days = (date.strptime("05/26/2021", "%m/%d/%Y") - date.today()).days
+        embed.add_field(name="Total Days Until The End of School", value=number_of_days)
+        number_of_school_days = 0
+        for day in range(number_of_days):
+            datetime.now().strftime("%m/%d/%Y")
+            if any(
+                [
+                    ["blue", "gold", "orange"] in day.lower()
+                    for day in self.SCHOOL_INFO_DICT["days"]["carmel"][
+                        datetime.now().strftime("%m/%d/%Y") + timedelta(days=day)
+                    ]
+                ]
+            ):
+                number_of_school_days += 1
+        embed.add_field(
+            name="School Days Until the End of School", value=number_of_school_days
         )
         embed.set_footer(
             text="Note: This report is for informational purposes only. Although we will try to make sure this report is up to date, we cannot guarantee it."
@@ -78,8 +88,8 @@ class Tasks(commands.Cog, name="tasks"):
         return embed
 
     @commands.command()
-    @commands.has_permissions(administrator=True)
-    async def runpayload(self, ctx):
+    # @commands.has_permissions(administrator=True)
+    async def testdailyreport(self, ctx: commands.Context):
         embed = await self.create_daily_report(ctx.guild)
         await ctx.send(embed=embed)
 
@@ -126,5 +136,5 @@ class Tasks(commands.Cog, name="tasks"):
         await self.bot.wait_until_ready()
 
 
-def setup(bot):
+def setup(bot: commands.Bot):
     bot.add_cog(Tasks(bot))
