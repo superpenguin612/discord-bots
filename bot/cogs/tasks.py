@@ -71,14 +71,10 @@ class Tasks(commands.Cog, name="tasks"):
         number_of_school_days = 0
         for day in range(number_of_days):
             datetime.now().strftime("%m/%d/%Y")
-            if any(
-                [
-                    ["blue", "gold", "orange"] in day.lower()
-                    for day in self.SCHOOL_INFO_DICT["days"]["carmel"][
-                        (datetime.now() + timedelta(days=day)).strftime("%m/%d/%Y")
-                    ]
-                ]
-            ):
+            day = self.SCHOOL_INFO_DICT["days"]["carmel"][
+                (datetime.now() + timedelta(days=day)).strftime("%m/%d/%Y")
+            ]
+            if any(day_type in day for day_type in ["blue", "gold", "orange"]):
                 number_of_school_days += 1
         embed.add_field(
             name="School Days Until the End of School", value=number_of_school_days
