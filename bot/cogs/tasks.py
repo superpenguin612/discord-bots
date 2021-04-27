@@ -67,9 +67,7 @@ class Tasks(commands.Cog, name="tasks"):
         number_of_days = (
             datetime.strptime("05/27/2021", "%m/%d/%Y") - datetime.now()
         ).days + 1
-        embed.add_field(
-            name="Total Days Until The End of School", value=number_of_days
-        )
+        embed.add_field(name="Total Days Until The End of School", value=number_of_days)
         number_of_school_days = 0
         for day in range(number_of_days):
             day = self.SCHOOL_INFO_DICT["days"]["carmel"][
@@ -91,7 +89,8 @@ class Tasks(commands.Cog, name="tasks"):
             if "in person" in day.lower():
                 number_of_carmel_in_person_days += 1
         embed.add_field(
-            name="Carmel In Person Days Until The End of School", value=number_of_carmel_in_person_days, 
+            name="Carmel In Person Days Until The End of School",
+            value=number_of_carmel_in_person_days,
         )
 
         number_of_greyhound_in_person_days = 0
@@ -102,7 +101,8 @@ class Tasks(commands.Cog, name="tasks"):
             if "in person" in day.lower():
                 number_of_greyhound_in_person_days += 1
         embed.add_field(
-            name="Greyhound In Person Days Until The End of School", value=number_of_greyhound_in_person_days
+            name="Greyhound In Person Days Until The End of School",
+            value=number_of_greyhound_in_person_days,
         )
 
         embed.set_footer(
