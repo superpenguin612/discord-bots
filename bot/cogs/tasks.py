@@ -65,20 +65,46 @@ class Tasks(commands.Cog, name="tasks"):
             name="Main Cafeteria Lunch Menu", value=lunch_menu_val_3, inline=False
         )
         number_of_days = (
-            datetime.strptime("05/26/2021", "%m/%d/%Y") - datetime.now()
-        ).days
-        embed.add_field(name="Total Days Until The End of School", value=number_of_days)
+            datetime.strptime("05/27/2021", "%m/%d/%Y") - datetime.now()
+        ).days + 1
+        embed.add_field(
+            name="Total Days Until The End of School", value=number_of_days
+        )
         number_of_school_days = 0
         for day in range(number_of_days):
-            datetime.now().strftime("%m/%d/%Y")
             day = self.SCHOOL_INFO_DICT["days"]["carmel"][
                 (datetime.now() + timedelta(days=day)).strftime("%m/%d/%Y")
             ]
-            if any(day_type in day for day_type in ["blue", "gold", "orange"]):
+            if any(
+                [day_type in day.lower() for day_type in ["blue", "gold", "orange"]]
+            ):
                 number_of_school_days += 1
         embed.add_field(
-            name="School Days Until the End of School", value=number_of_school_days
+            name="School Days Until The End of School", value=number_of_school_days
         )
+
+        number_of_carmel_in_person_days = 0
+        for day in range(number_of_days):
+            day = self.SCHOOL_INFO_DICT["days"]["carmel"][
+                (datetime.now() + timedelta(days=day)).strftime("%m/%d/%Y")
+            ]
+            if "in person" in day.lower():
+                number_of_carmel_in_person_days += 1
+        embed.add_field(
+            name="Carmel In Person Days Until The End of School", value=number_of_carmel_in_person_days, 
+        )
+
+        number_of_greyhound_in_person_days = 0
+        for day in range(number_of_days):
+            day = self.SCHOOL_INFO_DICT["days"]["carmel"][
+                (datetime.now() + timedelta(days=day)).strftime("%m/%d/%Y")
+            ]
+            if "in person" in day.lower():
+                number_of_greyhound_in_person_days += 1
+        embed.add_field(
+            name="Greyhound In Person Days Until The End of School", value=number_of_greyhound_in_person_days
+        )
+
         embed.set_footer(
             text="Note: This report is for informational purposes only. Although we will try to make sure this report is up to date, we cannot guarantee it."
         )
