@@ -227,7 +227,7 @@ class Math(commands.Cog, name="math"):
         guild_ids=[809169133086048257, 801630163866746901],
     )
     async def graph(self, ctx: SlashContext, graph_type: str, equation: str):
-        await ctx.respond()
+        await ctx.defer()
         x, y, z = sympy.symbols("x y z")
         # equations = equation.split(', ')
         try:
