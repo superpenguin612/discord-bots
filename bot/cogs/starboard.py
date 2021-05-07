@@ -86,7 +86,7 @@ class Starboard(commands.Cog, name="starboard"):
 
         starboard_message = await channel.send(embed=embed)
 
-        starred_users = [payload.user_id]
+        starred_users = [str(payload.user_id)]
         await self.bot.db.execute(
             "INSERT INTO starboard (server_id, channel_id, message_id, star_number, starboard_message_id, starred_users, forced, locked, removed) "
             "VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);",
