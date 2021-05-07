@@ -104,7 +104,10 @@ class Starboard(commands.Cog, name="starboard"):
     async def add_star(self, payload, record):
         star_number = record["star_number"] + 1
         guild = self.bot.get_guild(int(record["server_id"]))
-        channel = guild.get_channel(818915325646340126)
+        if guild.id == 621878393465733120:
+            channel = guild.get_channel(840287267029123103)
+        else:
+            channel = guild.get_channel(818915325646340126)
         starboard_message = await channel.fetch_message(
             int(record["starboard_message_id"])
         )
@@ -124,7 +127,10 @@ class Starboard(commands.Cog, name="starboard"):
     async def remove_star(self, payload, record):
         star_number = record["star_number"] - 1
         guild = self.bot.get_guild(int(record["server_id"]))
-        channel = guild.get_channel(818915325646340126)
+        if guild.id == 621878393465733120:
+            channel = guild.get_channel(840287267029123103)
+        else:
+            channel = guild.get_channel(818915325646340126)
         starboard_message = await channel.fetch_message(
             int(record["starboard_message_id"])
         )
