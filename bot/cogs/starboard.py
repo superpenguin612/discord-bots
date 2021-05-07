@@ -79,16 +79,22 @@ class Starboard(commands.Cog, name="starboard"):
         embed.set_footer(
             text=f'Message ID: {message.id} | Date: {datetime.now().strftime("%m/%d/%Y")}'
         )
-        channel = message.guild.get_channel(818915325646340126)
+        if message.guild.id == 621878393465733120:
+            channel = message.guild.get_channel(840287267029123103)
+        else:
+            channel = message.guild.get_channel(818915325646340126)
+
         starboard_message = await channel.send(embed=embed)
 
         starred_users = [payload.user_id]
-        await self.add_record(
-            message.guild.id,
-            message.channel.id,
-            message.id,
+        await self.bot.db.execute(
+            "INSERT INTO starboard (server_id, channel_id, message_id, star_number, starboard_message_id, starred_users, forced, locked, removed) "
+            "VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);",
+            str(message.guild.id),
+            str(message.channel.id),
+            str(message.id),
             star_number,
-            starboard_message.id,
+            str(starboard_message.id),
             starred_users,
             False,
             False,
@@ -108,7 +114,12 @@ class Starboard(commands.Cog, name="starboard"):
         await starboard_message.edit(embed=embed)
         starred_users = record["starred_users"]
         starred_users.append(str(payload.user_id))
-        await self.update_record(payload.message_id, star_number, starred_users)
+        await self.bot.db.execute(
+            "UPDATE starboard SET star_number = $1, starred_users = $2 WHERE message_id=$3",
+            star_number,
+            starred_users,
+            str(payload.message_id),
+        )
 
     async def remove_star(self, payload, record):
         star_number = record["star_number"] - 1
@@ -198,5 +209,5 @@ class Starboard(commands.Cog, name="starboard"):
         pass
 
 
-def setup(bot):
+def setup(bot: commands.Bot):
     bot.add_cog(Starboard(bot))
