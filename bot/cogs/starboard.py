@@ -140,7 +140,12 @@ class Starboard(commands.Cog, name="starboard"):
         await starboard_message.edit(embed=embed)
         starred_users = record["starred_users"]
         starred_users.remove(str(payload.user_id))
-        await self.update_record(payload.message_id, star_number, starred_users)
+        await self.bot.db.execute(
+            "UPDATE starboard SET star_number = $1, starred_users = $2 WHERE message_id=$3",
+            star_number,
+            starred_users,
+            str(payload.message_id),
+        )
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
