@@ -10,12 +10,10 @@ class Bottling(commands.Cog):
 
     @commands.Cog.listener(name="on_message")
     async def on_message(self, message):
-        if message.author.id != 796805491186597968:
-            if random.randint(1, 300) == 1:
-                await message.add_reaction("🍾")
-                await message.channel.send(f"{message.author.mention} lol get bottled")
-                await self.bot.process_commands(message)
-
+        if random.randint(1, 300) == 1:
+            await message.add_reaction("🍾")
+            message = await message.channel.send(f"{message.author.mention} lol get bottled")
+            await self.bot.process_commands(message)
 
 def setup(bot):
     bot.add_cog(Bottling(bot))

