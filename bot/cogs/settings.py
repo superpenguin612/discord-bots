@@ -1,38 +1,26 @@
 import discord
 from discord.ext import commands
-from discord_slash.model import SlashCommandOptionType
 from bot.helpers import tools
 from discord_slash import cog_ext, SlashContext
 from discord_slash.utils.manage_commands import create_option, create_choice
 import json
-from enum import Enum
 
 
 class Settings(commands.Cog, name="settings"):
-    DEFAULT_SETTINGS = {
-        "moderation": {
-            "muted_role": None,
-            "public_logs_channel": None,
-            "mod_logs_channel": None,
-        },
-        "starboard": {
-            "channel": None,
-            "number_required": 3,
-            "reaction": "⭐",
-        },
-        "suggestions": {
-            "channel": None,
-            "up_emoji": "<:upvote:818940395320639488>",
-            "down_emoji": "<:downvote:818940394967924767>",
-        },
-    }
-
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot):
         self.bot = bot
+
+    async def get_all_records(self):
+        return await self.bot.db.fetch("SELECT * FROM settings;")
 
     async def get_record_by_server_id(self, server_id):
         return await self.bot.db.fetchrow(
             "SELECT * FROM settings WHERE server_id=$1;", str(server_id)
+        )
+
+    async def add_record(self, server_id, json):
+        return await self.bot.db.execute(
+            "INSERT INTO settings (server_id, json) VALUES $1, $2", server_id, json
         )
 
     async def edit_record(self, server_id, json):
@@ -41,20 +29,38 @@ class Settings(commands.Cog, name="settings"):
         )
 
     @commands.Cog.listener()
-    async def on_guild_join(self, guild: discord.Guild) -> None:
-        json_str = json.dumps(self.DEFAULT_SETTINGS)
-        await self.bot.db.execute(
-            "INSERT INTO settings (server_id, json) VALUES $1, $2", guild.id, json_str
-        )
+    async def on_guild_join(self, guild):
+        default_settings = {
+            "bot_messages": {
+                "channel": 809169133635108882,
+            },
+            "moderation": {
+                "muted_role": 809169133232717890,
+                "mod_role": 818866766695890947,
+            },
+            "starboard": {
+                "channel": 818915325646340126,
+                "number_required": 5,
+                "reaction": "⭐",
+            },
+            "daily_report": {"channel": 819546169985597440},
+            "suggestions": {
+                "channel": 818901195023843368,
+                "up_emoji": "<:upvote:818940395320639488>",
+                "down_emoji": "<:downvote:818940394967924767>",
+            },
+        }
+        json_str = json.dumps(default_settings)
+        print(json_str)
+        await self.add_record(guild.id, json_str)
 
     @cog_ext.cog_slash(
         name="listsettings",
         description="Get the settings for the server.",
     )
-    async def listsettings(self, ctx: SlashContext) -> None:
-        record = await self.bot.db.fetchrow(
-            "SELECT * FROM settings WHERE server_id=$1;", str(ctx.guild.id)
-        )
+    async def listsettings(self, ctx):
+        record = await self.get_record_by_server_id(ctx.guild.id)
+        print(record)
         server_settings = json.loads(record["json"])
         embed = tools.create_embed(ctx, "Bot Settings")
         embed.add_field(
@@ -74,114 +80,6 @@ class Settings(commands.Cog, name="settings"):
     @cog_ext.cog_subcommand(
         base="editsettings",
         base_desc="Edit the settings for the server.",
-        subcommand_group="moderation",
-        sub_group_desc="Edit moderation settings.",
-        name="publiclogschannel",
-        description="Edit the channel for public mod logs.",
-        options=[
-            create_option(
-                name="channel",
-                description="The new public logs channel.",
-                option_type=SlashCommandOptionType.CHANNEL,
-                required=True,
-            ),
-        ],
-    )
-    async def editsettings_moderation_publiclogschannel(
-        self, ctx: SlashContext, channel: discord.TextChannel
-    ) -> None:
-        if type(channel) == discord.TextChannel:
-            record = await self.bot.db.fetchrow(
-                "SELECT * FROM settings WHERE server_id=$1;", str(ctx.guild.id)
-            )
-            server_settings = json.loads(record["json"])
-            server_settings["moderation"]["public_logs_channel"] = channel.id
-            await self.edit_record(ctx.guild.id, json.dumps(server_settings))
-            embed = tools.create_embed(
-                ctx,
-                "Edit Settings",
-                desc="The starboard channel has been updated successfully.",
-            )
-            await ctx.send(embed=embed)
-        else:
-            embed = tools.create_error_embed(ctx, "The channel must be a text channel.")
-            await ctx.send(embed=embed)
-
-    @cog_ext.cog_subcommand(
-        base="editsettings",
-        base_desc="Edit the settings for the server.",
-        subcommand_group="moderation",
-        sub_group_desc="Edit moderation settings.",
-        name="modlogschannel",
-        description="Edit the starboard channel.",
-        options=[
-            create_option(
-                name="channel",
-                description="The new starboard channel.",
-                option_type=SlashCommandOptionType.CHANNEL,
-                required=True,
-            ),
-        ],
-    )
-    async def editsettings_starboard_modlogschannel(
-        self, ctx: SlashContext, channel: discord.TextChannel
-    ) -> None:
-        if type(channel) == discord.TextChannel:
-            record = await self.bot.db.fetchrow(
-                "SELECT * FROM settings WHERE server_id=$1;", str(ctx.guild.id)
-            )
-            server_settings = json.loads(record["json"])
-            server_settings["starboard"]["channel"] = channel.id
-            await self.edit_record(ctx.guild.id, json.dumps(server_settings))
-            embed = tools.create_embed(
-                ctx,
-                "Edit Settings",
-                desc="The starboard channel has been updated successfully.",
-            )
-            await ctx.send(embed=embed)
-        else:
-            embed = tools.create_error_embed(ctx, "The channel must be a text channel.")
-            await ctx.send(embed=embed)
-
-    @cog_ext.cog_subcommand(
-        base="editsettings",
-        base_desc="Edit the settings for the server.",
-        subcommand_group="moderation",
-        sub_group_desc="Edit moderation settings.",
-        name="mutedrole",
-        description="Edit the muted role.",
-        options=[
-            create_option(
-                name="channel",
-                description="The new starboard channel.",
-                option_type=SlashCommandOptionType.CHANNEL,
-                required=True,
-            ),
-        ],
-    )
-    async def editsettings_moderation_mutedrole(
-        self, ctx: SlashContext, channel: discord.TextChannel
-    ) -> None:
-        if type(channel) == discord.TextChannel:
-            record = await self.bot.db.fetchrow(
-                "SELECT * FROM settings WHERE server_id=$1;", str(ctx.guild.id)
-            )
-            server_settings = json.loads(record["json"])
-            server_settings["starboard"]["channel"] = channel.id
-            await self.edit_record(ctx.guild.id, json.dumps(server_settings))
-            embed = tools.create_embed(
-                ctx,
-                "Edit Settings",
-                desc="The starboard channel has been updated successfully.",
-            )
-            await ctx.send(embed=embed)
-        else:
-            embed = tools.create_error_embed(ctx, "The channel must be a text channel.")
-            await ctx.send(embed=embed)
-
-    @cog_ext.cog_subcommand(
-        base="editsettings",
-        base_desc="Edit the settings for the server.",
         subcommand_group="starboard",
         sub_group_desc="Edit the settings for the starboard.",
         name="channel",
@@ -190,18 +88,14 @@ class Settings(commands.Cog, name="settings"):
             create_option(
                 name="channel",
                 description="The new starboard channel.",
-                option_type=SlashCommandOptionType.CHANNEL,
+                option_type=7,
                 required=True,
             ),
         ],
     )
-    async def editsettings_starboard_channel(
-        self, ctx: SlashContext, channel: discord.TextChannel
-    ) -> None:
-        if type(channel) == discord.TextChannel:
-            record = await self.bot.db.fetchrow(
-                "SELECT * FROM settings WHERE server_id=$1;", str(ctx.guild.id)
-            )
+    async def editsettings_starboard_channel(self, ctx, channel):
+        if type(channel) == discord.channel.TextChannel:
+            record = await self.get_record_by_server_id(ctx.guild.id)
             server_settings = json.loads(record["json"])
             server_settings["starboard"]["channel"] = channel.id
             await self.edit_record(ctx.guild.id, json.dumps(server_settings))
@@ -226,17 +120,13 @@ class Settings(commands.Cog, name="settings"):
             create_option(
                 name="number",
                 description="The new number of stars required for the starboard.",
-                option_type=SlashCommandOptionType.STRING,
+                option_type=4,
                 required=True,
             ),
         ],
     )
-    async def editsettings_starboard_numberrequired(
-        self, ctx: SlashContext, number: int
-    ) -> None:
-        record = await self.bot.db.fetchrow(
-                "SELECT * FROM settings WHERE server_id=$1;", str(ctx.guild.id)
-            )
+    async def editsettings_starboard_numberrequired(self, ctx, number):
+        record = await self.get_record_by_server_id(ctx.guild.id)
         server_settings = json.loads(record["json"])
         server_settings["starboard"]["number_required"] = number
         await self.edit_record(ctx.guild.id, json.dumps(server_settings))
@@ -258,17 +148,13 @@ class Settings(commands.Cog, name="settings"):
             create_option(
                 name="emoji",
                 description="The new reaction to use for the starboard.",
-                option_type=SlashCommandOptionType.STRING,
+                option_type=3,
                 required=True,
             ),
         ],
     )
-    async def editsettings_starboard_reaction(
-        self, ctx: SlashContext, emoji: str
-    ) -> None:
-        record = await self.bot.db.fetchrow(
-                "SELECT * FROM settings WHERE server_id=$1;", str(ctx.guild.id)
-        )
+    async def editsettings_starboard_reaction(self, ctx, emoji):
+        record = await self.get_record_by_server_id(ctx.guild.id)
         server_settings = json.loads(record["json"])
         server_settings["starboard"]["reaction"] = emoji
         await self.edit_record(ctx.guild.id, json.dumps(server_settings))
@@ -278,6 +164,38 @@ class Settings(commands.Cog, name="settings"):
             desc="The reaction to use for the starboard has been updated successfully.",
         )
         await ctx.send(embed=embed)
+
+    @cog_ext.cog_subcommand(
+        base="editsettings",
+        base_desc="Edit the settings for the server.",
+        subcommand_group="dailyreport",
+        sub_group_desc="Edit the settings for the daily report.",
+        name="channel",
+        description="Edit the daily report channel.",
+        options=[
+            create_option(
+                name="channel",
+                description="The new daily report channel.",
+                option_type=7,
+                required=True,
+            ),
+        ],
+    )
+    async def editsettings_dailyreport_channel(self, ctx, channel):
+        if type(channel) == discord.channel.TextChannel:
+            record = await self.get_record_by_server_id(ctx.guild.id)
+            server_settings = json.loads(record["json"])
+            server_settings["starboard"]["channel"] = channel.id
+            await self.edit_record(ctx.guild.id, json.dumps(server_settings))
+            embed = tools.create_embed(
+                ctx,
+                "Edit Settings",
+                desc="The daily report channel has been updated successfully.",
+            )
+            await ctx.send(embed=embed)
+        else:
+            embed = tools.create_error_embed(ctx, "The channel must be a text channel.")
+            await ctx.send(embed=embed)
 
     @cog_ext.cog_subcommand(
         base="editsettings",
@@ -295,13 +213,9 @@ class Settings(commands.Cog, name="settings"):
             ),
         ],
     )
-    async def editsettings_suggestions_channel(
-        self, ctx: SlashContext, channel: discord.TextChannel
-    ):
+    async def editsettings_suggestions_channel(self, ctx, channel):
         if type(channel) == discord.channel.TextChannel:
-            record = await self.bot.db.fetchrow(
-                "SELECT * FROM settings WHERE server_id=$1;", str(ctx.guild.id)
-            )
+            record = await self.get_record_by_server_id(ctx.guild.id)
             server_settings = json.loads(record["json"])
             server_settings["suggestions"]["channel"] = channel.id
             await self.edit_record(ctx.guild.id, json.dumps(server_settings))
@@ -326,15 +240,13 @@ class Settings(commands.Cog, name="settings"):
             create_option(
                 name="emoji",
                 description="The new up emoji for suggestions.",
-                option_type=SlashCommandOptionType.STRING,
+                option_type=7,
                 required=True,
             ),
         ],
     )
-    async def editsettings_suggestions_upemoji(self, ctx: SlashContext, emoji: str):
-        record = await self.bot.db.fetchrow(
-            "SELECT * FROM settings WHERE server_id=$1;", str(ctx.guild.id)
-        )
+    async def editsettings_suggestions_upemoji(self, ctx, emoji):
+        record = await self.get_record_by_server_id(ctx.guild.id)
         server_settings = json.loads(record["json"])
         server_settings["starboard"]["up_emoji"] = emoji
         await self.edit_record(ctx.guild.id, json.dumps(server_settings))
@@ -356,15 +268,13 @@ class Settings(commands.Cog, name="settings"):
             create_option(
                 name="emoji",
                 description="The new down emoji for suggestions.",
-                option_type=SlashCommandOptionType.STRING,
+                option_type=7,
                 required=True,
             ),
         ],
     )
-    async def editsettings_suggestions_downemoji(self, ctx: SlashContext, emoji: str):
-        record = await self.bot.db.fetchrow(
-            "SELECT * FROM settings WHERE server_id=$1;", str(ctx.guild.id)
-        )
+    async def editsettings_suggestions_downemoji(self, ctx, emoji):
+        record = await self.get_record_by_server_id(ctx.guild.id)
         server_settings = json.loads(record["json"])
         server_settings["starboard"]["down_emoji"] = emoji
         await self.edit_record(ctx.guild.id, json.dumps(server_settings))
@@ -376,5 +286,5 @@ class Settings(commands.Cog, name="settings"):
         await ctx.send(embed=embed)
 
 
-def setup(bot: commands.Bot):
+def setup(bot):
     bot.add_cog(Settings(bot))

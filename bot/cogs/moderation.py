@@ -7,42 +7,11 @@ from discord_slash.model import SlashCommandOptionType
 import asyncpg
 import datetime
 import time
-import typing
 
 
 class Moderation(commands.Cog, name="moderation"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-
-    async def send_log(self, guild: discord.Guild, mod_record: asyncpg.Record) -> None:
-
-        """Sends a log to the moderation channel selected for the guild."""
-        channel = guild.get_channel(1234)  # fix for settings later
-        embed = discord.Embed()
-        embed.title = mod_record["type"].upper()
-        embed.set_footer(text=f"ID: {mod_record['id']}")
-        embed.add_field(name="Reason", value=mod_record["reason"])
-        embed.add_field(
-            name="Moderator", value=guild.get_member(mod_record["moderator_id"]).mention
-        )
-        if mod_record["type"] == "purge":
-            embed.add_field(
-                name="Channel", value=guild.get_channel(mod_record["channel"]).mention
-            )
-            embed.add_field(name="Count", value=mod_record["count"])
-        if mod_record["type"] == "mute":
-            embed.add_field(name="Duration", value=mod_record["duration"])
-            # TODO: change channel to channel_id in Postgres
-        colors = {
-            "purge": discord.Colour.dark_orange(),
-            "warn": discord.Colour.dark_blue(),
-            "mute": discord.Colour.dark_green(),
-            "unmute": discord.Colour.dark_red(),
-            "kick": discord.Colour.purple(),
-            "ban": discord.Colour.red(),
-            "unban": discord.Colour.green(),
-        }
-        embed.color = colors[mod_record["type"]]
 
     @cog_ext.cog_subcommand(
         base="purge",
@@ -78,10 +47,9 @@ class Moderation(commands.Cog, name="moderation"):
             ctx, "Message Purge (All)", f"{num} messages deleted."
         )
         embed.add_field(
-            name="Moderation ID", value=moderation_record["id"], inline=False
+            name="moderation ID", value=moderation_record["id"], inline=False
         )
         await ctx.send(embed=embed)
-        await self.send_log(ctx.guild, moderation_record)
 
     @cog_ext.cog_subcommand(
         base="purge",
