@@ -7,6 +7,8 @@ import asyncpg
 from bot.cogs.help import HelpCommand
 from bot.cogs.events import Events
 import aiohttp, json
+from discord_buttons import DiscordButton, Button
+
 
 # ----------------
 # All perms
@@ -67,6 +69,20 @@ React with :blue_circle: to get the <@&819914637108969503> role.
 """
     embed = discord.Embed(title="Color Roles", description=desc)
     await channel.send(embed=embed)
+
+# DiscordButton(bot)
+
+# @bot.event
+# async def on_message(msg: discord.Message):
+#     if msg.content == "testbutton":
+#         await msg.channel.send(
+#             "Content",
+#             buttons=[
+#                 Button(style="blue", label="Blue"),
+#                 Button(style="red", label="Red"),
+#                 Button(style="url", label="url", url="https://example.org"),
+#             ],
+#         )
 
 
 def start():
