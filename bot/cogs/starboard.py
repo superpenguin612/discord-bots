@@ -28,38 +28,38 @@ class Starboard(commands.Cog, name="starboard"):
             "SELECT * FROM starboard WHERE server_id=$1;", str(server_id)
         )
 
-    # async def add_record(
-    #     self,
-    #     server_id,
-    #     channel_id,
-    #     message_id,
-    #     star_number,
-    #     starboard_message_id,
-    #     starred_users,
-    #     forced,
-    #     locked,
-    #     removed,
-    # ):
-    #     return await self.bot.db.fetchrow(
-    #         "INSERT INTO starboard (server_id, channel_id, message_id, star_number, starboard_message_id, starred_users, forced, locked, removed) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *;",
-    #         str(server_id),
-    #         str(channel_id),
-    #         str(message_id),
-    #         int(star_number),
-    #         str(starboard_message_id),
-    #         [str(user) for user in starred_users],
-    #         bool(forced),
-    #         bool(locked),
-    #         bool(removed),
-    #     )
+    async def add_record(
+        self,
+        server_id,
+        channel_id,
+        message_id,
+        star_number,
+        starboard_message_id,
+        starred_users,
+        forced,
+        locked,
+        removed,
+    ):
+        return await self.bot.db.fetchrow(
+            "INSERT INTO starboard (server_id, channel_id, message_id, star_number, starboard_message_id, starred_users, forced, locked, removed) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *;",
+            str(server_id),
+            str(channel_id),
+            str(message_id),
+            int(star_number),
+            str(starboard_message_id),
+            [str(user) for user in starred_users],
+            bool(forced),
+            bool(locked),
+            bool(removed),
+        )
 
-    # async def update_record(self, message_id, star_number, starred_users):
-    #     return await self.bot.db.fetchrow(
-    #         "UPDATE starboard SET star_number = $1, starred_users = $2 WHERE message_id=$3",
-    #         star_number,
-    #         starred_users,
-    #         str(message_id),
-    #     )
+    async def update_record(self, message_id, star_number, starred_users):
+        return await self.bot.db.fetchrow(
+            "UPDATE starboard SET star_number = $1, starred_users = $2 WHERE message_id=$3",
+            star_number,
+            starred_users,
+            str(message_id),
+        )
 
     async def remove_record(self, id):
         return await self.bot.db.fetch("DELETE FROM starboard WHERE id=$1", str(id))

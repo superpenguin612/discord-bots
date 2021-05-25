@@ -7,7 +7,7 @@ import random
 
 
 class Info(commands.Cog):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot):
         self.bot = bot
 
     @cog_ext.cog_slash(
@@ -86,7 +86,9 @@ class Info(commands.Cog):
         embed = tools.create_embed(
             ctx,
             "Server Roles",
-            "\n".join(reversed([role.mention for role in ctx.guild.roles])),
+            "\n".join(
+                reversed([role.mention for role in ctx.guild.roles])
+            ),  # [::1] reverses roles
         )
         await ctx.send(embed=embed)
 
@@ -152,5 +154,5 @@ class Info(commands.Cog):
         await ctx.send(embed=embed)
 
 
-def setup(bot: commands.Bot):
+def setup(bot):
     bot.add_cog(Info(bot))
