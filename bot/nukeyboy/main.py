@@ -3,7 +3,6 @@ from discord.ext import commands
 import os
 import dotenv
 import threading
-from bot.nukeyboy.commands import nuke
 
 # https://discord.com/api/oauth2/authorize?client_id=846818976238665779&permissions=8&scope=bot
 
