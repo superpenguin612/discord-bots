@@ -14,12 +14,20 @@ class Logging(commands.Cog, name="logging"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
+    async def get_log_channel(self, server_id):
+        record = await self.bot.db.fetchrow(
+            "SELECT * FROM settings WHERE server_id=$1;", str(server_id)
+        )
+        server_settings = json.loads(record["json"])
+        return server_settings["logging"]["log_channel"]
+
     @commands.Cog.listener(name="on_raw_message_edit")
     async def on_raw_message_edit(self, payload: discord.RawMessageUpdateEvent) -> None:
         if "author" in payload.data:
             if payload.data["author"]["id"] != self.bot.user.id:
                 guild = self.bot.get_guild(int(payload.data["guild_id"]))
-                log_channel = guild.get_channel(821887861439332362)
+                log_channel = guild.get_channel(await self.get_log_channel(guild.id))
+
                 message_channel = guild.get_channel(payload.channel_id)
                 message_author = guild.get_member(int(payload.data["author"]["id"]))
 
@@ -57,7 +65,7 @@ class Logging(commands.Cog, name="logging"):
         self, payload: discord.RawMessageDeleteEvent
     ) -> None:
         guild = self.bot.get_guild(payload.guild_id)
-        log_channel = guild.get_channel(821887861439332362)
+        log_channel = guild.get_channel(await self.get_log_channel(guild.id))
         message_channel = guild.get_channel(payload.channel_id)
 
         if payload.cached_message:
@@ -89,7 +97,7 @@ class Logging(commands.Cog, name="logging"):
     @commands.Cog.listener()
     async def on_guild_channel_create(self, channel: discord.abc.GuildChannel) -> None:
         guild = channel.guild
-        log_channel = guild.get_channel(821887861439332362)
+        log_channel = guild.get_channel(await self.get_log_channel(guild.id))
 
         embed = discord.Embed(
             title=f"Channel Create",
@@ -101,7 +109,7 @@ class Logging(commands.Cog, name="logging"):
     @commands.Cog.listener()
     async def on_guild_channel_delete(self, channel: discord.abc.GuildChannel) -> None:
         guild = channel.guild
-        log_channel = guild.get_channel(821887861439332362)
+        log_channel = guild.get_channel(await self.get_log_channel(guild.id))
 
         embed = discord.Embed(
             title=f"Channel Delete",
@@ -115,7 +123,7 @@ class Logging(commands.Cog, name="logging"):
         self, before: discord.abc.GuildChannel, after: discord.abc.GuildChannel
     ) -> None:
         guild = before.guild
-        log_channel = guild.get_channel(821887861439332362)
+        log_channel = guild.get_channel(await self.get_log_channel(guild.id))
 
         embed = discord.Embed(
             title=f"Channel Update",
@@ -127,7 +135,7 @@ class Logging(commands.Cog, name="logging"):
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member) -> None:
         guild = member.guild
-        log_channel = guild.get_channel(821887861439332362)
+        log_channel = guild.get_channel(await self.get_log_channel(guild.id))
 
         embed = discord.Embed(
             title=f"Member Join",
@@ -140,7 +148,7 @@ class Logging(commands.Cog, name="logging"):
     @commands.Cog.listener()
     async def on_member_remove(self, member: discord.Member) -> None:
         guild = member.guild
-        log_channel = guild.get_channel(821887861439332362)
+        log_channel = guild.get_channel(await self.get_log_channel(guild.id))
 
         embed = discord.Embed(
             title=f"Member Leave",
@@ -176,32 +184,90 @@ class Logging(commands.Cog, name="logging"):
             embed.set_author(name=before, icon_url=before.avatar_url)
 
             guild = before.guild
-            log_channel = guild.get_channel(821887861439332362)
+            log_channel = guild.get_channel(await self.get_log_channel(guild.id))
             await log_channel.send(embed=embed)
 
     @commands.Cog.listener()
-    async def on_invite_create(invite: discord.Invite) -> None:
-        pass
+    async def on_invite_create(self, invite: discord.Invite) -> None:
+        guild = invite.guild
+        log_channel = guild.get_channel(await self.get_log_channel(guild.id))
+
+        embed = discord.Embed(
+            title=f"Invite Create",
+            description=f"An invite has been created.",
+            color=discord.Color.red(),
+        )
+        embed.add_field(name="Code", value=invite.code)
+        embed.add_field(name="Channel", value=invite.channel.mention)
+        await log_channel.send(embed=embed)
 
     @commands.Cog.listener()
-    async def on_invite_delete(invite: discord.Invite) -> None:
-        pass
+    async def on_invite_delete(self, invite: discord.Invite) -> None:
+        guild = invite.guild
+        log_channel = guild.get_channel(await self.get_log_channel(guild.id))
+
+        embed = discord.Embed(
+            title=f"Invite Delete",
+            description=f"An invite has been deleted.",
+            color=discord.Color.red(),
+        )
+        embed.add_field(name="Code", value=invite.code)
+        embed.add_field(name="Channel", value=invite.channel.mention)
+        await log_channel.send(embed=embed)
 
     @commands.Cog.listener()
-    async def on_guild_update(before: discord.Guild, after: discord.Guild) -> None:
-        pass
+    async def on_guild_update(
+        self, before: discord.Guild, after: discord.Guild
+    ) -> None:
+        guild = before
+        log_channel = guild.get_channel(await self.get_log_channel(guild.id))
+
+        embed = discord.Embed(
+            title=f"Guild Update",
+            description=f"This guild has been updated.",
+            color=discord.Color.red(),
+        )
+        await log_channel.send(embed=embed)
 
     @commands.Cog.listener()
-    async def on_guild_role_create(role: discord.Role) -> None:
-        pass
+    async def on_guild_role_create(self, role: discord.Role) -> None:
+        guild = role.guild
+        log_channel = guild.get_channel(await self.get_log_channel(guild.id))
+
+        embed = discord.Embed(
+            title=f"Role Create",
+            description=f"{role.mention} has been created.",
+            color=discord.Color.red(),
+        )
+        await log_channel.send(embed=embed)
 
     @commands.Cog.listener()
-    async def on_guild_role_delete(role: discord.Role) -> None:
-        pass
+    async def on_guild_role_delete(self, role: discord.Role) -> None:
+        guild = role.guild
+        log_channel = guild.get_channel(await self.get_log_channel(guild.id))
+
+        embed = discord.Embed(
+            title=f"Role Delete",
+            description=f"{role.mention} has been deleted.",
+            color=discord.Color.red(),
+        )
+        await log_channel.send(embed=embed)
 
     @commands.Cog.listener()
-    async def on_guild_role_update(before: discord.Role, after: discord.Role) -> None:
-        pass
+    async def on_guild_role_update(
+        self, before: discord.Role, after: discord.Role
+    ) -> None:
+        if after.name == "Rainbow":
+            return
+        guild = before.guild
+        log_channel = guild.get_channel(await self.get_log_channel(guild.id))
+
+        embed = discord.Embed(
+            title=f"Role Update",
+            description=f"{before.mention} has been updated.",
+            color=discord.Color.red(),
+        )
+        await log_channel.send(embed=embed)
 
 
 def setup(bot: commands.Bot) -> None:

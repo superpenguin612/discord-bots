@@ -10,57 +10,45 @@ class Settings(commands.Cog, name="settings"):
     def __init__(self, bot):
         self.bot = bot
 
-    async def get_all_records(self):
-        return await self.bot.db.fetch("SELECT * FROM settings;")
-
-    async def get_record_by_server_id(self, server_id):
-        return await self.bot.db.fetchrow(
-            "SELECT * FROM settings WHERE server_id=$1;", str(server_id)
-        )
-
-    async def add_record(self, server_id, json):
-        return await self.bot.db.execute(
-            "INSERT INTO settings (server_id, json) VALUES $1, $2", server_id, json
-        )
-
-    async def edit_record(self, server_id, json):
-        return await self.bot.db.execute(
-            "UPDATE settings SET json=$1 WHERE server_id=$2", json, server_id
-        )
-
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
         default_settings = {
-            "bot_messages": {
-                "channel": 809169133635108882,
-            },
-            "moderation": {
-                "muted_role": 809169133232717890,
-                "mod_role": 818866766695890947,
-            },
+            "moderation": {"muted_role": None, "mod_role": None, "log_channel": None},
             "starboard": {
-                "channel": 818915325646340126,
+                "channel": None,
                 "number_required": 5,
                 "reaction": "⭐",
             },
-            "daily_report": {"channel": 819546169985597440},
+            "logging": {
+                "channel": None,
+                "enable_messages": True,
+                "enable_channels": True,
+                "enable_members": True,
+                "enable_invites": True,
+                "enable_roles": True,
+            },
+            "daily_report": {"channel": None},
             "suggestions": {
-                "channel": 818901195023843368,
-                "up_emoji": "<:upvote:818940395320639488>",
-                "down_emoji": "<:downvote:818940394967924767>",
+                "channel": None,
+                "up_emoji": "⬆️",
+                "down_emoji": "⬇️",
             },
         }
         json_str = json.dumps(default_settings)
-        print(json_str)
-        await self.add_record(guild.id, json_str)
+        await self.bot.db.execute(
+            "INSERT INTO settings (server_id, json) VALUES $1, $2",
+            str(guild.id),
+            json_str,
+        )
 
     @cog_ext.cog_slash(
         name="listsettings",
         description="Get the settings for the server.",
     )
     async def listsettings(self, ctx):
-        record = await self.get_record_by_server_id(ctx.guild.id)
-        print(record)
+        record = await self.bot.db.fetchrow(
+            "SELECT * FROM settings WHERE server_id=$1;", str(ctx.guild.id)
+        )
         server_settings = json.loads(record["json"])
         embed = tools.create_embed(ctx, "Bot Settings")
         embed.add_field(
@@ -286,5 +274,5 @@ class Settings(commands.Cog, name="settings"):
         await ctx.send(embed=embed)
 
 
-def setup(bot):
+def setup(bot: commands.Bot):
     bot.add_cog(Settings(bot))
