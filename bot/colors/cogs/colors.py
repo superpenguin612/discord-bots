@@ -33,28 +33,7 @@ class Colors(commands.Cog, name="colors"):
                 rainbow_role = role
         return rainbow_role
 
-    @commands.command()
-    async def tester(self, ctx):
-        await ctx.send("received")
-        rainbow_role = None
-        for role in ctx.guild.roles:
-            if role.name == "Rainbow":
-                rainbow_role = role
-            if rainbow_role:
-                try:
-                    await rainbow_role.edit(
-                        colour=discord.Colour.from_rgb(
-                            self.COLORS[self.color][0],
-                            self.COLORS[self.color][1],
-                            self.COLORS[self.color][2],
-                        )
-                    )
-                except:
-                    pass
-        print(rainbow_role.color)
-        self.color = self.color + 1 if self.color + 1 <= 7 else 0
-
-    @tasks.loop(seconds=7.5)
+    @tasks.loop(seconds=60.0)
     async def change_color(self):
         for guild in self.bot.guilds:
             rainbow_role = self.get_rainbow_role(guild)
