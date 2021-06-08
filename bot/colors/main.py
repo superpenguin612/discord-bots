@@ -9,17 +9,17 @@ from bot.cogs.help import HelpCommand
 
 # ----------------
 # All perms
-# https://discord.com/api/oauth2/authorize?client_id=851884016823042078&permissions=4294967295&scope=bot%20applications.commands
+# https://discord.com/api/oauth2/authorize?client_id=851948291641311312&permissions=4294967295&scope=bot%20applications.commands
 # Color perms
-# https://discord.com/api/oauth2/authorize?client_id=851884016823042078&permissions=268435456&scope=bot%20applications.commands
+# https://discord.com/api/oauth2/authorize?client_id=851948291641311312&permissions=268435456&scope=bot%20applications.commands
 # All but admin perms
-# https://discord.com/api/oauth2/authorize?client_id=851884016823042078&permissions=4294967287&scope=bot%20applications.commands
+# https://discord.com/api/oauth2/authorize?client_id=851948291641311312&permissions=4294967287&scope=bot%20applications.commands
 # Moderation perms
-# https://discord.com/api/oauth2/authorize?client_id=851884016823042078&permissions=2146823287&scope=bot%20applications.commands
+# https://discord.com/api/oauth2/authorize?client_id=851948291641311312&permissions=2146823287&scope=bot%20applications.commands
 # Basic perms
-# https://discord.com/api/oauth2/authorize?client_id=851884016823042078&permissions=37080128&scope=bot%20applications.commands
+# https://discord.com/api/oauth2/authorize?client_id=851948291641311312&permissions=37080128&scope=bot%20applications.commands
 # No slash perms
-# https://discord.com/api/oauth2/authorize?client_id=851884016823042078&permissions=379968&scope=bot%20applications.commands
+# https://discord.com/api/oauth2/authorize?client_id=851948291641311312&permissions=379968&scope=bot%20applications.commands
 # ----------------
 
 EXTENSIONS = [
