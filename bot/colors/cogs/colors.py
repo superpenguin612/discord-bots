@@ -71,7 +71,6 @@ class Colors(commands.Cog, name="colors"):
     @cog_ext.cog_slash(
         name="createrainbowrole",
         description="Create the rainbow role for the bot to use!",
-        guild_ids=[801630163866746901, 621878393465733120],
     )
     @commands.has_permissions(manage_roles=True)
     async def createrainbowrole(self, ctx: SlashContext) -> None:
@@ -106,7 +105,6 @@ class Colors(commands.Cog, name="colors"):
     @cog_ext.cog_slash(
         name="deleterainbowrole",
         description="Delete the rainbow role for the server.",
-        guild_ids=[801630163866746901, 621878393465733120],
     )
     @commands.has_permissions(manage_roles=True)
     async def deleterainbowrole(self, ctx: SlashContext) -> None:
@@ -131,7 +129,6 @@ class Colors(commands.Cog, name="colors"):
     @cog_ext.cog_slash(
         name="botrainbowrole",
         description="Give the bot the rainbow role.",
-        guild_ids=[801630163866746901, 621878393465733120],
     )
     @commands.has_permissions(manage_roles=True)
     async def botrole(self, ctx: SlashContext) -> None:
@@ -155,7 +152,6 @@ class Colors(commands.Cog, name="colors"):
     @cog_ext.cog_slash(
         name="giverainbowrole",
         description="Give yourself the rainbow role.",
-        guild_ids=[801630163866746901, 621878393465733120],
     )
     async def giverainbowrole(self, ctx: SlashContext) -> None:
         rainbow_role = self.get_rainbow_role(ctx.guild)
@@ -179,7 +175,6 @@ class Colors(commands.Cog, name="colors"):
     @cog_ext.cog_slash(
         name="removerainbowrole",
         description="Remove the rainbow role from yourself.",
-        guild_ids=[801630163866746901, 621878393465733120],
     )
     async def removerainbowrole(self, ctx: SlashContext) -> None:
         rainbow_role = self.get_rainbow_role(ctx.guild)
@@ -202,7 +197,6 @@ class Colors(commands.Cog, name="colors"):
     @cog_ext.cog_slash(
         name="invite",
         description="Invite the bot to another server!",
-        guild_ids=[801630163866746901, 621878393465733120],
     )
     async def invite(self, ctx: SlashContext) -> None:
         embed = tools.create_embed(
