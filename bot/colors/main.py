@@ -40,7 +40,7 @@ dotenv.load_dotenv()
 def start():
     for extension in EXTENSIONS:
         bot.load_extension(extension)
-    bot.run(os.environ["COLORS+_TOKEN"])  # bot token
+    bot.run(os.environ["COLORS_TOKEN"])  # bot token
 
 
 if __name__ == "__main__":
