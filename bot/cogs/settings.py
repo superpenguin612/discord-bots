@@ -10,6 +10,12 @@ class Settings(commands.Cog, name="settings"):
     def __init__(self, bot):
         self.bot = bot
 
+    async def get_guild_settings(self, guild_id):
+        record = await self.bot.db.fetchrow(
+            "SELECT * FROM settings WHERE server_id=$1;", str(guild_id)
+        )
+        return json.loads(record["json"])
+
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
         default_settings = {

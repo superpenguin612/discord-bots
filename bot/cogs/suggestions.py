@@ -5,6 +5,8 @@ from discord_slash import cog_ext, SlashContext
 from discord_slash.utils.manage_commands import create_option, create_choice
 from discord_slash.model import SlashCommandOptionType
 import asyncio
+import json
+import bot.cogs.settings
 
 
 class Suggestions(
@@ -226,7 +228,9 @@ class Suggestions(
         color: discord.Colour,
         downvote: bool = True,
     ) -> None:
-        suggestions_channel = self.bot.get_channel(818901195023843368)
+        settings_cog = self.bot.get_cog("settings")
+        settings = await settings_cog.get_guild_settings(ctx.guild.id)
+        suggestions_channel = ctx.guild.get_channel(settings["suggestions"]["channel"])
         embed = tools.create_embed(
             ctx, title, desc=suggestion, footer_enabled=False, color=color
         )
@@ -237,9 +241,9 @@ class Suggestions(
         if image_url:
             embed.set_image(url=image_url)
         msg = await suggestions_channel.send(embed=embed)
-        await msg.add_reaction("<:upvote:818940395320639488>")
+        await msg.add_reaction(settings["suggestions"]["up_emoji"])
         if downvote:
-            await msg.add_reaction("<:downvote:818940394967924767>")
+            await msg.add_reaction(settings["suggestions"]["down_emoji"])
 
         embed = tools.create_embed(
             ctx,
@@ -363,7 +367,9 @@ class Suggestions(
         else:
             image_url = msg.attachments[0].url
 
-        suggestions_channel = self.bot.get_channel(818901195023843368)
+        settings_cog = self.bot.get_cog("settings")
+        settings = await settings_cog.get_guild_settings(ctx.guild.id)
+        suggestions_channel = ctx.guild.get_channel(settings["suggestions"]["channel"])
         embed = tools.create_embed(
             ctx, title, desc=suggestion, footer_enabled=False, color=color
         )
@@ -374,9 +380,9 @@ class Suggestions(
         if image_url:
             embed.set_image(url=image_url)
         msg = await suggestions_channel.send(embed=embed)
-        await msg.add_reaction("<:upvote:818940395320639488>")
+        await msg.add_reaction(settings["suggestions"]["up_emoji"])
         if downvote:
-            await msg.add_reaction("<:downvote:818940394967924767>")
+            await msg.add_reaction(settings["suggestions"]["down_emoji"])
 
         embed = tools.create_embed(
             ctx,

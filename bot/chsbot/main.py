@@ -39,7 +39,7 @@ EXTENSIONS = [
     # 'bot.cogs.owner',
     # 'bot.cogs.music1',
     "bot.cogs.math",
-    "bot.chsbot.cogs.suggestions",
+    "bot.cogs.suggestions",
     "bot.chsbot.cogs.profanity",
 ]
 

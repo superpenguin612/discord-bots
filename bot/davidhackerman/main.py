@@ -33,6 +33,7 @@ EXTENSIONS = [
     "bot.cogs.tasks",
     "bot.cogs.starboard",
     "bot.cogs.logging",
+    "bot.cogs.suggestions",
     "bot.davidhackerman.cogs.bottling",
     "bot.davidhackerman.cogs.links",
     "bot.davidhackerman.cogs.member_join",

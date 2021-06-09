@@ -14,9 +14,9 @@ class Logging(commands.Cog, name="logging"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    async def get_log_channel(self, server_id):
+    async def get_log_channel(self, guild_id):
         record = await self.bot.db.fetchrow(
-            "SELECT * FROM settings WHERE server_id=$1;", str(server_id)
+            "SELECT * FROM settings WHERE server_id=$1;", str(guild_id)
         )
         server_settings = json.loads(record["json"])
         return server_settings["logging"]["log_channel"]
@@ -26,7 +26,12 @@ class Logging(commands.Cog, name="logging"):
         if "author" in payload.data:
             if payload.data["author"]["id"] != self.bot.user.id:
                 guild = self.bot.get_guild(int(payload.data["guild_id"]))
-                log_channel = guild.get_channel(await self.get_log_channel(guild.id))
+                settings_cog = self.bot.get_cog("settings")
+                log_channel = guild.get_channel(
+                    (await settings_cog.get_guild_settings(guild.id))["logging"][
+                        "log_channel"
+                    ]
+                )
 
                 message_channel = guild.get_channel(payload.channel_id)
                 message_author = guild.get_member(int(payload.data["author"]["id"]))
@@ -65,7 +70,10 @@ class Logging(commands.Cog, name="logging"):
         self, payload: discord.RawMessageDeleteEvent
     ) -> None:
         guild = self.bot.get_guild(payload.guild_id)
-        log_channel = guild.get_channel(await self.get_log_channel(guild.id))
+        settings_cog = self.bot.get_cog("settings")
+        log_channel = guild.get_channel(
+            (await settings_cog.get_guild_settings(guild.id))["logging"]["log_channel"]
+        )
         message_channel = guild.get_channel(payload.channel_id)
 
         if payload.cached_message:
@@ -97,7 +105,10 @@ class Logging(commands.Cog, name="logging"):
     @commands.Cog.listener()
     async def on_guild_channel_create(self, channel: discord.abc.GuildChannel) -> None:
         guild = channel.guild
-        log_channel = guild.get_channel(await self.get_log_channel(guild.id))
+        settings_cog = self.bot.get_cog("settings")
+        log_channel = guild.get_channel(
+            (await settings_cog.get_guild_settings(guild.id))["logging"]["log_channel"]
+        )
 
         embed = discord.Embed(
             title=f"Channel Create",
@@ -109,7 +120,10 @@ class Logging(commands.Cog, name="logging"):
     @commands.Cog.listener()
     async def on_guild_channel_delete(self, channel: discord.abc.GuildChannel) -> None:
         guild = channel.guild
-        log_channel = guild.get_channel(await self.get_log_channel(guild.id))
+        settings_cog = self.bot.get_cog("settings")
+        log_channel = guild.get_channel(
+            (await settings_cog.get_guild_settings(guild.id))["logging"]["log_channel"]
+        )
 
         embed = discord.Embed(
             title=f"Channel Delete",
@@ -123,7 +137,10 @@ class Logging(commands.Cog, name="logging"):
         self, before: discord.abc.GuildChannel, after: discord.abc.GuildChannel
     ) -> None:
         guild = before.guild
-        log_channel = guild.get_channel(await self.get_log_channel(guild.id))
+        settings_cog = self.bot.get_cog("settings")
+        log_channel = guild.get_channel(
+            (await settings_cog.get_guild_settings(guild.id))["logging"]["log_channel"]
+        )
 
         embed = discord.Embed(
             title=f"Channel Update",
@@ -135,7 +152,10 @@ class Logging(commands.Cog, name="logging"):
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member) -> None:
         guild = member.guild
-        log_channel = guild.get_channel(await self.get_log_channel(guild.id))
+        settings_cog = self.bot.get_cog("settings")
+        log_channel = guild.get_channel(
+            (await settings_cog.get_guild_settings(guild.id))["logging"]["log_channel"]
+        )
 
         embed = discord.Embed(
             title=f"Member Join",
@@ -148,7 +168,10 @@ class Logging(commands.Cog, name="logging"):
     @commands.Cog.listener()
     async def on_member_remove(self, member: discord.Member) -> None:
         guild = member.guild
-        log_channel = guild.get_channel(await self.get_log_channel(guild.id))
+        settings_cog = self.bot.get_cog("settings")
+        log_channel = guild.get_channel(
+            (await settings_cog.get_guild_settings(guild.id))["logging"]["log_channel"]
+        )
 
         embed = discord.Embed(
             title=f"Member Leave",
@@ -184,13 +207,21 @@ class Logging(commands.Cog, name="logging"):
             embed.set_author(name=before, icon_url=before.avatar_url)
 
             guild = before.guild
-            log_channel = guild.get_channel(await self.get_log_channel(guild.id))
+            settings_cog = self.bot.get_cog("settings")
+            log_channel = guild.get_channel(
+                await settings_cog.get_guild_settings(guild.id)["logging"][
+                    "log_channel"
+                ]
+            )
             await log_channel.send(embed=embed)
 
     @commands.Cog.listener()
     async def on_invite_create(self, invite: discord.Invite) -> None:
         guild = invite.guild
-        log_channel = guild.get_channel(await self.get_log_channel(guild.id))
+        settings_cog = self.bot.get_cog("settings")
+        log_channel = guild.get_channel(
+            (await settings_cog.get_guild_settings(guild.id))["logging"]["log_channel"]
+        )
 
         embed = discord.Embed(
             title=f"Invite Create",
@@ -204,7 +235,10 @@ class Logging(commands.Cog, name="logging"):
     @commands.Cog.listener()
     async def on_invite_delete(self, invite: discord.Invite) -> None:
         guild = invite.guild
-        log_channel = guild.get_channel(await self.get_log_channel(guild.id))
+        settings_cog = self.bot.get_cog("settings")
+        log_channel = guild.get_channel(
+            (await settings_cog.get_guild_settings(guild.id))["logging"]["log_channel"]
+        )
 
         embed = discord.Embed(
             title=f"Invite Delete",
@@ -220,7 +254,10 @@ class Logging(commands.Cog, name="logging"):
         self, before: discord.Guild, after: discord.Guild
     ) -> None:
         guild = before
-        log_channel = guild.get_channel(await self.get_log_channel(guild.id))
+        settings_cog = self.bot.get_cog("settings")
+        log_channel = guild.get_channel(
+            (await settings_cog.get_guild_settings(guild.id))["logging"]["log_channel"]
+        )
 
         embed = discord.Embed(
             title=f"Guild Update",
@@ -232,7 +269,10 @@ class Logging(commands.Cog, name="logging"):
     @commands.Cog.listener()
     async def on_guild_role_create(self, role: discord.Role) -> None:
         guild = role.guild
-        log_channel = guild.get_channel(await self.get_log_channel(guild.id))
+        settings_cog = self.bot.get_cog("settings")
+        log_channel = guild.get_channel(
+            (await settings_cog.get_guild_settings(guild.id))["logging"]["log_channel"]
+        )
 
         embed = discord.Embed(
             title=f"Role Create",
@@ -244,7 +284,10 @@ class Logging(commands.Cog, name="logging"):
     @commands.Cog.listener()
     async def on_guild_role_delete(self, role: discord.Role) -> None:
         guild = role.guild
-        log_channel = guild.get_channel(await self.get_log_channel(guild.id))
+        settings_cog = self.bot.get_cog("settings")
+        log_channel = guild.get_channel(
+            (await settings_cog.get_guild_settings(guild.id))["logging"]["log_channel"]
+        )
 
         embed = discord.Embed(
             title=f"Role Delete",
@@ -260,7 +303,10 @@ class Logging(commands.Cog, name="logging"):
         if after.name == "Rainbow":
             return
         guild = before.guild
-        log_channel = guild.get_channel(await self.get_log_channel(guild.id))
+        settings_cog = self.bot.get_cog("settings")
+        log_channel = guild.get_channel(
+            (await settings_cog.get_guild_settings(guild.id))["logging"]["log_channel"]
+        )
 
         embed = discord.Embed(
             title=f"Role Update",
