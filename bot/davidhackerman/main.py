@@ -35,6 +35,7 @@ EXTENSIONS = [
     "bot.cogs.logging",
     "bot.davidhackerman.cogs.bottling",
     "bot.davidhackerman.cogs.links",
+    "bot.davidhackerman.cogs.member_join",
 ]
 
 bot = commands.Bot(

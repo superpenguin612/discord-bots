@@ -36,7 +36,7 @@ class Settings(commands.Cog, name="settings"):
         }
         json_str = json.dumps(default_settings)
         await self.bot.db.execute(
-            "INSERT INTO settings (server_id, json) VALUES $1, $2",
+            "INSERT INTO settings (server_id, json) VALUES ($1, $2)",
             str(guild.id),
             json_str,
         )
