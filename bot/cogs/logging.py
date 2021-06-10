@@ -209,7 +209,7 @@ class Logging(commands.Cog, name="logging"):
             guild = before.guild
             settings_cog = self.bot.get_cog("settings")
             log_channel = guild.get_channel(
-                await settings_cog.get_guild_settings(guild.id)["logging"][
+                (await settings_cog.get_guild_settings(guild.id))["logging"][
                     "log_channel"
                 ]
             )
