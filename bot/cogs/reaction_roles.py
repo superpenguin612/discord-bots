@@ -52,17 +52,17 @@ class ReactionRoles(commands.Cog, name="reaction_roles"):
                 for record in records:
                     if record["emoji"] == str(payload.emoji):
                         guild = self.bot.get_guild(payload.guild_id)
-                        channel = guild.get_channel(payload.channel_id)
+                        # channel = guild.get_channel(payload.channel_id)
                         member = guild.get_member(payload.user_id)
                         role = guild.get_role(int(record["role_id"]))
                         await member.add_roles(role)
-                        embed = discord.Embed(
-                            title="Reaction Role",
-                            description=f"{member.mention}, you have been given {role.mention}.",
-                        )
-                        msg = await channel.send(embed=embed)
-                        await asyncio.sleep(2)
-                        await msg.delete()
+                        # embed = discord.Embed(
+                        #     title="Reaction Role",
+                        #     description=f"{member.mention}, you have been given {role.mention}.",
+                        # )
+                        # msg = await channel.send(embed=embed)
+                        # await asyncio.sleep(2)
+                        # await msg.delete()
 
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload: discord.RawReactionActionEvent):
@@ -72,17 +72,17 @@ class ReactionRoles(commands.Cog, name="reaction_roles"):
                 for record in records:
                     if record["emoji"] == str(payload.emoji):
                         guild = self.bot.get_guild(payload.guild_id)
-                        channel = guild.get_channel(payload.channel_id)
+                        # channel = guild.get_channel(payload.channel_id)
                         member = guild.get_member(payload.user_id)
                         role = guild.get_role(int(record["role_id"]))
                         await member.remove_roles(role)
-                        embed = discord.Embed(
-                            title="Reaction Role",
-                            description=f"{member.mention}, you have lost {role.mention}.",
-                        )
-                        msg = await channel.send(embed=embed)
-                        await asyncio.sleep(2)
-                        await msg.delete()
+                        # embed = discord.Embed(
+                        #     title="Reaction Role",
+                        #     description=f"{member.mention}, you have lost {role.mention}.",
+                        # )
+                        # msg = await channel.send(embed=embed)
+                        # await asyncio.sleep(2)
+                        # await msg.delete()
 
     @cog_ext.cog_subcommand(
         base="reactionroles",
