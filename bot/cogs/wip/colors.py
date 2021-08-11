@@ -1,12 +1,15 @@
+import random
+import logging
+from typing import Optional
+
+import aiohttp
 import discord
 from discord.ext import commands, tasks
-from discord_slash import cog_ext, SlashContext
+from discord_slash import SlashContext, cog_ext
 from discord_slash.model import SlashCommandOptionType
 from discord_slash.utils.manage_commands import create_option
+
 from bot.helpers import tools
-from typing import Optional
-import random
-import aiohttp
 
 
 class Colors(commands.Cog, name="colors"):
@@ -24,6 +27,8 @@ class Colors(commands.Cog, name="colors"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.color = 0
+        _logger = logging.getLogger(__name__)
+        self.logger = logging.LoggerAdapter(_logger, {"botname": self.bot.name})
         self.change_color.start()
 
     def get_rainbow_role(self, guild: discord.Guild) -> Optional[discord.Role]:
@@ -33,18 +38,22 @@ class Colors(commands.Cog, name="colors"):
                 rainbow_role = role
         return rainbow_role
 
-    @tasks.loop(seconds=60.0)
+    @tasks.loop(seconds=5.0)
     async def change_color(self):
         for guild in self.bot.guilds:
             rainbow_role = self.get_rainbow_role(guild)
             if rainbow_role:
-                await rainbow_role.edit(
-                    colour=discord.Colour.from_rgb(
-                        self.COLORS[self.color][0],
-                        self.COLORS[self.color][1],
-                        self.COLORS[self.color][2],
+                try:
+                    await rainbow_role.edit(
+                        colour=discord.Colour.from_rgb(
+                            self.COLORS[self.color][0],
+                            self.COLORS[self.color][1],
+                            self.COLORS[self.color][2],
+                        )
                     )
-                )
+                except:
+                    self.logger.error("woops", exc_info=True)
+
         self.color = self.color + 1 if self.color + 1 <= 7 else 0
 
     @cog_ext.cog_slash(

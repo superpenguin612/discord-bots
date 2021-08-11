@@ -1,15 +1,17 @@
+import random
+
+import aiohttp
 import discord
 from discord.ext import commands
-from discord_slash import cog_ext, SlashContext
+from discord_slash import SlashContext, cog_ext
 from discord_slash.model import SlashCommandOptionType
 from discord_slash.utils.manage_commands import create_option
+
 from bot.helpers import tools
-import random
-import aiohttp
 
 
-class Fun(commands.Cog, name="fun"):
-    def __init__(self, bot):
+class FunSlash(commands.Cog):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     @cog_ext.cog_slash(name="hello", description="Greet the bot!")
@@ -129,9 +131,11 @@ class Fun(commands.Cog, name="fun"):
                     embed.set_image(url=js["file"])
                     await ctx.send(embed=embed)
 
-    # --------------------------------------------
-    # LEGACY COMMANDS
-    # --------------------------------------------
+
+class Fun(FunSlash, commands.Cog, name="fun"):
+    def __init__(self, bot):
+        self.bot = bot
+        super().__init__(bot)
 
     @commands.command(name="hello", brief="Greet the bot!", aliases=["hi"])
     async def hello_legacy(self, ctx: commands.Context) -> None:

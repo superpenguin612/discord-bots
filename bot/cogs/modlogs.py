@@ -1,17 +1,11 @@
-import discord
-from discord.ext import commands
-from bot.helpers import tools
-from discord_slash import cog_ext, SlashContext
-from discord_slash.utils.manage_commands import create_option, create_choice
-from discord_slash.model import SlashCommandOptionType
-import datetime
-import time
-import asyncio
 import json
 
+import discord
+from discord.ext import commands
 
-class Logging(commands.Cog, name="logging"):
-    def __init__(self, bot: commands.Bot):
+
+class ModLogs(commands.Cog, name="modlogs"):
+    def __int__(self, bot: commands.Bot):
         self.bot = bot
 
     async def get_log_channel(self, guild_id):
@@ -317,4 +311,4 @@ class Logging(commands.Cog, name="logging"):
 
 
 def setup(bot: commands.Bot) -> None:
-    bot.add_cog(Logging(bot))
+    bot.add_cog(ModLogs(bot))

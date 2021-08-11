@@ -1,0 +1,72 @@
+# HOW TO CONFIGURE
+# you can put a value wherever there is a line that has a word, a semicolon (:), and no comment after it (comments start with #)
+# 
+---
+bots:
+  - ##################################################################
+    # REQUIRED SETTINGS
+    ##################################################################
+  
+    # name of your bot
+    name: bruh
+    # prefix of your bot
+    prefix: "?"
+    # your bot's token
+    token: # DO NOT PUT ANYTHING ON THIS LINE
+      # you can either put your token here...
+      value: 
+      # ...or set it in a file called .env in this folder, 
+      # put its name here,
+      name: 
+      # and set env to true.
+      env: 
+      # it's usually safer to put your token in a .env file, 
+      # but a place to put it here is provided for convenience.
+    
+    ##################################################################
+    # RECOMMENDED SETTINGS 
+    ##################################################################
+    # (you can technically delete everything here, they either aren't required or have defaults, 
+    # but I recommend you configure them)
+
+    # the description for your bot (shown in the help command)
+    description: 
+    allowed_mentions: # DO NOT PUT ANYTHING ON THIS LINE
+      # whether or not the bot can ping @everyone.
+      # you should probably set this to false, unless you're
+      # absolutely sure you need it and have no errors with its implementation.
+      everyone: false
+      # whether or not the bot can ping server roles (like @Moderator)
+      roles: true
+      # whether or not the bot can ping individual users (like @superpenguin612)
+      users: true
+    # your user id, allows for certain commands to only be run by you
+    owner_id: 688530998920871969
+    # whether or not to use the default help command, default is false because the bot comes with a better version
+    use_default_help_command: false
+
+    ##################################################################
+    # OPTIONAL SETTINGS
+    ##################################################################
+    # you don't need anything here but some are useful
+
+    # whether or not to enable discord gateway intents 
+    # (needs to be activated in the discord developer portal)
+    gateway_intents: true
+    # the maximum number of messages to cache (only useful for mod logs, if those are disabled leave blank)
+    max_messages: 10000
+    # only configure this if you know what you're doing, follow the template below
+    extra_data:
+      - name: AZURE_KEY
+        value: 
+        env: true
+    
+    # extensions you want to enable or disable
+    # you can't specify both enabled and disabled
+    extensions: # DO NOT PUT ANYTHING ON THIS LINE
+      # if you want to create a WHITELIST, make it here (ONLY these extensions will be activated)
+      enabled: 
+      # if you want to create a BLACKLIST, make it here (ALL extensions BUT these will be activated)
+      disabled: 
+      # if you have any custom cogs you've created, put them here to activate them
+      custom: 

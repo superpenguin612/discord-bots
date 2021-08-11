@@ -1,14 +1,16 @@
+import string
+
 import discord
 from discord.ext import commands
+
 from bot.helpers import tools
-import string
 
 
 class Profanity(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.profanity_wordlist = []
-        with open("bot/chsbot/helpers/profanity_wordlist.txt", "r") as f:
+        with open("bot/helpers/wordlist.txt", "r") as f:
             self.profanity_wordlist = f.read().splitlines()
 
     @commands.Cog.listener()

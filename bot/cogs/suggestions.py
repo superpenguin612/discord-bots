@@ -1,12 +1,14 @@
-import discord
-from discord.ext import commands
-from bot.helpers import tools
-from discord_slash import cog_ext, SlashContext
-from discord_slash.utils.manage_commands import create_option, create_choice
-from discord_slash.model import SlashCommandOptionType
 import asyncio
 import json
-import bot.cogs.settings
+
+import discord
+from discord.ext import commands
+from discord_slash import SlashContext, cog_ext
+from discord_slash.model import SlashCommandOptionType
+from discord_slash.utils.manage_commands import create_choice, create_option
+
+import bot.cogs.core.settings
+from bot.helpers import tools
 
 
 class Suggestions(

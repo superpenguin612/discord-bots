@@ -1,15 +1,17 @@
+import random
+
 import discord
 from discord.ext import commands
+
 from bot.helpers import tools
-import random
 
 
 class Bottling(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     @commands.Cog.listener(name="on_message")
-    async def on_message(self, message):
+    async def on_message(self, message: discord.Message):
         if message.author.id != 796805491186597968:
             if random.randint(1, 300) == 1:
                 await message.add_reaction("🍾")
@@ -17,5 +19,5 @@ class Bottling(commands.Cog):
                 await self.bot.process_commands(message)
 
 
-def setup(bot):
+def setup(bot: commands.Bot):
     bot.add_cog(Bottling(bot))

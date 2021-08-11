@@ -1,11 +1,13 @@
-import discord
-from discord.ext import commands
-from bot.helpers import tools
-from discord_slash import cog_ext, SlashContext
-from discord_slash.utils.manage_commands import create_option, create_choice
-from discord_slash.model import SlashCommandOptionType
 import json
 from datetime import date, datetime, time, timedelta
+
+import discord
+from discord.ext import commands
+from discord_slash import SlashContext, cog_ext
+from discord_slash.model import SlashCommandOptionType
+from discord_slash.utils.manage_commands import create_choice, create_option
+
+from bot.helpers import tools
 
 
 class School(commands.Cog):

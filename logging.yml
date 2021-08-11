@@ -1,0 +1,63 @@
+version: 1
+formatters:
+  bot:
+    format: "[%(asctime)s] [%(levelname)s] [%(botname)s] [%(name)s] - %(message)s"
+  discord:
+    format: "[%(asctime)s] [%(levelname)s] [%(name)s] - %(message)s"
+  commands:
+    format: "[%(asctime)s] [Bot: %botname)s] 
+    [User: %(username)s ID: %(userid)s] [Guild: %(guild)s ID: %(guildid)s] 
+    [Prefix: %(prefix)s] [Command: %(command)s] [Arguments: %(arguments)s]\n
+    Full message:\n
+    %(full)s"
+handlers:
+  bot_console:
+    class: logging.StreamHandler
+    formatter: bot
+    level: INFO
+    stream: ext://sys.stdout
+  discord_console:
+    class: logging.StreamHandler
+    formatter: discord
+    level: INFO
+    stream: ext://sys.stdout
+  bot_file:
+    class: logging.FileHandler
+    formatter: bot
+    level: INFO
+    filename: app.log
+  discord_file:
+    class: logging.FileHandler
+    formatter: discord
+    level: INFO
+    filename: app.log
+  commands_file:
+    class: logging.FileHandler
+    formatter: commands
+    level: INFO
+    filename: commands.log
+loggers:
+  __main__:
+    level: INFO
+    handlers:
+      - bot_console
+      - bot_file
+  bot:
+    level: INFO
+    handlers:
+      - bot_console
+      - bot_file
+  commands:
+    level: INFO
+    handlers:
+      - commands_file
+  discord:
+    level: INFO
+    handlers:
+      - discord_console
+      - discord_file
+# root:
+#   level: INFO
+#   handlers: 
+#     - bot_console
+#     - bot_file

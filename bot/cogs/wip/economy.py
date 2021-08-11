@@ -1,8 +1,10 @@
-import discord
-from discord.ext import commands
-from bot.helpers import tools
 import json
 import random
+
+import discord
+from discord.ext import commands
+
+from bot.helpers import tools
 
 
 class Economy(commands.Cog):

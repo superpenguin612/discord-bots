@@ -1,11 +1,12 @@
+import importlib
+
 import discord
 import discord.ext.commands as commands
-import bot.helpers.tools as tools
-from discord_slash import cog_ext, SlashContext
-from discord_slash.utils.manage_commands import create_option, create_choice
+from discord_slash import SlashContext, cog_ext
 from discord_slash.model import SlashCommandOptionType
+from discord_slash.utils.manage_commands import create_choice, create_option
 
-import importlib
+import bot.helpers.tools as tools
 
 sympy = importlib.import_module("sympy")
 from sympy.parsing.latex import parse_latex
@@ -112,7 +113,6 @@ class Math(commands.Cog, name="math"):
                 required=False,
             ),
         ],
-        guild_ids=[809169133086048257, 801630163866746901],
     )
     async def calc(
         self,
@@ -224,7 +224,7 @@ class Math(commands.Cog, name="math"):
                 required=True,
             ),
         ],
-        guild_ids=[809169133086048257, 801630163866746901],
+        # guild_ids=[809169133086048257, 801630163866746901],
     )
     async def graph(self, ctx: SlashContext, graph_type: str, equation: str):
         await ctx.defer()

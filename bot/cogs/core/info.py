@@ -1,13 +1,15 @@
+import random
+
 import discord
 from discord.ext import commands
-from bot.helpers import tools
-from discord_slash import cog_ext, SlashContext
+from discord_slash import SlashContext, cog_ext
 from discord_slash.utils.manage_commands import create_option
-import random
+
+from bot.helpers import tools
 
 
 class Info(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     @cog_ext.cog_slash(
@@ -86,9 +88,7 @@ class Info(commands.Cog):
         embed = tools.create_embed(
             ctx,
             "Server Roles",
-            "\n".join(
-                reversed([role.mention for role in ctx.guild.roles])
-            ),  # [::1] reverses roles
+            "\n".join(reversed([role.mention for role in ctx.guild.roles])),
         )
         await ctx.send(embed=embed)
 

@@ -1,17 +1,36 @@
-import discord
-from discord.ext import commands
-from bot.helpers import tools
-from discord_slash import cog_ext, SlashContext
-from discord_slash.utils.manage_commands import create_option, create_choice
-from discord_slash.model import SlashCommandOptionType
-import asyncpg
 import datetime
 import time
 
+import asyncpg
+import discord
+from discord.ext import commands
+from discord_slash import SlashContext, cog_ext
+from discord_slash.model import SlashCommandOptionType
+from discord_slash.utils.manage_commands import create_choice, create_option
+
+from bot.helpers import tools
+
 
 class Moderation(commands.Cog, name="moderation"):
+    """🧑‍⚖️ These commands provide useful tools to help
+    you manage your server more effectively."""
+
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+
+    @commands.command(name="purge")
+    @commands.has_permissions(manage_messages=True)
+    @commands.bot_has_permissions(manage_messages=True)
+    async def purge_legacy(self, ctx, num: int):
+        msgs = []
+        async for msg in ctx.channel.history(limit=num, before=ctx.message):
+            msgs.append(msg)
+        await ctx.channel.delete_messages(msgs)
+
+        embed = tools.create_embed(
+            ctx, "Message Purge (All)", f"{num} messages deleted."
+        )
+        await ctx.send(embed=embed)
 
     @cog_ext.cog_subcommand(
         base="purge",
