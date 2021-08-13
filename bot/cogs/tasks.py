@@ -24,14 +24,12 @@ class Tasks(commands.Cog, name="tasks"):
             title="Daily Report",
             description="Good morning everyone! Here's your report for the day.",
         )
-        school_day = (
-            self.SCHOOL_INFO_DICT["days"][datetime.now().strftime("%m/%d/%Y")],
-        )
+        school_day = self.SCHOOL_INFO_DICT["days"][datetime.now().strftime("%m/%d/%Y")]
 
         school_day_val = (
             f'Today is {datetime.now().strftime("%A, %B %d, %Y")}.\n'
             f"It's a {school_day} today.\n"
-            "(To view more details, run `/schoolday` or `c?schoolday` (legacy command).)"
+            "(To view more details, run `/schoolday` or `c?schoolday`)"
         )
         embed.add_field(name="School Day", value=school_day_val, inline=False)
         search = self.bot.get_cog("search")
@@ -78,14 +76,16 @@ class Tasks(commands.Cog, name="tasks"):
         embed.set_footer(
             text="Note: This report is for informational purposes only. Although we will try to make sure this report is up to date, we cannot guarantee it."
         )
-        embed.set_thumbnail(url=guild.icon_url)
+        embed.set_thumbnail(
+            url="https://resources.finalsite.net/images/f_auto,q_auto/v1540226230/ccsk12inus/awfkuopbc2f6uupyira9/CarmelHighSchoolLogo.jpg"
+        )
         return embed
 
-    @commands.command()
-    @commands.has_permissions(administrator=True)
-    async def testdailyreport(self, ctx: commands.Context):
-        embed = await self.create_daily_report(ctx.guild)
-        await ctx.send(embed=embed)
+    # @commands.command()
+    # @commands.has_permissions(administrator=True)
+    # async def testdailyreport(self, ctx: commands.Context):
+    #     embed = await self.create_daily_report(ctx.guild)
+    #     await ctx.send(embed=embed)
 
     @tasks.loop(seconds=1.0)
     async def daily_report(self):
