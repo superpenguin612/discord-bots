@@ -13,7 +13,7 @@ class Tasks(commands.Cog, name="tasks"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-        # self.daily_report.start()
+        self.daily_report.start()
         self.timed_unmute.start()
 
     async def create_daily_report(self, guild: discord.Guild) -> discord.Embed:
@@ -24,18 +24,13 @@ class Tasks(commands.Cog, name="tasks"):
             title="Daily Report",
             description="Good morning everyone! Here's your report for the day.",
         )
-        school_days = (
-            self.SCHOOL_INFO_DICT["days"]["carmel"][
-                datetime.now().strftime("%m/%d/%Y")
-            ],
-            self.SCHOOL_INFO_DICT["days"]["greyhound"][
-                datetime.now().strftime("%m/%d/%Y")
-            ],
+        school_day = (
+            self.SCHOOL_INFO_DICT["days"][datetime.now().strftime("%m/%d/%Y")],
         )
 
         school_day_val = (
             f'Today is {datetime.now().strftime("%A, %B %d, %Y")}.\n'
-            f"It's a {school_days[0]} for the Carmel cohort, and a {school_days[1]} for the Greyhound cohort.\n"
+            f"It's a {school_day} today.\n"
             "(To view more details, run `/schoolday` or `c?schoolday` (legacy command).)"
         )
         embed.add_field(name="School Day", value=school_day_val, inline=False)
@@ -64,45 +59,20 @@ class Tasks(commands.Cog, name="tasks"):
         embed.add_field(
             name="Main Cafeteria Lunch Menu", value=lunch_menu_val_3, inline=False
         )
+
         number_of_days = (
-            datetime.strptime("05/27/2021", "%m/%d/%Y") - datetime.now()
+            datetime.strptime("05/26/2022", "%m/%d/%Y") - datetime.now()
         ).days + 1
-        embed.add_field(name="Total Days Until The End of School", value=number_of_days)
+        embed.add_field(name="Days Until The End of School", value=number_of_days)
         number_of_school_days = 0
         for day in range(number_of_days):
-            day = self.SCHOOL_INFO_DICT["days"]["carmel"][
+            day = self.SCHOOL_INFO_DICT["days"][
                 (datetime.now() + timedelta(days=day)).strftime("%m/%d/%Y")
             ]
-            if any(
-                [day_type in day.lower() for day_type in ["blue", "gold", "orange"]]
-            ):
+            if any([day_type in day.lower() for day_type in ["blue", "gold"]]):
                 number_of_school_days += 1
         embed.add_field(
             name="School Days Until The End of School", value=number_of_school_days
-        )
-
-        number_of_carmel_in_person_days = 0
-        for day in range(number_of_days):
-            day = self.SCHOOL_INFO_DICT["days"]["carmel"][
-                (datetime.now() + timedelta(days=day)).strftime("%m/%d/%Y")
-            ]
-            if "in person" in day.lower():
-                number_of_carmel_in_person_days += 1
-        embed.add_field(
-            name="Carmel In Person Days Until The End of School",
-            value=number_of_carmel_in_person_days,
-        )
-
-        number_of_greyhound_in_person_days = 0
-        for day in range(number_of_days):
-            day = self.SCHOOL_INFO_DICT["days"]["carmel"][
-                (datetime.now() + timedelta(days=day)).strftime("%m/%d/%Y")
-            ]
-            if "in person" in day.lower():
-                number_of_greyhound_in_person_days += 1
-        embed.add_field(
-            name="Greyhound In Person Days Until The End of School",
-            value=number_of_greyhound_in_person_days,
         )
 
         embed.set_footer(
@@ -112,7 +82,7 @@ class Tasks(commands.Cog, name="tasks"):
         return embed
 
     @commands.command()
-    # @commands.has_permissions(administrator=True)
+    @commands.has_permissions(administrator=True)
     async def testdailyreport(self, ctx: commands.Context):
         embed = await self.create_daily_report(ctx.guild)
         await ctx.send(embed=embed)
