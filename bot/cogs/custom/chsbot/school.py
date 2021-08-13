@@ -68,7 +68,7 @@ class School(commands.Cog):
                     create_choice(name="carmel", value="carmel"),
                     create_choice(name="greyhound", value="greyhound"),
                 ],
-            ),
+            #),
             create_option(
                 name="date",
                 description="The optional date to look up. Must be in the form MM/DD/YYYY.",
@@ -77,14 +77,18 @@ class School(commands.Cog):
             ),
         ],
     )
+    
+    # One of the methods with the cohort default parameter being "None"
     async def schoolday(self, ctx, cohort=None, date=None):
         """Tells you information about today (Blue/Gold, In Person/Virtual, Late Start, weekends, breaks, etc.).
         The `all` argument is optional, and it will display information for both cohorts.
         """
         if cohort:
             if date:
+                 # You seem to use cohort to access a dictionary
                 school_day = self.SCHOOL_INFO_DICT["days"][cohort][date]
             else:
+                 # You seem to use cohort to access a dictionary
                 school_day = self.SCHOOL_INFO_DICT["days"][cohort][
                     datetime.now().strftime("%m/%d/%Y")
                 ]
@@ -128,6 +132,8 @@ class School(commands.Cog):
             ),
         ],
     )
+            
+    # One of the methods with the cohort default parameter being "None"
     async def schoolweek(self, ctx, cohort=None):
         """Tells you information about the next seven days.
         The `all` argument is optional, and it will display information for both cohorts.
@@ -138,6 +144,7 @@ class School(commands.Cog):
                 target_day = datetime.now() + timedelta(days=i + 1)
                 school_week.append(
                     target_day.strftime("%a, %b %d, %Y: ")
+                    # Using cohort to access a dictionary but if defaulted to null could cause undefined behavior but idk?
                     + self.SCHOOL_INFO_DICT["days"][cohort][
                         target_day.strftime("%m/%d/%Y")
                     ]
