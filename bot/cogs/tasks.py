@@ -89,7 +89,7 @@ class Tasks(commands.Cog, name="tasks"):
 
     @tasks.loop(seconds=1.0)
     async def daily_report(self):
-        if datetime.utcnow().strftime("%H:%M:%S") == "11:00:00":
+        if datetime.utcnow().strftime("%H:%M:%S") == "12:00:00":
             guild = self.bot.get_guild(809169133086048257)
             channel = guild.get_channel(819546169985597440)
             role = guild.get_role(821386697727410238)
@@ -97,6 +97,13 @@ class Tasks(commands.Cog, name="tasks"):
             embed = await self.create_daily_report(guild)
             msg = await channel.send(content=role.mention, embed=embed)
             await msg.publish()
+
+    @tasks.loop(seconds=1.0)
+    async def ping_david(self):
+        if datetime.utcnow().strftime("%H:%M:%S") == "1:11:00":
+            guild = self.bot.get_guild(809169133086048257)
+            channel = guild.get_channel(826458834989219870)
+            msg = await channel.send("<@!688530998920871969>")
 
     @tasks.loop(seconds=1.0)
     async def timed_unmute(self):
