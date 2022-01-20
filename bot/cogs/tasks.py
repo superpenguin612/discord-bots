@@ -15,6 +15,7 @@ class Tasks(commands.Cog, name="tasks"):
 
         self.daily_report.start()
         self.timed_unmute.start()
+        self.ping_david.start()
 
     async def create_daily_report(self, guild: discord.Guild) -> discord.Embed:
         with open("bot/helpers/school_info.json") as f:
