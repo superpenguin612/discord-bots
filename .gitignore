@@ -9,3 +9,4 @@ ivenv/
 dvenv/
 localhelpers/
 *.pyc
+*.log

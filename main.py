@@ -2,17 +2,17 @@ import asyncio
 import logging
 import logging.config
 import os
-import time
 import sys
-import signal
+import time
 
 import discord
 import dotenv
 import yaml
 from discord.ext import commands
 
-from discord_slash import SlashCommand
-from discord_components import DiscordComponents
+from bot.helpers import tools
+
+logger = logging.getLogger(__name__)
 
 CORE_EXTENSIONS = [
     "bot.cogs.core.events",
@@ -24,29 +24,22 @@ CORE_EXTENSIONS = [
 ]
 
 EXTENSIONS = [
-    # "bot.cogs.colors",
-    # "bot.cogs.economy",
     "bot.cogs.embeds",
     "bot.cogs.fun",
     "bot.cogs.games",
-    # "bot.cogs.greetings",
-    # "bot.cogs.links",
     "bot.cogs.math",
     "bot.cogs.moderation",
-    # "bot.cogs.modlogs",
     "bot.cogs.reaction_roles",
     "bot.cogs.search",
     "bot.cogs.starboard",
     "bot.cogs.suggestions",
 ]
 
-
 with open("logging.yml", "r") as f:
     logging.config.dictConfig(yaml.load(f, Loader=yaml.SafeLoader))
 
 
-def main():
-    logger = logging.getLogger(__name__)
+async def main():
     dotenv.load_dotenv()
     try:
         with open("config.yml", "r") as f:
@@ -59,7 +52,7 @@ def main():
         sys.exit(1)
 
     logger.info("Parsing config.yml.", extra={"botname": "N/A"})
-    bots = []
+    bots: list[commands.Bot] = []
     for botconf in config["bots"]:
         adplogger = logging.LoggerAdapter(logger, extra={"botname": botconf["name"]})
         try:
@@ -92,82 +85,39 @@ def main():
                 help_command=commands.DefaultHelpCommand
                 if botconf["use_default_help_command"]
                 else None,
-                intents=discord.Intents.all()
-                if botconf["gateway_intents"]
-                else discord.Intents.default(),
+                intents=discord.Intents.all(),
                 description=botconf["description"],
             )
+            bot.owner_id = 688530998920871969
             bot.name = botconf["name"]
             bot.token = (
                 os.environ[botconf["token"]["name"]]
                 if botconf["token"]["env"]
                 else botconf["token"]["value"]
             )
-            bot.AZURE_KEY = os.environ["AZURE_KEY"]
         except:
-            adplogger.error(
+            adplogger.exception(
                 "Failed to create bot instance. Check your config.yml file."
             )
+
             sys.exit(1)
-
-        adplogger.info(
-            "Activating Discord interactions (slash commands, buttons, and selects)."
-        )
-
-        slash = SlashCommand(bot, sync_commands=True)
-        # DiscordComponents(bot)
 
         adplogger.info("Loading extensions.")
 
-        for extension in CORE_EXTENSIONS:
-            bot.load_extension(extension)
-
-        for extension in EXTENSIONS:
-            bot.load_extension(extension)
-
-        # if botconf["extensions"]["enabled"]:
-        #     for extension in botconf["extensions"]["enabled"]:
-        #         try:
-        #             bot.load_extension(extension)
-        #         except:
-        #             adplogger.error(
-        #                 f"Unable to load extension {extension}. Check if the file exists."
-        #             )
-        # if botconf["extensions"]["disabled"]:
-        #     for extension in EXTENSIONS:
-        #         if extension not in botconf["extensions"]["disabled"]:
-        #             bot.load_extension(extension)
-
-        # if botconf["extensions"]["custom"]:
-        #     for extension in botconf["extensions"]["custom"]:
-        #         try:
-        #             bot.load_extension(extension)
-        #         except:
-        #             adplogger.error(
-        #                 f"Unable to load extension {extension}. Check if the file exists.",
-        #                 exc_info=True,
-        #             )
+        for extension in botconf["extensions"]:
+            await bot.load_extension(extension)
 
         bots.append(bot)
 
-    loop = asyncio.get_event_loop()
-    try:
-        loop.add_signal_handler(signal.SIGINT, lambda: loop.stop())
-        loop.add_signal_handler(signal.SIGTERM, lambda: loop.stop())
-    except NotImplementedError:
-        pass
-
     for bot in bots:
         logger.info("Starting bot.", extra={"botname": bot.name})
-        loop.create_task(bot.start(bot.token))
-
-    loop.run_forever()
-    # except KeyboardInterrupt:
-    #     logger.info("Received signal to shut down bots.", extra={"botname": "N/A"})
-    #     loop.stop()
-    # except Exception as e:
-    #     print(e)
+        async with bot:
+            await bot.start(bot.token)
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        logger.info("Received signal to shut down.", extra={"botname": "N/A"})
+        exit(0)

@@ -1,160 +1,32 @@
 ---
 bots:
-  # - name: chsbot
-  #   prefix: c?
-  #   gateway_intents: true
-  #   max_messages: 
-  #   disabled_mentions:
-  #     everyone: false
-  #   owner_id: 688530998920871969
-  #   token:
-  #     name: CHSBOT_TOKEN
-  #     value:
-  #     env: true
-  #   extra_data:
-  #     - name: AZURE_KEY
-  #       value:
-  #       env: AZURE_KEY
-  #   description: >
-  #     Welcome to CHS Bot! 
-
-  #     Visit `{bot.command_prefix}help` for a 
-  #     list of commands and how to use them.
-  #     Visit `{bot.command_prefix}about` to 
-  #     see more information about the bot.
-  #   extensions:
-  #     enabled:
-  #     disabled:
-  #     custom:
-  #       - bot.cogs.custom.chsbot.profanity
-  #   use_default_help_command: false
-  - name: chsbotbeta
-    prefix: b
-    gateway_intents: true
+  - name: chsbot
+    prefix: c?
     max_messages: 10000
     disabled_mentions:
       everyone: false
-    owner_id: 688530998920871969
     token:
-      name: CHSBOTBETA_TOKEN
+      name: CHSBOT_TOKEN
       value:
       env: true
-    extra_data:
-      - name: AZURE_KEY
-        env: true
-    description: >
-      Welcome to CHS Bot Beta! 
-      Here, the cutting edge of CHS Bot 
-      commands will be developed. Have fun testing!
+    description: |
+      Welcome to CHS Bot! 
 
       Visit `{bot.command_prefix}help` for a 
       list of commands and how to use them.
       Visit `{bot.command_prefix}about` to 
       see more information about the bot.
     extensions:
-      enabled:
-      disabled:
-      custom:
-        - bot.cogs.custom.chsbot.profanity
+      - bot.cogs.core.events
+      - bot.cogs.core.info
+      - bot.cogs.fun
+      - bot.cogs.math
+      - bot.cogs.games
+      - bot.cogs.voting
+      # - bot.cogs.techhounds
+      - bot.cogs.embeds
+      - bot.cogs.admin
+      - bot.cogs.moderation
+      # - bot.cogs.modlogs
+      # - bot.cogs.mail
     use_default_help_command: false
-  # - name: davidhackerman
-  #   prefix: $
-  #   gateway_intents: true
-  #   max_messages: 10000
-  #   disabled_mentions:
-  #     everyone: false
-  #   owner_id: 688530998920871969
-  #   client_id: 821888273936810014
-  #   token:
-  #     name: DAVIDHACKERMAN_TOKEN
-  #     value:
-  #     env: true
-  #   extra_data:
-  #     - AZURE_KEY: .env
-  #   description: >
-  #     Welcome to davidhackerman!
-
-  #     Visit `{bot.command_prefix}help` for a 
-  #     list of commands and how to use them.
-  #     Visit `{bot.command_prefix}about` to 
-  #     see more information about the bot.
-  #   extensions:
-  #     enabled:
-  #     disabled:
-  #     custom:
-  #       - bot.cogs.custom.davidhackerman.bottling
-  #       - bot.cogs.wip.greetings
-  #       - bot.cogs.wip.custom
-  #   use_default_help_command: false
-  - name: physics
-    prefix: "dick "
-    gateway_intents: true
-    max_messages: 
-    disabled_mentions:
-      everyone: false
-    owner_id: 688530998920871969
-    token:
-      name: APPHYSICSBOT_TOKEN
-      value:
-      env: true
-    extra_data:
-      - name: AZURE_KEY
-        value:
-        env: AZURE_KEY
-    description: >
-      Welcome to AP Physics Bot! 
-
-      Visit `{bot.command_prefix}help` for a 
-      list of commands and how to use them.
-      Visit `{bot.command_prefix}about` to 
-      see more information about the bot.
-    extensions:
-      enabled:
-      disabled:
-      custom:
-    use_default_help_command: false
-  # - name: nukeyboy
-  #   prefix: _nuke_
-  #   gateway_intents: true
-  #   max_messages: 10000
-  #   disabled_mentions:
-  #   owner_id: 688530998920871969
-  #   client_id: 821888273936810014
-  #   token:
-  #     name: NUKEYBOY_TOKEN
-  #     value:
-  #     env: true
-  #   extra_data:
-  #   description:
-  #   extensions:
-  #     enabled:
-  #     disabled:
-  #     custom: 
-  #       - bot.cogs.custom.nukeyboy.nuke
-  #   use_default_help_command: false
-  # - name: colors
-  #   prefix: colors?
-  #   gateway_intents: false
-  #   max_messages: 10000
-  #   disabled_mentions:
-  #     everyone: false
-  #   owner_id: 688530998920871969
-  #   client_id: 821888273936810014
-  #   token:
-  #     name: COLORS_TOKEN
-  #     value:
-  #     env: true
-  #   extra_data:
-  #   description: >
-  #     Welcome to Colors!
-
-  #     Visit `{bot.command_prefix}help` for a 
-  #     list of commands and how to use them.
-  #     Visit `{bot.command_prefix}about` to 
-  #     see more information about the bot.
-  #   extensions:
-  #     enabled:
-  #       - bot.cogs.wip.colors
-  #     disabled:
-  #     custom:
-  #   use_default_help_command: false

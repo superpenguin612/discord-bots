@@ -1,38 +1,29 @@
+# doesn't work yet
+
 import json
 
 import discord
 from discord.ext import commands
 
 
-class ModLogs(commands.Cog, name="modlogs"):
-    def __int__(self, bot: commands.Bot):
+class ModLogs(commands.Cog):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
-
-    async def get_log_channel(self, guild_id):
-        record = await self.bot.db.fetchrow(
-            "SELECT * FROM settings WHERE server_id=$1;", str(guild_id)
-        )
-        server_settings = json.loads(record["json"])
-        return server_settings["logging"]["log_channel"]
+        self.log_channel_id = 1016517257624567848
 
     @commands.Cog.listener(name="on_raw_message_edit")
     async def on_raw_message_edit(self, payload: discord.RawMessageUpdateEvent) -> None:
         if "author" in payload.data:
             if payload.data["author"]["id"] != self.bot.user.id:
                 guild = self.bot.get_guild(int(payload.data["guild_id"]))
-                settings_cog = self.bot.get_cog("settings")
-                log_channel = guild.get_channel(
-                    (await settings_cog.get_guild_settings(guild.id))["logging"][
-                        "log_channel"
-                    ]
-                )
+                log_channel = guild.get_channel(self.log_channel_id)
 
                 message_channel = guild.get_channel(payload.channel_id)
                 message_author = guild.get_member(int(payload.data["author"]["id"]))
 
                 embed = discord.Embed(title=f"Message Edit", color=discord.Color.blue())
                 embed.set_author(
-                    name=message_author, icon_url=message_author.avatar_url
+                    name=message_author, icon_url=message_author.avatar.url
                 )
                 try:
                     embed.add_field(
@@ -64,10 +55,7 @@ class ModLogs(commands.Cog, name="modlogs"):
         self, payload: discord.RawMessageDeleteEvent
     ) -> None:
         guild = self.bot.get_guild(payload.guild_id)
-        settings_cog = self.bot.get_cog("settings")
-        log_channel = guild.get_channel(
-            (await settings_cog.get_guild_settings(guild.id))["logging"]["log_channel"]
-        )
+        log_channel = guild.get_channel(self.log_channel_id)
         message_channel = guild.get_channel(payload.channel_id)
 
         if payload.cached_message:
@@ -79,7 +67,7 @@ class ModLogs(commands.Cog, name="modlogs"):
                 )
                 embed.set_author(
                     name=payload.cached_message.author,
-                    icon_url=payload.cached_message.author.avatar_url,
+                    icon_url=payload.cached_message.author.avatar.url,
                 )
                 embed.set_footer(
                     text=f"Channel: {message_channel} | Author ID: {payload.cached_message.author.id} | Message ID: {payload.message_id}"
@@ -99,10 +87,7 @@ class ModLogs(commands.Cog, name="modlogs"):
     @commands.Cog.listener()
     async def on_guild_channel_create(self, channel: discord.abc.GuildChannel) -> None:
         guild = channel.guild
-        settings_cog = self.bot.get_cog("settings")
-        log_channel = guild.get_channel(
-            (await settings_cog.get_guild_settings(guild.id))["logging"]["log_channel"]
-        )
+        log_channel = guild.get_channel(self.log_channel_id)
 
         embed = discord.Embed(
             title=f"Channel Create",
@@ -114,11 +99,7 @@ class ModLogs(commands.Cog, name="modlogs"):
     @commands.Cog.listener()
     async def on_guild_channel_delete(self, channel: discord.abc.GuildChannel) -> None:
         guild = channel.guild
-        settings_cog = self.bot.get_cog("settings")
-        log_channel = guild.get_channel(
-            (await settings_cog.get_guild_settings(guild.id))["logging"]["log_channel"]
-        )
-
+        log_channel = guild.get_channel(self.log_channel_id)
         embed = discord.Embed(
             title=f"Channel Delete",
             description=f"{channel.mention} has been deleted.",
@@ -131,10 +112,7 @@ class ModLogs(commands.Cog, name="modlogs"):
         self, before: discord.abc.GuildChannel, after: discord.abc.GuildChannel
     ) -> None:
         guild = before.guild
-        settings_cog = self.bot.get_cog("settings")
-        log_channel = guild.get_channel(
-            (await settings_cog.get_guild_settings(guild.id))["logging"]["log_channel"]
-        )
+        log_channel = guild.get_channel(self.log_channel_id)
 
         embed = discord.Embed(
             title=f"Channel Update",
@@ -146,33 +124,27 @@ class ModLogs(commands.Cog, name="modlogs"):
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member) -> None:
         guild = member.guild
-        settings_cog = self.bot.get_cog("settings")
-        log_channel = guild.get_channel(
-            (await settings_cog.get_guild_settings(guild.id))["logging"]["log_channel"]
-        )
+        log_channel = guild.get_channel(self.log_channel_id)
 
         embed = discord.Embed(
             title=f"Member Join",
             description=f"{member.mention} has joined the server.",
             color=discord.Color.red(),
         )
-        embed.set_author(name=member, icon_url=member.avatar_url)
+        embed.set_author(name=member, icon_url=member.avatar.url)
         await log_channel.send(embed=embed)
 
     @commands.Cog.listener()
     async def on_member_remove(self, member: discord.Member) -> None:
         guild = member.guild
-        settings_cog = self.bot.get_cog("settings")
-        log_channel = guild.get_channel(
-            (await settings_cog.get_guild_settings(guild.id))["logging"]["log_channel"]
-        )
+        log_channel = guild.get_channel(self.log_channel_id)
 
         embed = discord.Embed(
             title=f"Member Leave",
             description=f"{member.mention} has left the server.",
             color=discord.Color.red(),
         )
-        embed.set_author(name=member, icon_url=member.avatar_url)
+        embed.set_author(name=member, icon_url=member.avatar.url)
         await log_channel.send(embed=embed)
 
     @commands.Cog.listener()
@@ -198,24 +170,16 @@ class ModLogs(commands.Cog, name="modlogs"):
             elif removed_roles:
                 value = (" ").join([role.mention for role in removed_roles])
                 embed.add_field(name="Removed Roles", value=value)
-            embed.set_author(name=before, icon_url=before.avatar_url)
+            embed.set_author(name=before, icon_url=before.avatar.url)
 
             guild = before.guild
-            settings_cog = self.bot.get_cog("settings")
-            log_channel = guild.get_channel(
-                (await settings_cog.get_guild_settings(guild.id))["logging"][
-                    "log_channel"
-                ]
-            )
+            log_channel = guild.get_channel(self.log_channel_id)
             await log_channel.send(embed=embed)
 
     @commands.Cog.listener()
     async def on_invite_create(self, invite: discord.Invite) -> None:
         guild = invite.guild
-        settings_cog = self.bot.get_cog("settings")
-        log_channel = guild.get_channel(
-            (await settings_cog.get_guild_settings(guild.id))["logging"]["log_channel"]
-        )
+        log_channel = guild.get_channel(self.log_channel_id)
 
         embed = discord.Embed(
             title=f"Invite Create",
@@ -229,10 +193,7 @@ class ModLogs(commands.Cog, name="modlogs"):
     @commands.Cog.listener()
     async def on_invite_delete(self, invite: discord.Invite) -> None:
         guild = invite.guild
-        settings_cog = self.bot.get_cog("settings")
-        log_channel = guild.get_channel(
-            (await settings_cog.get_guild_settings(guild.id))["logging"]["log_channel"]
-        )
+        log_channel = guild.get_channel(self.log_channel_id)
 
         embed = discord.Embed(
             title=f"Invite Delete",
@@ -248,10 +209,7 @@ class ModLogs(commands.Cog, name="modlogs"):
         self, before: discord.Guild, after: discord.Guild
     ) -> None:
         guild = before
-        settings_cog = self.bot.get_cog("settings")
-        log_channel = guild.get_channel(
-            (await settings_cog.get_guild_settings(guild.id))["logging"]["log_channel"]
-        )
+        log_channel = guild.get_channel(self.log_channel_id)
 
         embed = discord.Embed(
             title=f"Guild Update",
@@ -263,10 +221,7 @@ class ModLogs(commands.Cog, name="modlogs"):
     @commands.Cog.listener()
     async def on_guild_role_create(self, role: discord.Role) -> None:
         guild = role.guild
-        settings_cog = self.bot.get_cog("settings")
-        log_channel = guild.get_channel(
-            (await settings_cog.get_guild_settings(guild.id))["logging"]["log_channel"]
-        )
+        log_channel = guild.get_channel(self.log_channel_id)
 
         embed = discord.Embed(
             title=f"Role Create",
@@ -278,10 +233,7 @@ class ModLogs(commands.Cog, name="modlogs"):
     @commands.Cog.listener()
     async def on_guild_role_delete(self, role: discord.Role) -> None:
         guild = role.guild
-        settings_cog = self.bot.get_cog("settings")
-        log_channel = guild.get_channel(
-            (await settings_cog.get_guild_settings(guild.id))["logging"]["log_channel"]
-        )
+        log_channel = guild.get_channel(self.log_channel_id)
 
         embed = discord.Embed(
             title=f"Role Delete",
@@ -297,10 +249,7 @@ class ModLogs(commands.Cog, name="modlogs"):
         if after.name == "Rainbow":
             return
         guild = before.guild
-        settings_cog = self.bot.get_cog("settings")
-        log_channel = guild.get_channel(
-            (await settings_cog.get_guild_settings(guild.id))["logging"]["log_channel"]
-        )
+        log_channel = guild.get_channel(self.log_channel_id)
 
         embed = discord.Embed(
             title=f"Role Update",
@@ -310,5 +259,5 @@ class ModLogs(commands.Cog, name="modlogs"):
         await log_channel.send(embed=embed)
 
 
-def setup(bot: commands.Bot) -> None:
-    bot.add_cog(ModLogs(bot))
+async def setup(bot: commands.Bot) -> None:
+    await bot.add_cog(ModLogs(bot))

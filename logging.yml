@@ -5,12 +5,9 @@ formatters:
   discord:
     format: "[%(asctime)s] [%(levelname)s] [%(name)s] - %(message)s"
   commands:
-    format: >
-      "[%(asctime)s] [Bot: %botname)s] 
-      [User: %(username)s ID: %(userid)s] [Guild: %(guild)s ID: %(guildid)s] 
-      [Prefix: %(prefix)s] [Command: %(command)s] [Arguments: %(arguments)s]\n
-      Full message:\n
-      %(full)s"
+    format: |
+      [%(asctime)s] [%(botname)s] [%(username)s (%(userid)s) in %(guild)s (%(guildid)s)]
+      [Command: %(command)s] [Message: %(full)s]
 handlers:
   bot_console:
     class: logging.StreamHandler
@@ -59,6 +56,6 @@ loggers:
       - discord_file
 # root:
 #   level: INFO
-#   handlers: 
+#   handlers:
 #     - bot_console
 #     - bot_file

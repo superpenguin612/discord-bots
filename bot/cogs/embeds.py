@@ -1,718 +1,394 @@
-import asyncio
-import datetime
-import time
-
 import discord
+from discord import app_commands
 from discord.ext import commands
-from discord_components import Button, ButtonStyle, InteractionType
-from discord_slash import SlashContext, cog_ext
-from discord_slash.model import SlashCommandOptionType
-from discord_slash.utils.manage_commands import create_choice, create_option
 
 from bot.helpers import tools
 
+# TODO: convert some of these extra modals to generic ones for tools module to declutter
+# TODO: make ;addembed and ;removeembed commands to have messages with more than one embed
 
-class Embeds(commands.Cog, name="embeds"):
-    def __init__(self, bot):
+
+class Embeds(commands.Cog):
+    def __init__(self, bot) -> None:
         self.bot = bot
+        self.bot.tree.add_command(
+            app_commands.ContextMenu(
+                name="Edit Embed",
+                callback=self.editembed_menu,
+            )
+        )
 
-    @cog_ext.cog_slash(
-        name="sendembed",
-        description="Send an embed message from the bot. This launches the embeditorificatorinator.",
-        options=[
-            create_option(
-                name="channel",
-                description="The channel the embed is in.",
-                option_type=SlashCommandOptionType.CHANNEL,
-                required=True,
-            ),
-        ],
-    )
-    async def sendembed(self, ctx: SlashContext, channel: discord.TextChannel) -> None:
-        embedcreator = EmbedCreator(self.bot, ctx, channel.id)
-        await embedcreator.run()
-
-    @cog_ext.cog_slash(
-        name="editembed",
-        description="Edit an embed message sent by the bot. This launches the embeditorificatorinator.",
-        options=[
-            create_option(
-                name="channel",
-                description="The channel the embed is in.",
-                option_type=SlashCommandOptionType.CHANNEL,
-                required=True,
-            ),
-            create_option(
-                name="message_id",
-                description="The ID of the message that contains the embed.",
-                option_type=SlashCommandOptionType.STRING,
-                required=True,
-            ),
-        ],
-    )
-    async def editembed(
-        self, ctx: SlashContext, channel: discord.TextChannel, message_id: str
+    async def editembed_menu(
+        self, interaction: discord.Interaction, message: discord.Message
     ) -> None:
-        embedcreator = EmbedCreator(self.bot, ctx, channel.id, int(message_id))
-        await embedcreator.run()
+        if message.author.id != self.bot.user.id:
+            await interaction.response.send_message(
+                embed=tools.create_error_embed(
+                    "That message was not sent by this bot."
+                ),
+                ephemeral=True,
+            )
+            return
+        if interaction.user.guild_permissions.manage_messages:
+            view = EmbedEditor(interaction.user, message)
+            await interaction.response.send_message(embeds=view.get_embeds(), view=view)
+        else:
+            await interaction.response.send_message(
+                embed=tools.create_error_embed("You can't do that."), ephemeral=True
+            )
+
+    @commands.hybrid_command(
+        name="sendembed",
+        description="Send an embed message from the bot.",
+    )
+    @app_commands.describe(channel="The channel to send the embed to.")
+    @commands.has_permissions(manage_messages=True)
+    async def sendembed(
+        self, ctx: commands.Context, channel: discord.TextChannel | None = None
+    ) -> None:
+        view = EmbedEditor(ctx.author, channel if channel else ctx.channel)
+        await ctx.send(embeds=view.get_embeds(), view=view)
+
+    @commands.hybrid_command(
+        name="editembed",
+        description="Edit an embed message sent by the bot.",
+    )
+    @app_commands.describe(
+        channel="The channel to send the embed to.",
+        message_id="The ID of the mesasge that contains the embed you want to edit.",
+        # embed_number="The number embed you want to edit (1 for the 1st, 2 for the 2nd, etc).",
+    )
+    @commands.has_permissions(manage_messages=True)
+    async def editembed(
+        self,
+        ctx: commands.Context,
+        channel: discord.TextChannel,
+        message_id: str,
+        # embed_number: int = 1,
+    ) -> None:
+        try:
+            message = await channel.fetch_message(int(message_id))
+        except:
+            await ctx.send(embed=tools.create_error_embed("Invalid message ID."))
+            return
+        if message.author.id != ctx.bot.user.id:
+            await ctx.send(
+                embed=tools.create_error_embed("That message was not sent by this bot.")
+            )
+            return
+        view = EmbedEditor(ctx.author, message)
+        await ctx.send(embeds=view.get_embeds(), view=view)
 
 
-def setup(bot: commands.Bot):
-    bot.add_cog(Embeds(bot))
+class EmbedEditor(tools.ViewBase):
+    embed: discord.Embed
+    channel: discord.TextChannel
+    message: discord.Message | None
 
-
-class EmbedCreator:
     def __init__(
         self,
-        bot: commands.Bot,
-        ctx: SlashContext,
-        channel_id: int,
-        message_id: int = None,
-    ):
-        self.bot = bot
-        self.ctx = ctx
-        self.channel_id = channel_id
-        self.message_id = message_id
+        user: discord.User,
+        target: discord.TextChannel | discord.Message,
+        embed_number: int = 0,
+    ) -> None:
+        super().__init__(user, timeout=600.0)
+        if isinstance(target, discord.TextChannel):
+            self.channel = target
+            self.embed = discord.Embed(description="Placeholder Text")
+            self.message = None
+        elif isinstance(target, discord.Message):
+            self.message = target
+            self.channel = target.channel
+            self.embed = self.message.embeds[embed_number]
+        self.update_field_buttons()
 
-    REACTIONS_CONVERTER = {
-        "👁": "view",
-        "📜": "title",
-        "📄": "description",
-        "📑": "footer",
-        "🟩": "color",
-        "🌠": "image",
-        "📎": "thumbnail",
-        "👤": "author",
-        "🖊️": "add_field",
-        "✅": "finish",
-    }
+    def get_embeds(self) -> list[discord.Embed]:
+        instructions = discord.Embed(
+            title="Embed Editor",
+            description="Use the buttons below to edit the displayed embed.",
+            colour=discord.Colour.from_str("#FBBF05"),
+        )
+        instructions.add_field(name="Location", value=self.channel.mention)
+        if self.message:
+            instructions.add_field(name="Message ID", value=self.message.id)
+        return [instructions, self.embed]
 
-    REACTIONS_CONVERTER_VIEW = {
-        "⤴️": "menu",
-        "✅": "finish",
-    }
-
-    def create_menu(self) -> discord.Embed:
-        desc = [
-            "View Embed - 👁",
-            "Title - 📜",
-            "Description - 📄",
-            "Footer - 📑",
-            "Color - 🟩",
-            "Image - 🌠",
-            "Thumbnail - 📎",
-            "Author - 👤",
-            "Add Field - 🖊️",
-            "Fields - 1️⃣-9️⃣",
-            "",
-            "Finish Setup - ✅",
+    def update_field_buttons(self) -> None:
+        field_buttons = [
+            child
+            for child in self.children
+            if isinstance(child, discord.ui.Button) and "Field " in child.label
         ]
-        return discord.Embed(
-            title="Embeditorificatorinator | Menu", description="\n".join(desc)
+        for button in field_buttons:
+            self.remove_item(button)
+
+        class FieldButtonModal(discord.ui.Modal):
+            embed: discord.Embed
+            index: int
+            interaction: discord.Interaction
+            name = discord.ui.TextInput(label="Name")
+            text = discord.ui.TextInput(
+                label="Text", style=discord.TextStyle.long, max_length=1024
+            )
+            inline = discord.ui.TextInput(label="Is Inline")
+
+            def __init__(self, embed: discord.Embed, index: int) -> None:
+                super().__init__(title=f"Edit Field {index+1}")
+                self.embed = embed
+                self.index = index
+                self.name.default = self.embed.fields[index].name
+                self.text.default = self.embed.fields[index].value
+                self.inline.default = str(self.embed.fields[index].inline)
+
+            async def on_submit(self, interaction: discord.Interaction) -> None:
+                self.embed.set_field_at(
+                    self.index,
+                    name=self.name.value,
+                    value=self.text.value,
+                    inline=self.inline.value.lower() in ["true", "yes", "y"],
+                )
+                self.interaction = interaction
+
+        def generate_callback(index: int):
+            async def callback(interaction: discord.Interaction) -> None:
+                modal = FieldButtonModal(self.embed, index)
+                await interaction.response.send_modal(modal)
+                await modal.wait()
+                await modal.interaction.response.edit_message(
+                    embeds=self.get_embeds(), view=self
+                )
+
+            return callback
+
+        for i in range(len(self.embed.fields)):
+            button = discord.ui.Button(label=f"Field {i+1}", row=2)
+
+            button.callback = generate_callback(i)
+            self.add_item(button)
+
+    @discord.ui.button(label="Text/Color")
+    async def text_color(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
+        class TextColorModal(discord.ui.Modal, title="Edit Embed Text"):
+            embed: discord.Embed
+            interaction: discord.Interaction
+            title_ = discord.ui.TextInput(label="Title", max_length=256, required=False)
+            description = discord.ui.TextInput(
+                label="Description",
+                style=discord.TextStyle.long,
+                max_length=4000,
+                required=False,
+            )
+            url = discord.ui.TextInput(label="URL", required=False)
+            color = discord.ui.TextInput(
+                label="Color", placeholder="Color as hex (#000000)", required=False
+            )
+
+            def __init__(self, embed: discord.Embed) -> None:
+                super().__init__()
+                self.embed = embed
+                self.title_.default = embed.title
+                self.description.default = embed.description
+                self.url.default = embed.url
+                self.color.default = (
+                    "#"
+                    + "".join(
+                        [
+                            hex(value)[2:].upper().zfill(2)
+                            for value in embed.colour.to_rgb()
+                        ]
+                    )
+                    if embed.colour
+                    else None
+                )
+
+            async def on_submit(self, interaction: discord.Interaction) -> None:
+                self.embed.title = self.title_.value
+                self.embed.description = self.description.value
+                self.embed.url = self.url.value
+                if self.color.value:
+                    self.embed.colour = discord.Colour.from_str(self.color.value)
+                self.interaction = interaction
+
+        modal = TextColorModal(self.embed)
+        await interaction.response.send_modal(modal)
+        await modal.wait()
+        await modal.interaction.response.edit_message(
+            embeds=self.get_embeds(), view=self
         )
 
-    async def run(self) -> None:
-        if self.message_id:
-            channel = self.ctx.guild.get_channel(self.channel_id)
-            message = await channel.fetch_message(self.message_id)
-            self.embed_viewer = message.embeds[0]
-        else:
-            self.embed_viewer = discord.Embed()
+    @discord.ui.button(label="Images")
+    async def images(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
+        class ImagesModal(discord.ui.Modal, title="Edit Images"):
+            embed: discord.Embed
+            interaction: discord.Interaction
+            image_url = discord.ui.TextInput(label="Image URL", required=False)
+            thumbnail_url = discord.ui.TextInput(label="Thumbnail URL", required=False)
 
-        self.embed_creator = self.create_menu()
-        self.bot_message = await self.ctx.send(embed=self.embed_creator)
+            def __init__(self, embed: discord.Embed) -> None:
+                super().__init__()
+                self.embed = embed
+                self.image_url.default = embed.image.url
+                self.thumbnail_url.default = embed.thumbnail.url
 
-        def rcheck(reaction: discord.Reaction, user: discord.User) -> bool:
-            return (
-                user.id == self.ctx.author_id
-                and reaction.message.id == self.bot_message.id
-            )
+            async def on_submit(self, interaction: discord.Interaction) -> None:
+                self.embed.set_image(url=self.image_url.value)
+                self.embed.set_thumbnail(url=self.thumbnail_url.value)
+                self.interaction = interaction
 
-        def tcheck(message: discord.Message) -> bool:
-            return (
-                message.author.id == self.ctx.author_id
-                and message.channel == self.ctx.channel
-            )
+        modal = ImagesModal(self.embed)
+        await interaction.response.send_modal(modal)
+        await modal.wait()
+        await modal.interaction.response.edit_message(
+            embeds=self.get_embeds(), view=self
+        )
 
-        running = True
-        self.setup_status = "menu"
+    @discord.ui.button(label="Author")
+    async def author(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
+        class AuthorModal(discord.ui.Modal, title="Edit Author"):
+            embed: discord.Embed
+            interaction: discord.Interaction
+            name = discord.ui.TextInput(label="Name", required=False)
+            url = discord.ui.TextInput(label="URL", required=False)
+            icon_url = discord.ui.TextInput(label="Icon URL", required=False)
 
-        self.field_count = 0
-        for reaction in self.REACTIONS_CONVERTER.keys():
-            await self.bot_message.add_reaction(reaction)
-        while running:
-            self.embed_creator = self.create_menu()
-            await self.bot_message.edit(embed=self.embed_creator)
+            def __init__(self, embed: discord.Embed) -> None:
+                super().__init__()
+                self.embed = embed
+                self.name.default = embed.author.name
+                self.url.default = embed.author.url
+                self.icon_url.default = embed.author.icon_url
 
+            async def on_submit(self, interaction: discord.Interaction) -> None:
+                self.embed.set_author(
+                    name=self.name.value,
+                    url=self.url.value,
+                    icon_url=self.icon_url.value,
+                )
+                self.interaction = interaction
+
+        modal = AuthorModal(self.embed)
+        await interaction.response.send_modal(modal)
+        await modal.wait()
+        await modal.interaction.response.edit_message(
+            embeds=self.get_embeds(), view=self
+        )
+
+    @discord.ui.button(label="Footer")
+    async def footer(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
+        class FooterModal(discord.ui.Modal, title="Edit Footer"):
+            embed: discord.Embed
+            interaction: discord.Interaction
+            text = discord.ui.TextInput(label="Text", required=False)
+            icon_url = discord.ui.TextInput(label="Icon URL", required=False)
+
+            def __init__(self, embed: discord.Embed) -> None:
+                super().__init__()
+                self.embed = embed
+                self.text.default = embed.footer.text
+                self.icon_url.default = embed.footer.icon_url
+
+            async def on_submit(self, interaction: discord.Interaction) -> None:
+                self.embed.set_footer(
+                    text=self.text.value,
+                    icon_url=self.icon_url.value,
+                )
+                self.interaction = interaction
+
+        modal = FooterModal(self.embed)
+        await interaction.response.send_modal(modal)
+        await modal.wait()
+        await modal.interaction.response.edit_message(
+            embeds=self.get_embeds(), view=self
+        )
+
+    class FieldModal(discord.ui.Modal):
+        target: int | None = None
+        interaction: discord.Interaction
+        index = discord.ui.TextInput(label="Index", required=True)
+
+        def __init__(self, title: str) -> None:
+            super().__init__(title=title)
+
+        async def on_submit(self, interaction: discord.Interaction) -> None:
             try:
-                reaction, user = await self.bot.wait_for(
-                    "reaction_add", check=rcheck, timeout=45
+                self.target = int(self.index.value)
+            except:
+                await interaction.response.send_message(
+                    embed=tools.create_error_embed("Inputted index is not an integer.")
                 )
-            except asyncio.TimeoutError:
                 return
+            self.interaction = interaction
 
-            self.setup_status = self.REACTIONS_CONVERTER.get(reaction.emoji)
-            if self.setup_status == "view":
-                await self.bot_message.clear_reactions()
-                await self.bot_message.edit(embed=self.embed_viewer)
-                for reaction in self.REACTIONS_CONVERTER_VIEW.keys():
-                    await self.bot_message.add_reaction(reaction)
-                try:
-                    reaction, user = await self.bot.wait_for(
-                        "reaction_add", check=rcheck, timeout=45
-                    )
-                except asyncio.TimeoutError:
-                    return
-                self.setup_status = self.REACTIONS_CONVERTER_VIEW.get(reaction.emoji)
-                if self.setup_status == "menu":
-                    await self.bot_message.edit(embed=self.embed_creator)
-                    await self.bot_message.clear_reactions()
-                    for reaction in self.REACTIONS_CONVERTER.keys():
-                        await self.bot_message.add_reaction(reaction)
-            if self.setup_status == "title":
-                self.embed_creator = discord.Embed(
-                    title="Embeditorificatorinator | Title",
-                    description="Send the title you want for the embed.",
-                )
-                await self.bot_message.edit(embed=self.embed_creator)
-                try:
-                    msg = await self.bot.wait_for("message", check=tcheck, timeout=300)
-                except asyncio.TimeoutError:
-                    return
-                self.embed_viewer.title = (
-                    msg.content
-                    if msg.content.lower() != "none"
-                    else discord.Embed.Empty
-                )
-                await msg.delete()
-            elif self.setup_status == "description":
-                self.embed_creator = discord.Embed(
-                    title="Embeditorificatorinator | Description",
-                    description="Send the description you want for the embed.",
-                )
-                await self.bot_message.edit(embed=self.embed_creator)
-                try:
-                    msg = await self.bot.wait_for("message", check=tcheck, timeout=300)
-                except asyncio.TimeoutError:
-                    return
-                self.embed_viewer.description = (
-                    msg.content
-                    if msg.content.lower() != "none"
-                    else discord.Embed.Empty
-                )
-                await msg.delete()
-            elif self.setup_status == "footer":
-                self.embed_creator = discord.Embed(
-                    title="Embeditorificatorinator | Footer",
-                    description="Send the footer you want for the embed.",
-                )
-                await self.bot_message.edit(embed=self.embed_creator)
-                try:
-                    msg = await self.bot.wait_for("message", check=tcheck, timeout=300)
-                except asyncio.TimeoutError:
-                    return
-                self.embed_viewer.set_footer(
-                    text=msg.content
-                    if msg.content.lower() != "none"
-                    else discord.Embed.Empty
-                )
-                await msg.delete()
-            elif self.setup_status == "color":
-                self.embed_creator = discord.Embed(
-                    title="Embeditorificatorinator | Color",
-                    description='Send the color you want for the embed. This must be in hexadecimal, preceded by a "#".\nExample: #FFFFFF',
-                )
-                await self.bot_message.edit(embed=self.embed_creator)
-                try:
-                    msg = await self.bot.wait_for("message", check=tcheck, timeout=300)
-                except asyncio.TimeoutError:
-                    return
-
-                if msg.content.lower() == "none":
-                    self.embed_viewer.color = discord.Embed.Empty
-                else:
-                    r, g, b = [
-                        int(msg.content.lstrip("#")[i : i + 2], 16) for i in (0, 2, 4)
-                    ]
-                    self.embed_viewer.color = discord.Color.from_rgb(r, g, b)
-                await msg.delete()
-            elif self.setup_status == "image":
-                self.embed_creator = discord.Embed(
-                    title="Embeditorificatorinator | Image",
-                    description="Send the image you want for the embed.\nThis can be either a URL or an image upload.",
-                )
-                await self.bot_message.edit(embed=self.embed_creator)
-                try:
-                    msg = await self.bot.wait_for("message", check=tcheck, timeout=300)
-                except asyncio.TimeoutError:
-                    return
-                if msg.content.startswith("http"):
-                    image_url = (
-                        msg.content
-                        if msg.content.lower() != "none"
-                        else discord.Embed.Empty
-                    )
-                else:
-                    image_url = msg.attachments[0].proxy_url
-                self.embed_viewer.set_image(url=image_url)
-                await msg.delete()
-            elif self.setup_status == "thumbnail":
-                self.embed_creator = discord.Embed(
-                    title="Embeditorificatorinator | Thumbnail",
-                    description="Send the thumbnail you want for the embed.\nThis can be either a URL or an image upload.",
-                )
-                await self.bot_message.edit(embed=self.embed_creator)
-                try:
-                    msg = await self.bot.wait_for("message", check=tcheck, timeout=300)
-                except asyncio.TimeoutError:
-                    return
-                if msg.content.startswith("http"):
-                    thumbnail_url = (
-                        msg.content
-                        if msg.content.lower() != "none"
-                        else discord.Embed.Empty
-                    )
-                else:
-                    thumbnail_url = msg.attachments[0].proxy_url
-                self.embed_viewer.set_thumbnail(url=thumbnail_url)
-                await msg.delete()
-            elif self.setup_status == "author":
-                self.embed_creator = discord.Embed(
-                    title="Embeditorificatorinator | Author",
-                    description="Send the author you want for the embed.",
-                )
-                await self.bot_message.edit(embed=self.embed_creator)
-                try:
-                    msg = await self.bot.wait_for("message", check=tcheck, timeout=300)
-                except asyncio.TimeoutError:
-                    return
-                author = (
-                    msg.content
-                    if msg.content.lower() != "none"
-                    else discord.Embed.Empty
-                )
-                await msg.delete()
-
-                self.embed_creator = discord.Embed(
-                    title="Embeditorificatorinator | Author Image URL",
-                    description="Send the author image URL you want for the embed.",
-                )
-                await self.bot_message.edit(embed=self.embed_creator)
-                try:
-                    msg = await self.bot.wait_for("message", check=tcheck, timeout=300)
-                except asyncio.TimeoutError:
-                    return
-                if msg.content.startswith("http"):
-                    author_icon_url = msg.content
-                if msg.content.lower() == "none":
-                    author_icon_url = discord.Embed.Empty
-                else:
-                    author_icon_url = msg.attachments[0].proxy_url
-                self.embed_viewer.set_author(name=author, icon_url=author_icon_url)
-                await msg.delete()
-            elif self.setup_status == "finish":
-                channel = self.ctx.guild.get_channel(self.channel_id)
-                if self.message_id:
-                    message = await channel.fetch_message(self.message_id)
-                    await message.edit(embed=self.embed_viewer)
-                else:
-                    await channel.send(embed=self.embed_viewer)
-                self.embed_creator = discord.Embed(
-                    title="Embeditorificatorinator",
-                    description="Embed has been created and sent succesfully!",
-                )
-                await self.bot_message.edit(embed=self.embed_creator)
-                await self.bot_message.clear_reactions()
-                running = False
-            self.setup_status = "menu"
-
-
-class ButtonEmbedCreator:
-    def __init__(
-        self,
-        bot: commands.Bot,
-        ctx: SlashContext,
-        channel_id: int,
-        message_id: int = None,
-    ):
-        self.bot = bot
-        self.ctx = ctx
-        self.channel_id = channel_id
-        self.message_id = message_id
-
-    def create_menu(self) -> discord.Embed:
-        return discord.Embed(
-            title="Embeditorificatorinator | Menu",
-            description="Please select an option below.",
-        )
-
-    def create_buttons(self, disabled: bool = False) -> list[list[Button]]:
-        return [
-            [
-                Button(
-                    label="View Embed",
-                    style=ButtonStyle.blue,
-                    id="viewembed",
-                    disabled=disabled,
-                ),
-                Button(
-                    label="Title",
-                    style=ButtonStyle.gray,
-                    id="title",
-                    disabled=disabled,
-                ),
-                Button(
-                    label="Description",
-                    style=ButtonStyle.gray,
-                    id="description",
-                    disabled=disabled,
-                ),
-                Button(
-                    label="Footer",
-                    style=ButtonStyle.gray,
-                    id="footer",
-                    disabled=disabled,
-                ),
-                Button(
-                    label="Color",
-                    style=ButtonStyle.gray,
-                    id="color",
-                    disabled=disabled,
-                ),
-            ],
-            [
-                Button(
-                    label="Image",
-                    style=ButtonStyle.gray,
-                    id="image",
-                    disabled=disabled,
-                ),
-                Button(
-                    label="Thumbnail",
-                    style=ButtonStyle.gray,
-                    id="thumbnail",
-                    disabled=disabled,
-                ),
-                Button(
-                    label="Author",
-                    style=ButtonStyle.gray,
-                    id="author",
-                    disabled=disabled,
-                ),
-                Button(
-                    label="Add Field",
-                    style=ButtonStyle.gray,
-                    id="addfield",
-                    disabled=disabled,
-                ),
-            ],
-            [
-                Button(
-                    label="Field 1",
-                    style=ButtonStyle.gray,
-                    id="field1",
-                    disabled=True if self.field_count >= 1 else False,
-                ),
-                Button(
-                    label="Field 2",
-                    style=ButtonStyle.gray,
-                    id="field2",
-                    disabled=True if self.field_count >= 2 else False,
-                ),
-                Button(
-                    label="Field 3",
-                    style=ButtonStyle.gray,
-                    id="field3",
-                    disabled=True if self.field_count >= 3 else False,
-                ),
-                Button(
-                    label="Field 4",
-                    style=ButtonStyle.gray,
-                    id="field4",
-                    disabled=True if self.field_count >= 4 else False,
-                ),
-                Button(
-                    label="Field 5",
-                    style=ButtonStyle.gray,
-                    id="field5",
-                    disabled=True if self.field_count >= 5 else False,
-                ),
-            ],
-            [
-                Button(
-                    label="Field 6",
-                    style=ButtonStyle.gray,
-                    id="field6",
-                    disabled=True if self.field_count >= 6 else False,
-                ),
-                Button(
-                    label="Field 7",
-                    style=ButtonStyle.gray,
-                    id="field7",
-                    disabled=True if self.field_count >= 7 else False,
-                ),
-                Button(
-                    label="Field 8",
-                    style=ButtonStyle.gray,
-                    id="field8",
-                    disabled=True if self.field_count >= 8 else False,
-                ),
-                Button(
-                    label="Field 9",
-                    style=ButtonStyle.gray,
-                    id="field9",
-                    disabled=True if self.field_count >= 9 else False,
-                ),
-                Button(
-                    label="Field 10",
-                    style=ButtonStyle.gray,
-                    id="field10",
-                    disabled=True if self.field_count >= 10 else False,
-                ),
-            ],
-        ]
-
-    async def run(self) -> None:
-        if self.message_id:
-            channel = self.ctx.guild.get_channel(self.channel_id)
-            message = await channel.fetch_message(self.message_id)
-            self.embed_viewer = message.embeds[0]
-        else:
-            self.embed_viewer = discord.Embed()
-
-        self.embed_creator = self.create_menu()
-        self.bot_message = await self.ctx.send(embed=self.embed_creator)
-
-        def rcheck(reaction: discord.Reaction, user: discord.User) -> bool:
-            return (
-                user.id == self.ctx.author_id
-                and reaction.message.id == self.bot_message.id
+    @discord.ui.button(label="Add Field", style=discord.ButtonStyle.blurple, row=3)
+    async def add_field(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
+        modal = self.FieldModal("Add Field")
+        await interaction.response.send_modal(modal)
+        await modal.wait()
+        if modal.target != None:
+            self.embed.insert_field_at(
+                modal.target - 1, name="Placeholder Text", value="Placeholder Text"
+            )
+            self.update_field_buttons()
+            await modal.interaction.response.edit_message(
+                embeds=self.get_embeds(), view=self
             )
 
-        self.setup_status = "menu"
+    @discord.ui.button(label="Remove Field", style=discord.ButtonStyle.blurple, row=3)
+    async def remove_field(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
+        modal = self.FieldModal("Remove Field")
+        await interaction.response.send_modal(modal)
+        await modal.wait()
+        if modal.target != None:
+            self.embed.remove_field(modal.target - 1)
+            self.update_field_buttons()
+            await modal.interaction.response.edit_message(
+                embeds=self.get_embeds(), view=self
+            )
 
-        while True:
-            self.embed_creator = self.create_menu()
-            await self.bot_message.edit(embed=self.embed_creator)
+    @discord.ui.button(label="Send", style=discord.ButtonStyle.green, row=4)
+    async def send(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
+        await interaction.response.edit_message(
+            embed=discord.Embed(
+                title="Embed Editor",
+                description="Sent!",
+                colour=discord.Colour.green(),
+            ),
+            view=None,
+        )
+        if self.message:
+            await self.message.edit(embed=self.embed)
+        else:
+            await self.channel.send(embed=self.embed)
+        self.stop()
 
-            # try:
-            #     interaction = await self.bot.wait_for(
-            #         "button_click", check=lambda i:  , timeout=45
-            #     )
-            # except asyncio.TimeoutError:
-            #     return
+    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, row=4)
+    async def cancel(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
+        await interaction.response.edit_message(
+            embed=discord.Embed(
+                title="Embed Editor",
+                description="Cancelled!",
+                colour=discord.Colour.red(),
+            ),
+            view=None,
+        )
+        self.stop()
 
-            self.setup_status = self.REACTIONS_CONVERTER.get(reaction.emoji)
-            if self.setup_status == "view":
-                await self.bot_message.clear_reactions()
-                await self.bot_message.edit(embed=self.embed_viewer)
-                for reaction in self.REACTIONS_CONVERTER_VIEW.keys():
-                    await self.bot_message.add_reaction(reaction)
-                try:
-                    reaction, user = await self.bot.wait_for(
-                        "reaction_add", check=rcheck, timeout=45
-                    )
-                except asyncio.TimeoutError:
-                    return
-                self.setup_status = self.REACTIONS_CONVERTER_VIEW.get(reaction.emoji)
-                if self.setup_status == "menu":
-                    await self.bot_message.edit(embed=self.embed_creator)
-                    await self.bot_message.clear_reactions()
-                    for reaction in self.REACTIONS_CONVERTER.keys():
-                        await self.bot_message.add_reaction(reaction)
-            if self.setup_status == "title":
-                self.embed_creator = discord.Embed(
-                    title="Embeditorificatorinator | Title",
-                    description="Send the title you want for the embed.",
-                )
-                await self.bot_message.edit(embed=self.embed_creator)
-                try:
-                    msg = await self.bot.wait_for(
-                        "message",
-                        check=lambda m: m.author.id == self.ctx.author_id
-                        and m.channel == self.ctx.channel,
-                        timeout=300,
-                    )
-                except asyncio.TimeoutError:
-                    return
-                self.embed_viewer.title = (
-                    msg.content
-                    if msg.content.lower() != "none"
-                    else discord.Embed.Empty
-                )
-                await msg.delete()
-            elif self.setup_status == "description":
-                self.embed_creator = discord.Embed(
-                    title="Embeditorificatorinator | Description",
-                    description="Send the description you want for the embed.",
-                )
-                await self.bot_message.edit(embed=self.embed_creator)
-                try:
-                    msg = await self.bot.wait_for(
-                        "message",
-                        check=lambda m: m.author.id == self.ctx.author_id
-                        and m.channel == self.ctx.channel,
-                        timeout=300,
-                    )
-                except asyncio.TimeoutError:
-                    return
-                self.embed_viewer.description = (
-                    msg.content
-                    if msg.content.lower() != "none"
-                    else discord.Embed.Empty
-                )
-                await msg.delete()
-            elif self.setup_status == "footer":
-                self.embed_creator = discord.Embed(
-                    title="Embeditorificatorinator | Footer",
-                    description="Send the footer you want for the embed.",
-                )
-                await self.bot_message.edit(embed=self.embed_creator)
-                try:
-                    msg = await self.bot.wait_for(
-                        "message",
-                        check=lambda m: m.author.id == self.ctx.author_id
-                        and m.channel == self.ctx.channel,
-                        timeout=300,
-                    )
-                except asyncio.TimeoutError:
-                    return
-                self.embed_viewer.set_footer(
-                    text=msg.content
-                    if msg.content.lower() != "none"
-                    else discord.Embed.Empty
-                )
-                await msg.delete()
-            elif self.setup_status == "color":
-                self.embed_creator = discord.Embed(
-                    title="Embeditorificatorinator | Color",
-                    description='Send the color you want for the embed. This must be in hexadecimal, preceded by a "#".\nExample: #FFFFFF',
-                )
-                await self.bot_message.edit(embed=self.embed_creator)
-                try:
-                    msg = await self.bot.wait_for(
-                        "message",
-                        check=lambda m: m.author.id == self.ctx.author_id
-                        and m.channel == self.ctx.channel,
-                        timeout=300,
-                    )
-                except asyncio.TimeoutError:
-                    return
 
-                if msg.content.lower() == "none":
-                    self.embed_viewer.color = discord.Embed.Empty
-                else:
-                    r, g, b = [
-                        int(msg.content.lstrip("#")[i : i + 2], 16) for i in (0, 2, 4)
-                    ]
-                    self.embed_viewer.color = discord.Color.from_rgb(r, g, b)
-                await msg.delete()
-            elif self.setup_status == "image":
-                self.embed_creator = discord.Embed(
-                    title="Embeditorificatorinator | Image",
-                    description="Send the image you want for the embed.\nThis can be either a URL or an image upload.",
-                )
-                await self.bot_message.edit(embed=self.embed_creator)
-                try:
-                    msg = await self.bot.wait_for(
-                        "message",
-                        check=lambda m: m.author.id == self.ctx.author_id
-                        and m.channel == self.ctx.channel,
-                        timeout=300,
-                    )
-                except asyncio.TimeoutError:
-                    return
-                if msg.content.startswith("http"):
-                    image_url = (
-                        msg.content
-                        if msg.content.lower() != "none"
-                        else discord.Embed.Empty
-                    )
-                else:
-                    image_url = msg.attachments[0].proxy_url
-                self.embed_viewer.set_image(url=image_url)
-                await msg.delete()
-            elif self.setup_status == "thumbnail":
-                self.embed_creator = discord.Embed(
-                    title="Embeditorificatorinator | Thumbnail",
-                    description="Send the thumbnail you want for the embed.\nThis can be either a URL or an image upload.",
-                )
-                await self.bot_message.edit(embed=self.embed_creator)
-                try:
-                    msg = await self.bot.wait_for(
-                        "message",
-                        check=lambda m: m.author.id == self.ctx.author_id
-                        and m.channel == self.ctx.channel,
-                        timeout=300,
-                    )
-                except asyncio.TimeoutError:
-                    return
-                if msg.content.startswith("http"):
-                    thumbnail_url = (
-                        msg.content
-                        if msg.content.lower() != "none"
-                        else discord.Embed.Empty
-                    )
-                else:
-                    thumbnail_url = msg.attachments[0].proxy_url
-                self.embed_viewer.set_thumbnail(url=thumbnail_url)
-                await msg.delete()
-            elif self.setup_status == "author":
-                self.embed_creator = discord.Embed(
-                    title="Embeditorificatorinator | Author",
-                    description="Send the author you want for the embed.",
-                )
-                await self.bot_message.edit(embed=self.embed_creator)
-                try:
-                    msg = await self.bot.wait_for(
-                        "message",
-                        check=lambda m: m.author.id == self.ctx.author_id
-                        and m.channel == self.ctx.channel,
-                        timeout=300,
-                    )
-                except asyncio.TimeoutError:
-                    return
-                author = (
-                    msg.content
-                    if msg.content.lower() != "none"
-                    else discord.Embed.Empty
-                )
-                await msg.delete()
-
-                self.embed_creator = discord.Embed(
-                    title="Embeditorificatorinator | Author Image URL",
-                    description="Send the author image URL you want for the embed.",
-                )
-                await self.bot_message.edit(embed=self.embed_creator)
-                try:
-                    msg = await self.bot.wait_for(
-                        "message",
-                        check=lambda m: m.author.id == self.ctx.author_id
-                        and m.channel == self.ctx.channel,
-                        timeout=300,
-                    )
-                except asyncio.TimeoutError:
-                    return
-                if msg.content.startswith("http"):
-                    author_icon_url = msg.content
-                if msg.content.lower() == "none":
-                    author_icon_url = discord.Embed.Empty
-                else:
-                    author_icon_url = msg.attachments[0].proxy_url
-                self.embed_viewer.set_author(name=author, icon_url=author_icon_url)
-                await msg.delete()
-            elif self.setup_status == "finish":
-                channel = self.ctx.guild.get_channel(self.channel_id)
-                if self.message_id:
-                    message = await channel.fetch_message(self.message_id)
-                    await message.edit(embed=self.embed_viewer)
-                else:
-                    await channel.send(embed=self.embed_viewer)
-                self.embed_creator = discord.Embed(
-                    title="Embeditorificatorinator",
-                    description="Embed has been created and sent succesfully!",
-                )
-                await self.bot_message.edit(embed=self.embed_creator)
-                await self.bot_message.clear_reactions()
-                running = False
-            self.setup_status = "menu"
+async def setup(bot: commands.Bot) -> None:
+    await bot.add_cog(Embeds(bot))
