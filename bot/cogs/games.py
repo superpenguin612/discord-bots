@@ -178,7 +178,6 @@ class TicTacToe(commands.Cog):
     )
     @app_commands.describe(player2="The player to ask to play tic tac toe with.")
     async def tictactoe(self, ctx: commands.Context, player2: discord.User) -> None:
-
         view = tools.Confirmation(player2, timeout=45.0)
         msg = await ctx.send(
             embed=tools.create_embed(
