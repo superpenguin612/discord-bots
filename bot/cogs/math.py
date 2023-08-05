@@ -23,12 +23,13 @@ class Math(commands.Cog):
         )
         embed.set_image(url=url)
         await ctx.send(embed=embed)
-    
+
     @commands.hybrid_command(description="Render the equation for PID control.")
     async def pid(self, ctx: commands.Context) -> None:
         embed = tools.create_embed("PID Control Equation")
         url = "https://latex.codecogs.com/png.latex?" + urllib.parse.quote(
-            "\\huge\\dpi{500}\\color{white}" + r"u(t) = K_pe(t) + K_i\int_{0}^{t}e(\tau)d\tau + K_d\frac{\mathrm{d} e(t)}{\mathrm{d} t}"
+            "\\huge\\dpi{500}\\color{white}"
+            + r"u(t) = K_pe(t) + K_i\int_{0}^{t}e(\tau)d\tau + K_d\frac{\mathrm{d} e(t)}{\mathrm{d} t}"
         )
         embed.set_image(url=url)
         await ctx.send(embed=embed)

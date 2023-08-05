@@ -1,4 +1,3 @@
-
 # import base64
 # import json
 # import logging
@@ -36,11 +35,10 @@
 #     @commands.is_owner()
 #     async def teq(self, ctx: commands.Context, id: str = None):
 #         await self.email_query()
-    
+
 #     @tasks.loop(minutes=5.0)
 #     async def email_query_task(self):
 #         await self.email_query()
-
 
 
 #     def check_for_new_mail(self) -> list[str]:
@@ -51,7 +49,7 @@
 #         """
 #         with open("messages.json", "r") as f:
 #             existing_messages = json.load(f)
-        
+
 #         try:
 #             service = build('gmail', 'v1', credentials=self.creds)
 #             results = service.users().messages().list(userId="me").execute()
@@ -61,7 +59,7 @@
 #             # https://googleapis.github.io/google-api-python-client/docs/dyn/gmail_v1.users.messages.html#list
 #         except HttpError as error:
 #             logger.exception("An API error occurred.")
-        
+
 #         with open("messages.json", "w") as f:
 #             json.dump(messages, f)
 
@@ -97,10 +95,9 @@
 #                 if header.get('name') == "From":
 #                     name = header.get("value")
 #                     embed.set_author(name=name)
-            
+
 #             embeds += [embed]
 #         return embeds
-
 
 
 # async def setup(bot: commands.Bot) -> None:
