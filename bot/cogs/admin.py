@@ -4,7 +4,6 @@ import subprocess
 import discord
 from discord.ext import commands
 
-import bot.cogs.techhounds
 import bot.cogs.custom.chsbot
 from bot.helpers import tools
 
